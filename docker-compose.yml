@@ -87,7 +87,7 @@ services:
     environment:
       - NODE_OPTIONS=--max-old-space-size=8096
       - APP__PORT=8080
-      - APP__BASE_URL=${OPENCTI_EXTERNAL_SCHEME}://${OPENCTI_HOST}:${OPENCTI_PORT}
+      - APP__BASE_URL=${OPENCTI_BASE_URL}
       - APP__ADMIN__EMAIL=${OPENCTI_ADMIN_EMAIL}
       - APP__ADMIN__PASSWORD=${OPENCTI_ADMIN_PASSWORD}
       - APP__ADMIN__TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -111,8 +111,8 @@ services:
       - SMTP__PORT=25
       - PROVIDERS__LOCAL__STRATEGY=LocalStrategy
       - APP__HEALTH_ACCESS_KEY=${OPENCTI_HEALTHCHECK_ACCESS_KEY}
-    ports:
-      - "${OPENCTI_PORT}:8080"
+    expose:
+      - "8080"
     depends_on:
       redis:
         condition: service_healthy
@@ -128,6 +128,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
+  caddy:
+    image: caddy:2.9.1-alpine
+    ports:
+      - "443:443"
+    volumes:
+      - type: bind
+        source: ./Caddyfile
+        target: /etc/caddy/Caddyfile
+        read_only: true
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      opencti:
+        condition: service_healthy
+    restart: always
   worker:
     image: opencti/worker:6.9.0
     environment:
@@ -264,3 +279,5 @@ volumes:
   redisdata:
   amqpdata:
   rsakeys:
+  caddy_data:
+  caddy_config:

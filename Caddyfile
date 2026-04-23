@@ -1,0 +1,7 @@
+{
+    local_certs
+}
+
+https://localhost {
+    reverse_proxy opencti:8080
+}

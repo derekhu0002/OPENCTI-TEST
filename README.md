@@ -4,6 +4,11 @@
 
 You can find the detailed documentation about the Docker installation in the [OpenCTI documentation space](https://docs.opencti.io/latest/deployment/installation/#using-docker).
 
+## Local HTTPS
+
+This workspace can expose OpenCTI through a local Caddy reverse proxy at `https://localhost`.
+If your browser reports the certificate as untrusted, import Caddy's local root CA certificate from the running `caddy` container into the Windows Current User trusted root store.
+
 ## Community
 
 ### Status & bugs
