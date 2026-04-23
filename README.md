@@ -14,7 +14,7 @@ If your browser reports the certificate as untrusted, import Caddy's local root 
 ### Status & bugs
 
 Currently OpenCTI is under heavy development, if you wish to report bugs or ask for new features, you can directly use the [Github issues module](https://github.com/OpenCTI-Platform/opencti/issues).
-
+ss
 ### Discussion
 
 If you need support or you wish to engage a discussion about the OpenCTI platform, feel free to join us on our [Slack channel](https://community.filigran.io). You can also send us an email to contact@opencti.io.
