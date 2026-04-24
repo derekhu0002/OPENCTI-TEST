@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "testcasename": "MISP Intel接入",
+    "testdescription": "",
+    "acceptanceCriteria": "",
+    "relatedIntentElementId": "1244",
+    "status": "missing-criteria",
+    "resolvedScriptPath": "",
+    "executionCommand": "",
+    "exitCode": null,
+    "failureError": "acceptanceCriteria is empty",
+    "stdout": "",
+    "stderr": "acceptanceCriteria is empty"
+  }
+]
