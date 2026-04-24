@@ -235,6 +235,141 @@ services:
     depends_on:
       opencti:
         condition: service_healthy
+  connector-mitre:
+    image: opencti/connector-mitre:6.8.17
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_MITRE_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=MITRE ATT&CK
+      - CONNECTOR_SCOPE=mitre
+      - CONNECTOR_LOG_LEVEL=info
+      - MITRE_INTERVAL=${MITRE_INTERVAL}
+      - MITRE_REMOVE_STATEMENT_MARKING=${MITRE_REMOVE_STATEMENT_MARKING}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
+  connector-cve:
+    image: opencti/connector-cve:6.8.17
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_CVE_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=NIST NVD CVE
+      - CONNECTOR_SCOPE=vulnerability
+      - CONNECTOR_LOG_LEVEL=info
+      - CVE_INTERVAL=${CVE_INTERVAL}
+      - CVE_API_KEY=${CVE_API_KEY}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
+  connector-google-ti-feeds:
+    image: opencti/connector-google-ti-feeds:6.8.17
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_GOOGLE_TI_FEEDS_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=Google Threat Intelligence (GTI)
+      - CONNECTOR_SCOPE=google-ti-feeds
+      - CONNECTOR_LOG_LEVEL=info
+      - GOOGLE_TI_FEEDS_INTERVAL=${GOOGLE_TI_FEEDS_INTERVAL}
+      - GOOGLE_TI_FEEDS_API_KEY=${GOOGLE_TI_FEEDS_API_KEY}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
+  connector-crowdstrike:
+    image: opencti/connector-crowdstrike:6.8.17
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_CROWDSTRIKE_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=CrowdStrike Falcon Intelligence
+      - CONNECTOR_SCOPE=crowdstrike
+      - CONNECTOR_LOG_LEVEL=info
+      - CROWDSTRIKE_FALCON_INTERVAL=${CROWDSTRIKE_FALCON_INTERVAL}
+      - CROWDSTRIKE_FALCON_BASE_URL=${CROWDSTRIKE_FALCON_BASE_URL}
+      - CROWDSTRIKE_FALCON_CLIENT_ID=${CROWDSTRIKE_FALCON_CLIENT_ID}
+      - CROWDSTRIKE_FALCON_CLIENT_SECRET=${CROWDSTRIKE_FALCON_CLIENT_SECRET}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
+  connector-ransomwarelive:
+    image: opencti/connector-ransomwarelive:6.8.17
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_RANSOMWARELIVE_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=Ransomware.live
+      - CONNECTOR_SCOPE=ransomwarelive
+      - CONNECTOR_LOG_LEVEL=info
+      - RANSOMWARELIVE_INTERVAL=${RANSOMWARELIVE_INTERVAL}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
+  connector-cisa-known-exploited-vulnerabilities:
+    image: opencti/connector-cisa-known-exploited-vulnerabilities:6.8.17
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_CISA_KEV_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=CISA Known Exploited Vulnerabilities (KEV)
+      - CONNECTOR_SCOPE=cisa-known-exploited-vulnerabilities
+      - CONNECTOR_LOG_LEVEL=info
+      - CISA_KEV_INTERVAL=${CISA_KEV_INTERVAL}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
+  connector-mandiant:
+    image: opencti/connector-mandiant:6.8.17
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_MANDIANT_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=Mandiant
+      - CONNECTOR_SCOPE=mandiant
+      - CONNECTOR_LOG_LEVEL=info
+      - MANDIANT_IMPORT_INTERVAL=${MANDIANT_IMPORT_INTERVAL}
+      - MANDIANT_API_V4_KEY_ID=${MANDIANT_API_V4_KEY_ID}
+      - MANDIANT_API_V4_KEY_SECRET=${MANDIANT_API_V4_KEY_SECRET}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
+  connector-threatfox:
+    image: opencti/connector-threatfox:6.8.17
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_THREATFOX_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=ThreatFox
+      - CONNECTOR_SCOPE=threatfox
+      - CONNECTOR_LOG_LEVEL=info
+      - THREATFOX_INTERVAL=${THREATFOX_INTERVAL}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
   xtm-composer:
     image: filigran/xtm-composer:1.0.1
     platform: linux/amd64

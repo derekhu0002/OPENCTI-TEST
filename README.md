@@ -9,6 +9,14 @@ You can find the detailed documentation about the Docker installation in the [Op
 This workspace can expose OpenCTI through a local Caddy reverse proxy at `https://localhost`.
 If your browser reports the certificate as untrusted, import Caddy's local root CA certificate from the running `caddy` container into the Windows Current User trusted root store.
 
+## External Import Connectors
+
+The workspace now carries runtime definitions for the threat-intelligence connectors modeled in `design/KG/SystemArchitecture.json`: MITRE ATT&CK, NIST NVD CVE, Google Threat Intelligence (GTI), CrowdStrike Falcon Intelligence, Ransomware.live, CISA KEV, Mandiant, and ThreatFox.
+
+The credentialed connectors are gated behind the Docker Compose profile `threat-intel-connectors` so the default stack does not fail when vendor API credentials are intentionally left blank in `.env`. Public-feed connectors share the same profile to keep the modeled set enabled as a unit.
+
+Architecture and deployment consistency is validated by the pytest suite in `tests/test_architecture_connector_support.py`.
+
 ## Community
 
 ### Status & bugs
