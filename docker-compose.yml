@@ -267,6 +267,27 @@ services:
     depends_on:
       opencti:
         condition: service_healthy
+  connector-automotive-security-timeline:
+    build:
+      context: ./connectors/automotive-security-timeline
+    image: opencti/connector-automotive-security-timeline:6.9.0
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_AUTOMOTIVE_TIMELINE_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=Automotive Security Timeline
+      - CONNECTOR_SCOPE=report,url
+      - CONNECTOR_LOG_LEVEL=info
+      - CONNECTOR_DURATION_PERIOD=${CONNECTOR_AUTOMOTIVE_TIMELINE_DURATION_PERIOD}
+      - AUTOMOTIVE_TIMELINE_SOURCE_URL=${AUTOMOTIVE_TIMELINE_SOURCE_URL}
+      - AUTOMOTIVE_TIMELINE_VERIFY_TLS=${AUTOMOTIVE_TIMELINE_VERIFY_TLS}
+      - AUTOMOTIVE_TIMELINE_REQUEST_TIMEOUT=${AUTOMOTIVE_TIMELINE_REQUEST_TIMEOUT}
+      - AUTOMOTIVE_TIMELINE_UPDATE_EXISTING=true
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
   xtm-composer:
     image: filigran/xtm-composer:1.0.1
     platform: linux/amd64
