@@ -251,6 +251,22 @@ services:
     depends_on:
       opencti:
         condition: service_healthy
+  connector-mitre:
+    image: opencti/connector-mitre:6.9.0
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_MITRE_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=EXTERNAL_IMPORT
+      - CONNECTOR_NAME=MITRE ATT&CK
+      - CONNECTOR_SCOPE=mitre
+      - CONNECTOR_LOG_LEVEL=info
+      - MITRE_INTERVAL=${MITRE_INTERVAL}
+      - MITRE_REMOVE_STATEMENT_MARKING=${MITRE_REMOVE_STATEMENT_MARKING}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
   xtm-composer:
     image: filigran/xtm-composer:1.0.1
     platform: linux/amd64
