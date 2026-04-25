@@ -1,1 +1,0 @@
-{"query":"query { __schema { mutationType { fields { name args { name type { kind name ofType { kind name ofType { kind name } } } } } } }"}

@@ -1,1 +1,0 @@
-{"query":"mutation { streamCollectionAdd(input: {name: \"Copilot MISP Intel\", description: \"Created for connector coverage\", stream_public: false, stream_live: true}) { id name } }"}

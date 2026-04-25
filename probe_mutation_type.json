@@ -1,1 +1,0 @@
-{"query":"query { __type(name: \"Mutation\") { fields { name args { name type { kind name ofType { kind name ofType { kind name } } } } } } }"}
