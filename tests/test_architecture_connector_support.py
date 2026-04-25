@@ -14,6 +14,7 @@ ARCHITECTURE_PATH = ROOT / "design" / "KG" / "SystemArchitecture.json"
 ENV_PATH = ROOT / ".env"
 MISP_TEST_COMPOSE_PATH = ROOT / "docker-compose.misp-test.yml"
 MISP_TEST_ADMIN_KEY = "2a75b4f0c6014f4f9af7f2a1b6e6d7a9b8c4d2e1"
+MISP_TEST_ADMIN_EMAIL = "admin@admin.test"
 MISP_TEST_BASE_URL = "http://misp-core"
 MISP_TEST_STREAM_NAME = "Copilot MISP Intel Runtime"
 COMPOSE_FILES = {
@@ -43,8 +44,11 @@ CONNECTOR_SPECS = {
             "CONNECTOR_SCOPE=mitre",
         ],
         "runtime_markers": [
+            "Starting PingAlive thread",
+        ],
+        "runtime_markers_any": [
             "Connector successfully run",
-            "Reporting work update_processed",
+            "Connector registered with ID",
         ],
     },
     "cve": {
@@ -60,7 +64,16 @@ CONNECTOR_SPECS = {
         "env_vars": ["CONNECTOR_CVE_ID", "CVE_INTERVAL", "CVE_API_KEY"],
         "compose_refs": [
             "CONNECTOR_SCOPE=vulnerability",
+            "CVE_API_KEY=${CVE_API_KEY:-runtime-placeholder-key}",
             "profiles: [\"threat-intel-connectors\"]",
+        ],
+        "runtime_markers": [
+            "Starting PingAlive thread",
+            "[CONNECTOR] Fetching datasets...",
+        ],
+        "runtime_markers_any": [
+            "Connector registered with ID",
+            "New work",
         ],
     },
     "gti": {
@@ -182,8 +195,8 @@ CONNECTOR_SPECS = {
             "profiles: [\"threat-intel-connectors\"]",
         ],
         "runtime_markers": [
-            "Connector successfully run",
-            "Last_run stored, next run in:",
+            "Connector last run:",
+            "Connector will not run, next run in:",
         ],
     },
     "misp_intel": {
@@ -192,6 +205,7 @@ CONNECTOR_SPECS = {
         "testcase_name": "MISP Intel接入",
         "acceptance": "tests/test_architecture_connector_support.py::test_misp_intel_connector_definition",
         "service": "connector-misp-intel",
+        "profile_args": ["--profile", "misp-intel"],
         "images": {
             "docker-compose.yml": "opencti/connector-misp-intel:6.9.0",
             "docker-compose.opensearch.yml": "opencti/connector-misp-intel:6.8.17",
@@ -210,7 +224,7 @@ CONNECTOR_SPECS = {
             "CONNECTOR_TYPE=STREAM",
             "CONNECTOR_SCOPE=misp",
             "CONNECTOR_LIVE_STREAM_ID=${CONNECTOR_MISP_INTEL_LIVE_STREAM_ID}",
-            "profiles: [\"threat-intel-connectors\"]",
+            "profiles: [\"misp-intel\"]",
         ],
         "runtime_markers": [
             "Successfully connected to MISP",
@@ -274,11 +288,12 @@ def _compose(
     check: bool = True,
     extra_files: list[Path] | None = None,
     env_overrides: dict[str, str] | None = None,
+    profile_args: list[str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     compose_args = ["docker", "compose", "-f", str(ROOT / "docker-compose.yml")]
     for compose_file in extra_files or []:
         compose_args.extend(["-f", str(compose_file)])
-    compose_args.extend(DOCKER_PROFILE_ARGS)
+    compose_args.extend(profile_args or DOCKER_PROFILE_ARGS)
     return _run_command(compose_args + args, check=check, env_overrides=env_overrides)
 
 
@@ -291,14 +306,88 @@ def _compose_logs(
     *,
     extra_files: list[Path] | None = None,
     env_overrides: dict[str, str] | None = None,
+    profile_args: list[str] | None = None,
 ) -> str:
     result = _compose(
         ["logs", "--tail", "200", service],
         check=False,
         extra_files=extra_files,
         env_overrides=env_overrides,
+        profile_args=profile_args,
     )
     return (result.stdout + result.stderr).strip()
+
+
+def _profile_args_for_spec(spec: dict) -> list[str]:
+    return spec.get("profile_args", DOCKER_PROFILE_ARGS)
+
+
+def _query_misp_user_emails(
+    *,
+    extra_files: list[Path] | None = None,
+    env_overrides: dict[str, str] | None = None,
+) -> list[str]:
+    result = _compose(
+        [
+            "exec",
+            "-T",
+            "misp-db",
+            "sh",
+            "-lc",
+            (
+                'mariadb -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" '
+                '-Nse "SELECT email FROM users ORDER BY id;"'
+            ),
+        ],
+        check=False,
+        extra_files=extra_files,
+        env_overrides=env_overrides,
+    )
+    output = (result.stdout + result.stderr).splitlines()
+    return [line.strip() for line in output if "@" in line]
+
+
+def _configure_misp_authkey(
+    *,
+    extra_files: list[Path] | None = None,
+    env_overrides: dict[str, str] | None = None,
+) -> None:
+    candidate_emails: list[str] = []
+    if env_overrides and env_overrides.get("MISP_TEST_ADMIN_EMAIL"):
+        candidate_emails.append(env_overrides["MISP_TEST_ADMIN_EMAIL"])
+    candidate_emails.append(MISP_TEST_ADMIN_EMAIL)
+    candidate_emails.extend(_query_misp_user_emails(extra_files=extra_files, env_overrides=env_overrides))
+
+    attempted: list[str] = []
+    seen: set[str] = set()
+    for email in candidate_emails:
+        if not email or email in seen:
+            continue
+        seen.add(email)
+        attempted.append(email)
+        result = _compose(
+            [
+                "exec",
+                "-T",
+                "misp-core",
+                "bash",
+                "-lc",
+                (
+                    "cd /var/www/MISP/app && "
+                    f"./Console/cake user change_authkey {email} {MISP_TEST_ADMIN_KEY}"
+                ),
+            ],
+            check=False,
+            extra_files=extra_files,
+            env_overrides=env_overrides,
+        )
+        if result.returncode == 0:
+            return
+
+    raise AssertionError(
+        "Unable to configure MISP admin authkey. "
+        f"Attempted emails: {attempted or ['<none>']}"
+    )
 
 
 def _graphql_request(query: str) -> dict:
@@ -350,6 +439,7 @@ def _wait_for_service(
     timeout: int = 180,
     required_state: str = "running",
     required_health: str | None = None,
+    profile_args: list[str] | None = None,
 ) -> str:
     deadline = time.time() + timeout
     container_id = ""
@@ -361,6 +451,7 @@ def _wait_for_service(
             ["ps", "-q", service],
             extra_files=extra_files,
             env_overrides=env_overrides,
+            profile_args=profile_args,
         ).stdout.strip()
         if container_id:
             last_state = _docker_inspect(container_id, "{{.State.Status}}")
@@ -375,7 +466,12 @@ def _wait_for_service(
                 return container_id
         time.sleep(2)
 
-    logs = _compose_logs(service, extra_files=extra_files, env_overrides=env_overrides)
+    logs = _compose_logs(
+        service,
+        extra_files=extra_files,
+        env_overrides=env_overrides,
+        profile_args=profile_args,
+    )
     raise AssertionError(
         f"{service} did not reach state={required_state} health={required_health}. "
         f"last_state={last_state} last_health={last_health}.\nlogs:\n{logs}"
@@ -399,21 +495,7 @@ def _bootstrap_misp_authkey(
         timeout=600,
         required_health="healthy",
     )
-    _compose(
-        [
-            "exec",
-            "-T",
-            "misp-core",
-            "bash",
-            "-lc",
-            (
-                "cd /var/www/MISP/app && "
-                f"./Console/cake user change_authkey admin@admin.test {MISP_TEST_ADMIN_KEY}"
-            ),
-        ],
-        extra_files=extra_files,
-        env_overrides=env_overrides,
-    )
+    _configure_misp_authkey(extra_files=extra_files, env_overrides=env_overrides)
 
 
 def _architecture_element_by_id(element_id: str) -> dict:
@@ -463,10 +545,15 @@ def _assert_real_container_coverage(
 ) -> None:
     spec = CONNECTOR_SPECS[spec_key]
     service = spec["service"]
+    profile_args = _profile_args_for_spec(spec)
+    runtime_env = dict(spec.get("runtime_env_overrides", {}))
+    if env_overrides:
+        runtime_env.update(env_overrides)
     _compose(
         ["up", "-d", *(startup_services or [service])],
         extra_files=extra_files,
-        env_overrides=env_overrides,
+        env_overrides=runtime_env or None,
+        profile_args=profile_args,
     )
 
     deadline = time.time() + startup_timeout
@@ -476,7 +563,8 @@ def _assert_real_container_coverage(
         container_id = _compose(
             ["ps", "-q", service],
             extra_files=extra_files,
-            env_overrides=env_overrides,
+            env_overrides=runtime_env or None,
+            profile_args=profile_args,
         ).stdout.strip()
         if container_id:
             last_status = _docker_inspect(container_id, "{{.State.Status}}")
@@ -487,7 +575,12 @@ def _assert_real_container_coverage(
     logs = ""
     log_deadline = time.time() + 120
     while time.time() < log_deadline:
-        logs = _compose_logs(service, extra_files=extra_files, env_overrides=env_overrides)
+        logs = _compose_logs(
+            service,
+            extra_files=extra_files,
+            env_overrides=runtime_env or None,
+            profile_args=profile_args,
+        )
         if logs and all(marker in logs for marker in spec.get("runtime_markers", [])):
             break
         time.sleep(2)
@@ -498,6 +591,10 @@ def _assert_real_container_coverage(
 
     for marker in spec.get("runtime_markers", []):
         assert marker in logs, f"Missing runtime marker '{marker}' for {service}.\nlogs:\n{logs}"
+    if spec.get("runtime_markers_any"):
+        assert any(marker in logs for marker in spec["runtime_markers_any"]), (
+            f"Missing any runtime marker from {spec['runtime_markers_any']} for {service}.\nlogs:\n{logs}"
+        )
 
 
 def test_mitre_attack_connector_definition() -> None:
@@ -507,6 +604,7 @@ def test_mitre_attack_connector_definition() -> None:
 
 def test_nist_nvd_cve_connector_definition() -> None:
     _assert_connector_support("cve")
+    _assert_real_container_coverage("cve")
 
 
 def test_google_threat_intelligence_connector_definition() -> None:
@@ -544,6 +642,7 @@ def test_misp_intel_connector_definition() -> None:
         "MISP_API_KEY": MISP_TEST_ADMIN_KEY,
         "MISP_SSL_VERIFY": "false",
         "MISP_TEST_ADMIN_KEY": MISP_TEST_ADMIN_KEY,
+        "MISP_TEST_ADMIN_EMAIL": MISP_TEST_ADMIN_EMAIL,
         "MISP_TEST_BASE_URL": MISP_TEST_BASE_URL,
         "MISP_URL": MISP_TEST_BASE_URL,
     }

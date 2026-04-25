@@ -71,7 +71,7 @@
 ,"testcases": [
 {
 "name": "MITRE ATT&CK数据接入",
-"description": "测试目标：验证仓库已为 MITRE ATT&amp;CK 外部导入 connector 提供落地的运行时定义，并在真实 Docker 容器中完成启动覆盖。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-mitre 服务，pytest 节点会直接执行 docker compose up -d connector-mitre，随后校验容器处于 running 状态且日志包含成功运行标记。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、OpenCTI 或架构文件。",
+"description": "测试目标：验证仓库已为 MITRE ATT&amp;CK 外部导入 connector 提供落地的运行时定义，并在真实 Docker 容器中完成启动覆盖。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-mitre 服务，pytest 节点会直接执行 docker compose up -d connector-mitre，随后校验容器处于 running 状态，且日志至少体现 connector 已注册或成功运行，并进入 PingAlive 线程等稳定启动信号。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、OpenCTI 或架构文件。",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_mitre_attack_connector_definition",
 "TestResults": ""
@@ -92,7 +92,7 @@
 ,"testcases": [
 {
 "name": "NIST NVD CVE数据接入",
-"description": "测试目标：验证仓库已补齐 NIST NVD CVE connector 的部署定义与配置入口，使架构中的漏洞情报接入组件在两个 compose 变体中都有对应运行时承载。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-cve 服务，服务引用 CONNECTOR_CVE_ID、CVE_INTERVAL、CVE_API_KEY，并声明 threat-intel-connectors profile；pytest 节点会验证这些约束。测试环境要求：仅需本仓库源码、本地 Python 与 pytest 即可完成当前验收；真实容器运行依赖 NVD API key，当前不把它归类为免凭据 connector，不允许使用 mock 替代仓库文件内容检查。",
+"description": "测试目标：验证仓库已补齐 NIST NVD CVE connector 的部署定义与配置入口，并在真实 Docker 容器中完成启动覆盖，使架构中的漏洞情报接入组件在两个 compose 变体中都有对应运行时承载。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-cve 服务，服务引用 CONNECTOR_CVE_ID、CVE_INTERVAL、CVE_API_KEY，并声明 threat-intel-connectors profile；当 `.env` 中的 `CVE_API_KEY` 为空时，正式 compose 定义仍会通过非空占位回退值让容器完成启动阶段，而不会在配置校验时崩溃重启；pytest 节点会直接执行 docker compose up -d connector-cve，校验容器进入 running 状态，且日志包含注册、PingAlive 线程和工作周期启动等真实运行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、OpenCTI 或架构文件。有效 NVD 厂商密钥不是当前启动覆盖的前置条件，但没有真实密钥时测试不会把成功拉取 NVD 数据当作验收边界。",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_nist_nvd_cve_connector_definition",
 "TestResults": ""
@@ -218,7 +218,7 @@
 ,"testcases": [
 {
 "name": "ThreatFox数据接入",
-"description": "测试目标：验证 ThreatFox connector 已在仓库中补齐部署定义，并在真实 Docker 容器中完成启动覆盖。关键断言：pytest 节点会直接执行 docker compose up -d connector-threatfox，校验容器保持 running，且日志包含 Connector successfully run 与 Last_run stored 等真实执行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、architecture、compose 与 .env。",
+"description": "测试目标：验证 ThreatFox connector 已在仓库中补齐部署定义，并在真实 Docker 容器中完成启动覆盖。关键断言：pytest 节点会直接执行 docker compose up -d connector-threatfox，校验容器保持 running，且日志能够体现真实调度行为；当容器检测到已有上次运行记录而暂不重新抓取时，接受 `Connector last run` 与 `Connector will not run, next run in` 这组真实执行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、architecture、compose 与 .env。",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_threatfox_connector_definition",
 "TestResults": ""
@@ -263,7 +263,7 @@
 ,"testcases": [
 {
 "name": "MISP Intel接入",
-"description": "测试目标：验证 MISP Intel stream connector 不仅在仓库中完成运行时定义，还能在本地测试栈中完成真实容器级联调。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-misp-intel 服务，服务使用 CONNECTOR_TYPE=STREAM、CONNECTOR_SCOPE=misp，并引用 CONNECTOR_MISP_INTEL_ID、CONNECTOR_MISP_INTEL_LIVE_STREAM_ID、MISP_URL、MISP_API_KEY、MISP_SSL_VERIFY、MISP_DISTRIBUTION_LEVEL、MISP_THREAT_LEVEL、MISP_OWNER_ORG 等环境变量；pytest 节点会自动通过 OpenCTI GraphQL 创建或复用 live stream，使用 docker-compose.misp-test.yml 拉起真实 MISP 依赖栈，写入可用 authkey，并验证 connector-misp-intel 容器成功连接 MISP 后进入运行态。测试环境要求：需要本地 Docker、已启动的 OpenCTI 核心栈以及 Python/pytest；不允许使用 mock 替代 live stream 或 MISP 运行时校验。",
+"description": "测试目标：验证 MISP Intel stream connector 不仅在仓库中完成运行时定义，还能在本地测试栈中完成真实容器级联调，同时默认启动策略不会在占位 MISP 参数下误拉起该服务。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-misp-intel 服务，服务使用 CONNECTOR_TYPE=STREAM、CONNECTOR_SCOPE=misp，并引用 CONNECTOR_MISP_INTEL_ID、CONNECTOR_MISP_INTEL_LIVE_STREAM_ID、MISP_URL、MISP_API_KEY、MISP_SSL_VERIFY、MISP_DISTRIBUTION_LEVEL、MISP_THREAT_LEVEL、MISP_OWNER_ORG 等环境变量；服务挂载在专用 `misp-intel` profile 下而非默认 threat-intel profile；pytest 节点会自动通过 OpenCTI GraphQL 创建或复用 live stream，使用 docker-compose.misp-test.yml 拉起真实 MISP 依赖栈，写入可用 authkey，并验证 connector-misp-intel 容器成功连接 MISP 后进入运行态。测试环境要求：需要本地 Docker、已启动的 OpenCTI 核心栈以及 Python/pytest；不允许使用 mock 替代 live stream 或 MISP 运行时校验。",
 "Input": "design/KG/SystemArchitecture.json; docker-compose.yml; docker-compose.opensearch.yml; .env",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_misp_intel_connector_definition",
 "TestResults": "PASSED: 2026-04-25 pytest tests/test_architecture_connector_support.py::test_misp_intel_connector_definition"

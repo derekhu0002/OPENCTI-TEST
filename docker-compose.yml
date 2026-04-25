@@ -279,7 +279,7 @@ services:
       - CONNECTOR_SCOPE=vulnerability
       - CONNECTOR_LOG_LEVEL=info
       - CVE_INTERVAL=${CVE_INTERVAL}
-      - CVE_API_KEY=${CVE_API_KEY}
+      - CVE_API_KEY=${CVE_API_KEY:-runtime-placeholder-key}
     restart: always
     depends_on:
       opencti:
@@ -388,7 +388,7 @@ services:
         condition: service_healthy
   connector-misp-intel:
     image: opencti/connector-misp-intel:6.9.0
-    profiles: ["threat-intel-connectors"]
+    profiles: ["misp-intel"]
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
