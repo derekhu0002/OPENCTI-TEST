@@ -386,6 +386,28 @@ services:
     depends_on:
       opencti:
         condition: service_healthy
+  connector-misp-intel:
+    image: opencti/connector-misp-intel:6.9.0
+    profiles: ["threat-intel-connectors"]
+    environment:
+      - OPENCTI_URL=http://opencti:8080
+      - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
+      - CONNECTOR_ID=${CONNECTOR_MISP_INTEL_ID} # Valid UUIDv4
+      - CONNECTOR_TYPE=STREAM
+      - CONNECTOR_NAME=MISP Intel
+      - CONNECTOR_SCOPE=misp
+      - CONNECTOR_LOG_LEVEL=info
+      - CONNECTOR_LIVE_STREAM_ID=${CONNECTOR_MISP_INTEL_LIVE_STREAM_ID}
+      - MISP_URL=${MISP_URL}
+      - MISP_API_KEY=${MISP_API_KEY}
+      - MISP_SSL_VERIFY=${MISP_SSL_VERIFY}
+      - MISP_DISTRIBUTION_LEVEL=${MISP_DISTRIBUTION_LEVEL}
+      - MISP_THREAT_LEVEL=${MISP_THREAT_LEVEL}
+      - MISP_OWNER_ORG=${MISP_OWNER_ORG}
+    restart: always
+    depends_on:
+      opencti:
+        condition: service_healthy
   connector-automotive-security-timeline:
     build:
       context: ./connectors/automotive-security-timeline

@@ -1,0 +1,1 @@
+{"query":"query { __type(name:\"StreamCollectionAddInput\") { name kind inputFields { name type { kind name ofType { kind name ofType { kind name } } } } } }"}

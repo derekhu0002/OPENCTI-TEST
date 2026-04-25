@@ -1,0 +1,92 @@
+services:
+  misp-redis:
+    image: valkey/valkey:7.2
+    command:
+      - sh
+      - -c
+      - exec valkey-server --requirepass "$${REDIS_PASSWORD:-redispassword}"
+    environment:
+      REDIS_PASSWORD: ${MISP_TEST_REDIS_PASSWORD:-redispassword}
+      TZ: UTC
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - valkey-cli -a "$${REDIS_PASSWORD:-redispassword}" ping | grep -q PONG || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  misp-db:
+    image: mariadb:10.11
+    command:
+      - --innodb-buffer-pool-size=512M
+      - --innodb-log-file-size=256M
+    environment:
+      MYSQL_USER: ${MISP_TEST_MYSQL_USER:-misp}
+      MYSQL_PASSWORD: ${MISP_TEST_MYSQL_PASSWORD:-example}
+      MYSQL_ROOT_PASSWORD: ${MISP_TEST_MYSQL_ROOT_PASSWORD:-password}
+      MYSQL_DATABASE: ${MISP_TEST_MYSQL_DATABASE:-misp}
+      TZ: UTC
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin --user="$${MYSQL_USER}" --password="$${MYSQL_PASSWORD}" status
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  misp-modules:
+    image: ghcr.io/misp/misp-docker/misp-modules:latest
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /bin/bash -c '</dev/tcp/localhost/6666'
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+  misp-core:
+    image: ghcr.io/misp/misp-docker/misp-core:latest
+    depends_on:
+      misp-redis:
+        condition: service_healthy
+      misp-db:
+        condition: service_healthy
+      misp-modules:
+        condition: service_healthy
+    environment:
+      ADMIN_EMAIL: ${MISP_TEST_ADMIN_EMAIL:-admin@admin.test}
+      ADMIN_KEY: ${MISP_TEST_ADMIN_KEY:-2a75b4f0c6014f4f9af7f2a1b6e6d7a9b8c4d2e1}
+      ADMIN_ORG: ${MISP_TEST_ADMIN_ORG:-ORGNAME}
+      ADMIN_PASSWORD: ${MISP_TEST_ADMIN_PASSWORD:-admin}
+      BASE_URL: ${MISP_TEST_BASE_URL:-http://misp-core}
+      DISABLE_SSL_REDIRECT: "true"
+      ENABLE_BACKGROUND_UPDATES: "false"
+      ENABLE_DB_SETTINGS: "false"
+      ENABLE_REDIS_EMPTY_PASSWORD: "false"
+      MISP_MODULES_FQDN: http://misp-modules
+      MYSQL_DATABASE: ${MISP_TEST_MYSQL_DATABASE:-misp}
+      MYSQL_HOST: misp-db
+      MYSQL_PASSWORD: ${MISP_TEST_MYSQL_PASSWORD:-example}
+      MYSQL_PORT: "3306"
+      MYSQL_USER: ${MISP_TEST_MYSQL_USER:-misp}
+      REDIS_HOST: misp-redis
+      REDIS_PASSWORD: ${MISP_TEST_REDIS_PASSWORD:-redispassword}
+      REDIS_PORT: "6379"
+      TZ: UTC
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://localhost/users/heartbeat >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  connector-misp-intel:
+    depends_on:
+      misp-core:
+        condition: service_healthy

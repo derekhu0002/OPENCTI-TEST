@@ -263,10 +263,10 @@
 ,"testcases": [
 {
 "name": "MISP Intel接入",
-"description": "",
-"Input": "",
-"acceptanceCriteria": "",
-"TestResults": ""
+"description": "测试目标：验证 MISP Intel stream connector 不仅在仓库中完成运行时定义，还能在本地测试栈中完成真实容器级联调。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-misp-intel 服务，服务使用 CONNECTOR_TYPE=STREAM、CONNECTOR_SCOPE=misp，并引用 CONNECTOR_MISP_INTEL_ID、CONNECTOR_MISP_INTEL_LIVE_STREAM_ID、MISP_URL、MISP_API_KEY、MISP_SSL_VERIFY、MISP_DISTRIBUTION_LEVEL、MISP_THREAT_LEVEL、MISP_OWNER_ORG 等环境变量；pytest 节点会自动通过 OpenCTI GraphQL 创建或复用 live stream，使用 docker-compose.misp-test.yml 拉起真实 MISP 依赖栈，写入可用 authkey，并验证 connector-misp-intel 容器成功连接 MISP 后进入运行态。测试环境要求：需要本地 Docker、已启动的 OpenCTI 核心栈以及 Python/pytest；不允许使用 mock 替代 live stream 或 MISP 运行时校验。",
+"Input": "design/KG/SystemArchitecture.json; docker-compose.yml; docker-compose.opensearch.yml; .env",
+"acceptanceCriteria": "tests/test_architecture_connector_support.py::test_misp_intel_connector_definition",
+"TestResults": "PASSED: 2026-04-25 pytest tests/test_architecture_connector_support.py::test_misp_intel_connector_definition"
 }
 ]
 }
