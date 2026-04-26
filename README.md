@@ -152,6 +152,31 @@ To preview backup actions without changing anything:
 powershell -ExecutionPolicy Bypass -File .\scripts\backup-opencti.ps1 -WhatIf
 ```
 
+To restore the latest backup back into the current workspace:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\restore-opencti.ps1
+```
+
+To restore a specific backup directory:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\restore-opencti.ps1 -BackupPath .\backups\20260426-120000
+```
+
+The restore script will:
+
+- stop and remove the current Compose stack with `docker compose down`;
+- restore metadata files from `backups/<timestamp>/metadata` back into the repository root;
+- recreate each archived Docker volume from `backups/<timestamp>/volumes`;
+- restart the stack if it was running before the restore started.
+
+To preview restore actions without changing anything:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\restore-opencti.ps1 -WhatIf
+```
+
 ## Operational Notes
 
 - `threat-intel-connectors` is enabled by default through `.env`.

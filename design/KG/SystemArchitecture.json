@@ -39,6 +39,33 @@
 ]
 },
 {
+"id": "{4F6CBDCD-0E9A-44c7-A1AC-AAC670B36538}",
+"name": "OpenCTIToNeo4jMirrorSync"
+,"type": "ArchiMate_ApplicationComponent"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/OpenCTIToNeo4jMirrorSync"
+,"testcases": [
+{
+"name": "OpenCTI 情报数据镜像至 Neo4j 完整性验证",
+"description": "*   **测试场景（GIVEN）：**\r\n    1.  OpenCTI 容器环境已启动。\r\n    2.  镜像专用 Neo4j 容器已启动（监听端口需与车辆资产库隔离，例如 7687）。\r\n    3.  同步插件/脚本（Connector）已配置 Live Stream 权限。\r\n*   **操作步骤（WHEN）：**\r\n    1.  在 OpenCTI 界面上手动创建一个 `IPv4-Addr` (1.2.3.4)。\r\n    2.  创建一个 `Malware` (Mirai-Botnet)。\r\n    3.  在两者之间建立 `Relationship` (indicates)。\r\n*   **预期结果（THEN）：**\r\n    1.  **节点校验：** Neo4j 中必须出现标签为 `:ipv4-addr` 且属性 `value='1.2.3.4'` 的节点。\r\n    2.  **属性映射：** 节点的 `standard_id` (STIX ID) 必须与 OpenCTI 中一致。\r\n    3.  **关系校验：** 执行 `MATCH (a:ipv4-addr)-[r:indicates]-&gt;(b:malware) RETURN r` 必须能查询到该关系。\r\n*   **验收标准文件：** `OPENCTI-TEST/tests/mirror/test_neo4j_sync_integrity.py`",
+"Input": "",
+"acceptanceCriteria": "",
+"TestResults": ""
+}
+]
+},
+{
+"id": "{995F2B7F-86A7-4775-A17C-AB426A0E0DDB}",
+"name": "CONNECTORS"
+,"type": "ArchiMate_ApplicationComponent"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CONNECTORS"
+,"subdiagram_views": [
+{
+"view_id": "{58496187-E2C1-49a2-A95A-399BB7EB0E7A}",
+"view_name": "CONNECTORS"
+}
+]
+},
+{
 "id": "{F16836BB-B5AD-427f-BBFB-653B403CF9E0}",
 "name": "MITRE ATT&CK"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
@@ -257,7 +284,7 @@
 "name": "MISP Intel接入",
 "description": "",
 "Input": "",
-"acceptanceCriteria": "",
+"acceptanceCriteria": "tests/test_architecture_connector_support.py::test_misp_intel_connector_definition",
 "TestResults": ""
 }
 ]
@@ -318,11 +345,11 @@
 ]
 },
 {
-"view_id": "{84DFE546-E90B-44a6-BEB7-5470ED13B5B5}",
-"view_name": "ApplicationLayer"
-,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/ApplicationLayer"
-,"parent_element_id": "{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}"
-,"parent_element_name": "ApplicationLayer"
+"view_id": "{58496187-E2C1-49a2-A95A-399BB7EB0E7A}",
+"view_name": "CONNECTORS"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CONNECTORS/CONNECTORS"
+,"parent_element_id": "{995F2B7F-86A7-4775-A17C-AB426A0E0DDB}"
+,"parent_element_name": "CONNECTORS"
 ,"included_elements": [
 "{F16836BB-B5AD-427f-BBFB-653B403CF9E0}",
 "{7CC107A9-989C-4e25-9CE7-B1DBBAFF6F63}",
@@ -335,6 +362,20 @@
 "{50435384-6C9E-49e7-A7B1-9AC24CD3972E}",
 "{46F4A252-948E-442d-AABD-6609B54763DF}",
 "{15A815E6-AC3C-4b7a-AC7D-6A4147F13BFC}"
+]
+,"included_relationships": [
+
+]
+},
+{
+"view_id": "{84DFE546-E90B-44a6-BEB7-5470ED13B5B5}",
+"view_name": "ApplicationLayer"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/ApplicationLayer"
+,"parent_element_id": "{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}"
+,"parent_element_name": "ApplicationLayer"
+,"included_elements": [
+"{4F6CBDCD-0E9A-44c7-A1AC-AAC670B36538}",
+"{995F2B7F-86A7-4775-A17C-AB426A0E0DDB}"
 ]
 ,"included_relationships": [
 
