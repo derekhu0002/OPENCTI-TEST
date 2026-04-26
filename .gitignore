@@ -1,4 +1,5 @@
 *.iml
 .env
 __pycache__
+backups
 tests/__pycache__/test_architecture_connector_support.cpython-313-pytest-9.0.3.pyc
