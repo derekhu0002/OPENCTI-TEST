@@ -3,64 +3,46 @@
 "description": "",
 "elements": [
 {
-"id": "1207",
+"id": "{A437C67D-90A3-4a48-B9A9-D17F90FC18F0}",
 "name": "StrategyLayerAndMotivationAspect"
 ,"type": "ArchiMate_Assessment"
+,"browser_path": "Model/System/StrategyLayerAndMotivationAspect/StrategyLayerAndMotivationAspect"
 ,"subdiagram_views": [
 {
-"view_id": "159",
+"view_id": "{0B4C49ED-9F3D-497e-B726-A45491B6C57E}",
 "view_name": "StrategyLayerAndMotivationAspect"
 }
 ]
 },
 {
-"id": "1208",
+"id": "{47D7DB7E-CB3F-4111-A116-B34A234A10D5}",
 "name": "BusinessLayer"
 ,"type": "ArchiMate_Assessment"
+,"browser_path": "Model/System/BusinessLayer/BusinessLayer"
 ,"subdiagram_views": [
 {
-"view_id": "160",
+"view_id": "{B7341552-BD0E-4e40-95A3-5224AAB12BF1}",
 "view_name": "BusinessLayer"
 }
 ]
 },
 {
-"id": "1209",
+"id": "{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}",
 "name": "ApplicationLayer"
 ,"type": "ArchiMate_Assessment"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer"
 ,"subdiagram_views": [
 {
-"view_id": "161",
+"view_id": "{84DFE546-E90B-44a6-BEB7-5470ED13B5B5}",
 "view_name": "ApplicationLayer"
 }
 ]
 },
 {
-"id": "1210",
-"name": "TechnologyLayer"
-,"type": "ArchiMate_Assessment"
-,"subdiagram_views": [
-{
-"view_id": "162",
-"view_name": "TechnologyLayer"
-}
-]
-},
-{
-"id": "1211",
-"name": "ProjectManagement"
-,"type": "ArchiMate_Assessment"
-,"subdiagram_views": [
-{
-"view_id": "163",
-"view_name": "ProjectManagement"
-}
-]
-},
-{
-"id": "1234",
+"id": "{F16836BB-B5AD-427f-BBFB-653B403CF9E0}",
 "name": "MITRE ATT&CK"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/MITRE ATT&CK"
 ,"description": "MITRE ATT&amp;CK is a globally-accessible knowledge base of adversary tactics and techniques based on real-world observations. The ATT&amp;CK knowledge base is used as a foundation for the development of specific threat models and methodologies in the private sector, in government, and in the cybersecurity product and service community. The integration of MITRE ATT&amp;CK with OpenCTI allows for the ingestion of data from MITRE datasets, facilitating the pre-population of your OpenCTI instance. This includes importing information on tools, malware, campaigns, intrusion sets, attack patterns, courses of action, alongside MITRE-specific frameworks such as x-mitre-matrix, x-mitre-tactic, x-mitre-collection, x-mitre-data-source, and x-mitre-data-component. The connector supports the ingestion of data from MITRE Enterprise, MITRE Mobile, and MITRE ICS matrices."
 ,"attributes": [
 {
@@ -71,7 +53,7 @@
 ,"testcases": [
 {
 "name": "MITRE ATT&CK数据接入",
-"description": "测试目标：验证仓库已为 MITRE ATT&amp;CK 外部导入 connector 提供落地的运行时定义，并在真实 Docker 容器中完成启动覆盖。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-mitre 服务，pytest 节点会直接执行 docker compose up -d connector-mitre，随后校验容器处于 running 状态，且日志至少体现 connector 已注册或成功运行，并进入 PingAlive 线程等稳定启动信号。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、OpenCTI 或架构文件。",
+"description": "测试目标：验证仓库已为 MITRE ATT&amp;amp;CK 外部导入 connector 提供落地的运行时定义，并在真实 Docker 容器中完成启动覆盖。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-mitre 服务，pytest 节点会直接执行 docker compose up -d connector-mitre，随后校验容器处于 running 状态，且日志至少体现 connector 已注册或成功运行，并进入 PingAlive 线程等稳定启动信号。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、OpenCTI 或架构文件。",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_mitre_attack_connector_definition",
 "TestResults": ""
@@ -79,9 +61,10 @@
 ]
 },
 {
-"id": "1235",
+"id": "{7CC107A9-989C-4e25-9CE7-B1DBBAFF6F63}",
 "name": "NIST NVD CVE"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/NIST NVD CVE"
 ,"description": "The NVD facilitates automated vulnerability management, security measurement, and compliance processes by providing comprehensive databases that include: • Vulnerability catalogs • Software vulnerability details • Product identifiers • Severity scoring metrics Common Vulnerabilities and Exposures (CVE) provides a standardized dictionary of publicly disclosed cybersecurity vulnerabilities and exposures, serving as a universal reference system for the security community. This connector seamlessly integrates with the NVD to retrieve CVE data, transform it into STIX2 format, and automatically import it into OpenCTI on a scheduled basis, ensuring your threat intelligence platform remains current with the latest vulnerability information.”"
 ,"attributes": [
 {
@@ -92,7 +75,7 @@
 ,"testcases": [
 {
 "name": "NIST NVD CVE数据接入",
-"description": "测试目标：验证仓库已补齐 NIST NVD CVE connector 的部署定义与配置入口，并在真实 Docker 容器中完成启动覆盖，使架构中的漏洞情报接入组件在两个 compose 变体中都有对应运行时承载。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-cve 服务，服务引用 CONNECTOR_CVE_ID、CVE_INTERVAL、CVE_API_KEY，并声明 threat-intel-connectors profile；当 `.env` 中的 `CVE_API_KEY` 为空时，正式 compose 定义仍会通过非空占位回退值让容器完成启动阶段，而不会在配置校验时崩溃重启；pytest 节点会直接执行 docker compose up -d connector-cve，校验容器进入 running 状态，且日志包含注册、PingAlive 线程和工作周期启动等真实运行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、OpenCTI 或架构文件。有效 NVD 厂商密钥不是当前启动覆盖的前置条件，但没有真实密钥时测试不会把成功拉取 NVD 数据当作验收边界。",
+"description": "测试目标：验证仓库已补齐 NIST NVD CVE connector 的部署定义与配置入口，使架构中的漏洞情报接入组件在两个 compose 变体中都有对应运行时承载。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-cve 服务，服务引用 CONNECTOR_CVE_ID、CVE_INTERVAL、CVE_API_KEY，并声明 threat-intel-connectors profile；pytest 节点会验证这些约束。测试环境要求：仅需本仓库源码、本地 Python 与 pytest 即可完成当前验收；真实容器运行依赖 NVD API key，当前不把它归类为免凭据 connector，不允许使用 mock 替代仓库文件内容检查。",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_nist_nvd_cve_connector_definition",
 "TestResults": ""
@@ -100,9 +83,10 @@
 ]
 },
 {
-"id": "1236",
+"id": "{3862B850-2927-4727-A0DB-AB48414D00C6}",
 "name": "Google Threat Intelligence (GTI)"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Google Threat Intelligence (GTI)"
 ,"description": "Google Threat Intelligence provides unparalleled visibility into threats, enabling the delivery of detailed and timely intelligence to security teams worldwide. By protecting billions of users, detecting millions of phishing attempts, and dedicating extensive resources to incident investigation, Google has a comprehensive view of the threat landscape, ensuring that critical organizations, including yours, remain secure.\r\n\r\nThe integration of Google Threat Intelligence with OpenCTI enables the ingestion of threat data from the Google Threat Intel API directly into the OpenCTI platform. The connector imports key data types such as reports, locations, sectors, malware, intrusion sets, attack patterns, vulnerabilities, and raw IOCs, providing structured intelligence in a comprehensible format within OpenCTI."
 ,"attributes": [
 {
@@ -121,9 +105,10 @@
 ]
 },
 {
-"id": "1237",
+"id": "{0D953003-0F28-42c4-A62B-0E30E4F013DE}",
 "name": "CrowdStrike Falcon Intelligence"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CrowdStrike Falcon Intelligence"
 ,"description": "CrowdStrike Falcon Intelligence is an integral threat intelligence module within the Falcon platform, crafted to enhance the speed and effectiveness of threat detection, investigation, and response. It equips SOC teams to work more swiftly and intelligently, leveraging automation, enrichment, and high-fidelity data to optimize their cybersecurity operations.\r\n\r\nThe OpenCTI CrowdStrike connector facilitates the import of intelligence from the CrowdStrike Falcon platform. By utilizing the Intel APIs, this connector accesses CrowdStrike&#226;€™s comprehensive intelligence, including data on threat actors, indicators, reports, and YARA rules, thus enhancing the threat intelligence capabilities within OpenCTI."
 ,"attributes": [
 {
@@ -142,9 +127,10 @@
 ]
 },
 {
-"id": "1238",
+"id": "{9D79C54A-5215-4929-8C2A-E0EC4F3FB065}",
 "name": "Ransomware.live"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Ransomware.live"
 ,"description": "Ransomware.live is a specialized threat intelligence service focused on monitoring and reporting ransomware activities and incidents. By providing real-time data on ransomware campaigns, including attack vectors and ransom demands, RansomwareLive aids organizations in understanding and defending against this pervasive threat.\r\n\r\nIntegrating Ransomware.live with OpenCTI allows for the modeling of various attacks and ransomware group claims, as well as their victims, enabling tracking and alerts. This enhances the threat intelligence platform's capabilities with timely and detailed insights into the latest ransomware threats."
 ,"attributes": [
 {
@@ -163,9 +149,10 @@
 ]
 },
 {
-"id": "1239",
+"id": "{3721856F-866C-44b6-8787-F8B364DAC5E5}",
 "name": "CISA Known Exploited Vulnerabilities (KEV)"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CISA Known Exploited Vulnerabilities (KEV)"
 ,"description": "CISA KEV (Known Exploited Vulnerabilities) is a catalog maintained by the Cybersecurity and Infrastructure Security Agency that lists vulnerabilities actively exploited in the wild. It serves as an authoritative resource for organizations to prioritize vulnerability remediation and enhance their security resilience.\r\n\r\nThe integration of the CISA KEV source with OpenCTI enables the ingestion of vulnerabilities known to be actively exploited. This process involves parsing out Identity, Infrastructure, and Vulnerability STIX Objects, which are then imported into OpenCTI."
 ,"attributes": [
 {
@@ -184,9 +171,10 @@
 ]
 },
 {
-"id": "1240",
+"id": "{C80C2E68-7BA1-4f7d-86AB-C22D382AD185}",
 "name": "Mandiant"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Mandiant"
 ,"description": "The Mandiant connector imports comprehensive cyber threat intelligence from Mandiant (now part of Google Cloud) Advantage API V4 into OpenCTI. It provides access to Mandiant's threat actor profiles, malware families, campaigns, vulnerability reports, indicators of compromise (IOCs), and threat analysis reports. The connector supports incremental imports with configurable intervals for different entity types, custom TLP markings, and relationship inference for enhanced threat context."
 ,"attributes": [
 {
@@ -205,9 +193,10 @@
 ]
 },
 {
-"id": "1241",
+"id": "{79E5A8ED-4925-4776-9790-4A2A5A7D55C0}",
 "name": "ThreatFox"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/ThreatFox"
 ,"description": "ThreatFox is a platform from abuse.ch and Spamhaus dedicated to sharing indicators of compromise (IOCs) associated with malware, with the infosec community, AV vendors and cyber threat intelligence providers\r\n\r\nThe integration of ThreatFox with OpenCTI facilitates the automatic import of IOCs into the threat intelligence platform. This integration imports data for the following OpenCTI observables/indicators: file-md5, file-sha1, file-sha256, ipv4-addr, domain-name, and url. It also incorporates the Malware entity, enhancing the platform's capability to effectively manage and respond to threats."
 ,"attributes": [
 {
@@ -218,7 +207,7 @@
 ,"testcases": [
 {
 "name": "ThreatFox数据接入",
-"description": "测试目标：验证 ThreatFox connector 已在仓库中补齐部署定义，并在真实 Docker 容器中完成启动覆盖。关键断言：pytest 节点会直接执行 docker compose up -d connector-threatfox，校验容器保持 running，且日志能够体现真实调度行为；当容器检测到已有上次运行记录而暂不重新抓取时，接受 `Connector last run` 与 `Connector will not run, next run in` 这组真实执行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、architecture、compose 与 .env。",
+"description": "测试目标：验证 ThreatFox connector 已在仓库中补齐部署定义，并在真实 Docker 容器中完成启动覆盖。关键断言：pytest 节点会直接执行 docker compose up -d connector-threatfox，校验容器保持 running，且日志包含 Connector successfully run 与 Last_run stored 等真实执行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、architecture、compose 与 .env。",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_threatfox_connector_definition",
 "TestResults": ""
@@ -226,9 +215,10 @@
 ]
 },
 {
-"id": "1242",
+"id": "{50435384-6C9E-49e7-A7B1-9AC24CD3972E}",
 "name": "Kaspersky Enrichment"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Kaspersky Enrichment"
 ,"description": "The OpenCTI Kaspersky enrichment connector allows you to enrich your observables with intelligence from the Kaspersky Threat Intelligence Portal. The connector queries the Kaspersky API to retrieve contextual information and threat data associated with your indicators/observables.\r\n\r\nAt this time, the connector supports file observables enrichment with Kaspersky's threat intelligence. Support for additional observable types (IP addresses, domains, and URLs) will be added in future releases."
 ,"attributes": [
 {
@@ -238,9 +228,10 @@
 ]
 },
 {
-"id": "1243",
+"id": "{46F4A252-948E-442d-AABD-6609B54763DF}",
 "name": "VirusTotal"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/VirusTotal"
 ,"description": "VirusTotal is a comprehensive service that aggregates data from numerous antivirus products and online scanners to analyze suspicious files and URLs for potential threats. By providing collective analysis results, VirusTotal helps security teams identify malicious content quickly and effectively, supporting more comprehensive cybersecurity efforts.\r\n\r\nIntegrating VirusTotal with OpenCTI enhances threat intelligence by providing access to the collective insights of numerous security vendors. This integration allows for the automatic import of analysis results for files and URLs, enriching the threat intelligence platform with detailed threat data. Security teams can leverage VirusTotal data to confirm, investigate, and respond to potential threats more efficiently, fortifying their overall security posture."
 ,"attributes": [
 {
@@ -250,9 +241,10 @@
 ]
 },
 {
-"id": "1244",
+"id": "{15A815E6-AC3C-4b7a-AC7D-6A4147F13BFC}",
 "name": "MISP Intel"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/MISP Intel"
 ,"description": "The MISP Intel connector enables synchronization between OpenCTI and MISP (Malware Information Sharing Platform) instances. It streams data from OpenCTI to MISP in real-time, automatically converting OpenCTI containers (reports, groupings, cases) and their associated STIX objects into MISP events. The connector supports flexible configuration options including distribution levels, threat levels, automatic publishing, and custom tagging. It maintains relationships between entities and supports organization-specific settings, making it ideal for organizations that use both OpenCTI and MISP for threat intelligence management and need to keep both platforms synchronized."
 ,"attributes": [
 {
@@ -263,10 +255,34 @@
 ,"testcases": [
 {
 "name": "MISP Intel接入",
-"description": "测试目标：验证 MISP Intel stream connector 不仅在仓库中完成运行时定义，还能在本地测试栈中完成真实容器级联调，同时默认启动策略不会在占位 MISP 参数下误拉起该服务。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-misp-intel 服务，服务使用 CONNECTOR_TYPE=STREAM、CONNECTOR_SCOPE=misp，并引用 CONNECTOR_MISP_INTEL_ID、CONNECTOR_MISP_INTEL_LIVE_STREAM_ID、MISP_URL、MISP_API_KEY、MISP_SSL_VERIFY、MISP_DISTRIBUTION_LEVEL、MISP_THREAT_LEVEL、MISP_OWNER_ORG 等环境变量；服务挂载在专用 `misp-intel` profile 下而非默认 threat-intel profile；pytest 节点会自动通过 OpenCTI GraphQL 创建或复用 live stream，使用 docker-compose.misp-test.yml 拉起真实 MISP 依赖栈，写入可用 authkey，并验证 connector-misp-intel 容器成功连接 MISP 后进入运行态。测试环境要求：需要本地 Docker、已启动的 OpenCTI 核心栈以及 Python/pytest；不允许使用 mock 替代 live stream 或 MISP 运行时校验。",
-"Input": "design/KG/SystemArchitecture.json; docker-compose.yml; docker-compose.opensearch.yml; .env",
-"acceptanceCriteria": "tests/test_architecture_connector_support.py::test_misp_intel_connector_definition",
-"TestResults": "PASSED: 2026-04-25 pytest tests/test_architecture_connector_support.py::test_misp_intel_connector_definition"
+"description": "",
+"Input": "",
+"acceptanceCriteria": "",
+"TestResults": ""
+}
+]
+},
+{
+"id": "{03048AE3-88C4-4893-88CD-DC244C7163B0}",
+"name": "TechnologyLayer"
+,"type": "ArchiMate_Assessment"
+,"browser_path": "Model/System/TechnologyLayer/TechnologyLayer"
+,"subdiagram_views": [
+{
+"view_id": "{DA69C86F-94DB-40e1-A44F-6EBA0BF7EC79}",
+"view_name": "TechnologyLayer"
+}
+]
+},
+{
+"id": "{CA7350B0-1F62-4053-9833-685F6A12B3B5}",
+"name": "ProjectManagement"
+,"type": "ArchiMate_Assessment"
+,"browser_path": "Model/System/ProjectManagement/ProjectManagement"
+,"subdiagram_views": [
+{
+"view_id": "{107597C2-E3D5-4de3-922F-05E901E97684}",
+"view_name": "ProjectManagement"
 }
 ]
 }
@@ -276,9 +292,10 @@
 ],
 "views": [
 {
-"view_id": "159",
+"view_id": "{0B4C49ED-9F3D-497e-B726-A45491B6C57E}",
 "view_name": "StrategyLayerAndMotivationAspect"
-,"parent_element_id": "1207"
+,"browser_path": "Model/System/StrategyLayerAndMotivationAspect/StrategyLayerAndMotivationAspect/StrategyLayerAndMotivationAspect"
+,"parent_element_id": "{A437C67D-90A3-4a48-B9A9-D17F90FC18F0}"
 ,"parent_element_name": "StrategyLayerAndMotivationAspect"
 ,"included_elements": [
 
@@ -288,9 +305,10 @@
 ]
 },
 {
-"view_id": "160",
+"view_id": "{B7341552-BD0E-4e40-95A3-5224AAB12BF1}",
 "view_name": "BusinessLayer"
-,"parent_element_id": "1208"
+,"browser_path": "Model/System/BusinessLayer/BusinessLayer/BusinessLayer"
+,"parent_element_id": "{47D7DB7E-CB3F-4111-A116-B34A234A10D5}"
 ,"parent_element_name": "BusinessLayer"
 ,"included_elements": [
 
@@ -300,31 +318,33 @@
 ]
 },
 {
-"view_id": "161",
+"view_id": "{84DFE546-E90B-44a6-BEB7-5470ED13B5B5}",
 "view_name": "ApplicationLayer"
-,"parent_element_id": "1209"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/ApplicationLayer"
+,"parent_element_id": "{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}"
 ,"parent_element_name": "ApplicationLayer"
 ,"included_elements": [
-"1234",
-"1235",
-"1236",
-"1237",
-"1238",
-"1239",
-"1240",
-"1241",
-"1242",
-"1243",
-"1244"
+"{F16836BB-B5AD-427f-BBFB-653B403CF9E0}",
+"{7CC107A9-989C-4e25-9CE7-B1DBBAFF6F63}",
+"{3862B850-2927-4727-A0DB-AB48414D00C6}",
+"{0D953003-0F28-42c4-A62B-0E30E4F013DE}",
+"{9D79C54A-5215-4929-8C2A-E0EC4F3FB065}",
+"{3721856F-866C-44b6-8787-F8B364DAC5E5}",
+"{C80C2E68-7BA1-4f7d-86AB-C22D382AD185}",
+"{79E5A8ED-4925-4776-9790-4A2A5A7D55C0}",
+"{50435384-6C9E-49e7-A7B1-9AC24CD3972E}",
+"{46F4A252-948E-442d-AABD-6609B54763DF}",
+"{15A815E6-AC3C-4b7a-AC7D-6A4147F13BFC}"
 ]
 ,"included_relationships": [
 
 ]
 },
 {
-"view_id": "162",
+"view_id": "{DA69C86F-94DB-40e1-A44F-6EBA0BF7EC79}",
 "view_name": "TechnologyLayer"
-,"parent_element_id": "1210"
+,"browser_path": "Model/System/TechnologyLayer/TechnologyLayer/TechnologyLayer"
+,"parent_element_id": "{03048AE3-88C4-4893-88CD-DC244C7163B0}"
 ,"parent_element_name": "TechnologyLayer"
 ,"included_elements": [
 
@@ -334,9 +354,10 @@
 ]
 },
 {
-"view_id": "163",
+"view_id": "{107597C2-E3D5-4de3-922F-05E901E97684}",
 "view_name": "ProjectManagement"
-,"parent_element_id": "1211"
+,"browser_path": "Model/System/ProjectManagement/ProjectManagement/ProjectManagement"
+,"parent_element_id": "{CA7350B0-1F62-4053-9833-685F6A12B3B5}"
 ,"parent_element_name": "ProjectManagement"
 ,"included_elements": [
 
@@ -346,14 +367,15 @@
 ]
 },
 {
-"view_id": "158",
+"view_id": "{98C55C09-9C9B-4f53-A566-D92C9FF20805}",
 "view_name": "SystemArchitecture"
+,"browser_path": "Model/System/SystemArchitecture"
 ,"included_elements": [
-"1207",
-"1208",
-"1209",
-"1210",
-"1211"
+"{A437C67D-90A3-4a48-B9A9-D17F90FC18F0}",
+"{47D7DB7E-CB3F-4111-A116-B34A234A10D5}",
+"{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}",
+"{03048AE3-88C4-4893-88CD-DC244C7163B0}",
+"{CA7350B0-1F62-4053-9833-685F6A12B3B5}"
 ]
 ,"included_relationships": [
 
