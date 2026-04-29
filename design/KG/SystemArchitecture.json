@@ -47,6 +47,7 @@
 {
 "name": "OpenCTI 情报数据镜像至 Neo4j 完整性验证",
 "description": "*   **测试场景（GIVEN）：**\r\n    1.  OpenCTI 容器环境已启动。\r\n    2.  镜像专用 Neo4j 容器已启动（监听端口需与车辆资产库隔离，例如 7687）。\r\n    3.  同步插件/脚本（Connector）已配置 Live Stream 权限。\r\n*   **操作步骤（WHEN）：**\r\n    1.  在 OpenCTI 界面上手动创建一个 `IPv4-Addr` (1.2.3.4)。\r\n    2.  创建一个 `Malware` (Mirai-Botnet)。\r\n    3.  在两者之间建立 `Relationship` (indicates)。\r\n*   **预期结果（THEN）：**\r\n    1.  **节点校验：** Neo4j 中必须出现标签为 `:ipv4-addr` 且属性 `value='1.2.3.4'` 的节点。\r\n    2.  **属性映射：** 节点的 `standard_id` (STIX ID) 必须与 OpenCTI 中一致。\r\n    3.  **关系校验：** 执行 `MATCH (a:ipv4-addr)-[r:indicates]-&gt;(b:malware) RETURN r` 必须能查询到该关系。\r\n*   **验收标准文件：** `OPENCTI-TEST/tests/mirror/test_neo4j_sync_integrity.py`",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "",
 "TestResults": ""
@@ -81,6 +82,7 @@
 {
 "name": "MITRE ATT&CK数据接入",
 "description": "测试目标：验证仓库已为 MITRE ATT&amp;amp;CK 外部导入 connector 提供落地的运行时定义，并在真实 Docker 容器中完成启动覆盖。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-mitre 服务，pytest 节点会直接执行 docker compose up -d connector-mitre，随后校验容器处于 running 状态，且日志至少体现 connector 已注册或成功运行，并进入 PingAlive 线程等稳定启动信号。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、OpenCTI 或架构文件。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_mitre_attack_connector_definition",
 "TestResults": ""
@@ -103,6 +105,7 @@
 {
 "name": "NIST NVD CVE数据接入",
 "description": "测试目标：验证仓库已补齐 NIST NVD CVE connector 的部署定义与配置入口，使架构中的漏洞情报接入组件在两个 compose 变体中都有对应运行时承载。关键断言：docker-compose.yml 与 docker-compose.opensearch.yml 都存在 connector-cve 服务，服务引用 CONNECTOR_CVE_ID、CVE_INTERVAL、CVE_API_KEY，并声明 threat-intel-connectors profile；pytest 节点会验证这些约束。测试环境要求：仅需本仓库源码、本地 Python 与 pytest 即可完成当前验收；真实容器运行依赖 NVD API key，当前不把它归类为免凭据 connector，不允许使用 mock 替代仓库文件内容检查。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_nist_nvd_cve_connector_definition",
 "TestResults": ""
@@ -125,6 +128,7 @@
 {
 "name": "Google Threat Intelligence (GTI)数据接入",
 "description": "测试目标：验证 Google Threat Intelligence (GTI) connector 已在仓库中获得可部署的运行时定义，并与架构组件名称保持一致。关键断言：两个 compose 文件都存在 connector-google-ti-feeds 服务，服务引用 CONNECTOR_GOOGLE_TI_FEEDS_ID、GOOGLE_TI_FEEDS_INTERVAL、GOOGLE_TI_FEEDS_API_KEY，并使用 google-ti-feeds 作用域和 threat-intel-connectors profile；pytest 节点能直接完成校验。测试环境要求：仅需本仓库源码、本地 Python 与 pytest；不需要真实 GTI API Key，不允许通过 mock 伪造 compose 或 .env 内容。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_google_threat_intelligence_connector_definition",
 "TestResults": ""
@@ -147,6 +151,7 @@
 {
 "name": "CrowdStrike Falcon Intelligence数据接入",
 "description": "测试目标：验证 CrowdStrike Falcon Intelligence connector 的部署支撑已落地到工作区，并保留凭据驱动型集成所需的最小配置边界。关键断言：两个 compose 文件都存在 connector-crowdstrike 服务，服务引用 CONNECTOR_CROWDSTRIKE_ID、CROWDSTRIKE_FALCON_INTERVAL、CROWDSTRIKE_FALCON_BASE_URL、CROWDSTRIKE_FALCON_CLIENT_ID、CROWDSTRIKE_FALCON_CLIENT_SECRET，并通过 threat-intel-connectors profile 受控启用；pytest 节点可直接运行。测试环境要求：仅需本仓库源码、本地 Python 与 pytest；不要求真实 CrowdStrike 凭据，不允许使用 mock 绕过对配置文件的直接验证。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_crowdstrike_connector_definition",
 "TestResults": ""
@@ -169,6 +174,7 @@
 {
 "name": "Ransomware.live数据接入",
 "description": "测试目标：验证 Ransomware.live connector 已在仓库的运行时配置中落地，并在真实 Docker 容器中完成启动覆盖。关键断言：pytest 节点会直接执行 docker compose up -d connector-ransomwarelive，校验容器保持 running，且日志能够体现真实连接器执行；当前上游 https://www.ransomware.live/v2/groups 返回 404 时，测试接受该已知外部接口错误，但不接受容器未启动。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker 或仓库文件。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_ransomwarelive_connector_definition",
 "TestResults": ""
@@ -191,6 +197,7 @@
 {
 "name": "CISA Known Exploited Vulnerabilities (KEV)数据接入",
 "description": "测试目标：验证 CISA KEV connector 的架构声明已经映射到仓库中的实际部署定义，并在真实 Docker 容器中完成启动覆盖。关键断言：pytest 节点会直接执行 docker compose up -d connector-cisa-known-exploited-vulnerabilities，校验容器保持 running，且日志包含 CISA Bundle Complete 与 sending bundle to queue 等真实执行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker 或仓库配置。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_cisa_kev_connector_definition",
 "TestResults": ""
@@ -213,6 +220,7 @@
 {
 "name": "Mandiant数据接入",
 "description": "测试目标：验证 Mandiant connector 已在仓库中落地为可部署的运行时定义，并明确保留 API V4 凭据接入所需的环境变量边界。关键断言：两个 compose 文件都存在 connector-mandiant 服务，服务引用 CONNECTOR_MANDIANT_ID、MANDIANT_IMPORT_INTERVAL、MANDIANT_API_V4_KEY_ID、MANDIANT_API_V4_KEY_SECRET，并声明 mandiant scope 与 threat-intel-connectors profile；pytest 节点可直接运行。测试环境要求：仅需本仓库源码、本地 Python 与 pytest；不依赖真实 Mandiant 凭据，不允许使用 mock 替代配置文件级校验。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_mandiant_connector_definition",
 "TestResults": ""
@@ -235,6 +243,7 @@
 {
 "name": "ThreatFox数据接入",
 "description": "测试目标：验证 ThreatFox connector 已在仓库中补齐部署定义，并在真实 Docker 容器中完成启动覆盖。关键断言：pytest 节点会直接执行 docker compose up -d connector-threatfox，校验容器保持 running，且日志包含 Connector successfully run 与 Last_run stored 等真实执行痕迹。测试环境要求：必须有可用的真实 Docker daemon、docker compose、本仓库源码和本地 Python/pytest；不允许 mock Docker、architecture、compose 与 .env。",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_threatfox_connector_definition",
 "TestResults": ""
@@ -283,6 +292,7 @@
 {
 "name": "MISP Intel接入",
 "description": "",
+"type": "Acceptance Test",
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_misp_intel_connector_definition",
 "TestResults": ""
