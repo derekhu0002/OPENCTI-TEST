@@ -3,71 +3,67 @@
 "description": "",
 "elements": [
 {
-"id": "{A437C67D-90A3-4a48-B9A9-D17F90FC18F0}",
+"id": "1207",
 "name": "StrategyLayerAndMotivationAspect"
 ,"type": "ArchiMate_Assessment"
 ,"browser_path": "Model/System/StrategyLayerAndMotivationAspect/StrategyLayerAndMotivationAspect"
 ,"subdiagram_views": [
 {
-"view_id": "{0B4C49ED-9F3D-497e-B726-A45491B6C57E}",
+"view_id": "159",
 "view_name": "StrategyLayerAndMotivationAspect"
 }
 ]
 },
 {
-"id": "{47D7DB7E-CB3F-4111-A116-B34A234A10D5}",
+"id": "1208",
 "name": "BusinessLayer"
 ,"type": "ArchiMate_Assessment"
 ,"browser_path": "Model/System/BusinessLayer/BusinessLayer"
 ,"subdiagram_views": [
 {
-"view_id": "{B7341552-BD0E-4e40-95A3-5224AAB12BF1}",
+"view_id": "160",
 "view_name": "BusinessLayer"
 }
 ]
 },
 {
-"id": "{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}",
+"id": "1209",
 "name": "ApplicationLayer"
 ,"type": "ArchiMate_Assessment"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer"
 ,"subdiagram_views": [
 {
-"view_id": "{84DFE546-E90B-44a6-BEB7-5470ED13B5B5}",
+"view_id": "161",
 "view_name": "ApplicationLayer"
 }
 ]
 },
 {
-"id": "{4F6CBDCD-0E9A-44c7-A1AC-AAC670B36538}",
-"name": "OpenCTIToNeo4jMirrorSync"
-,"type": "ArchiMate_ApplicationComponent"
-,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/OpenCTIToNeo4jMirrorSync"
-,"testcases": [
-{
-"name": "OpenCTI 情报数据镜像至 Neo4j 完整性验证",
-"description": "*   **测试场景（GIVEN）：**\r\n    1.  OpenCTI 容器环境已启动。\r\n    2.  镜像专用 Neo4j 容器已启动（监听端口需与车辆资产库隔离，例如 7687）。\r\n    3.  同步插件/脚本（Connector）已配置 Live Stream 权限。\r\n*   **操作步骤（WHEN）：**\r\n    1.  在 OpenCTI 界面上手动创建一个 `IPv4-Addr` (1.2.3.4)。\r\n    2.  创建一个 `Malware` (Mirai-Botnet)。\r\n    3.  在两者之间建立 `Relationship` (indicates)。\r\n*   **预期结果（THEN）：**\r\n    1.  **节点校验：** Neo4j 中必须出现标签为 `:ipv4-addr` 且属性 `value='1.2.3.4'` 的节点。\r\n    2.  **属性映射：** 节点的 `standard_id` (STIX ID) 必须与 OpenCTI 中一致。\r\n    3.  **关系校验：** 执行 `MATCH (a:ipv4-addr)-[r:indicates]-&gt;(b:malware) RETURN r` 必须能查询到该关系。\r\n*   **验收标准文件：** `OPENCTI-TEST/tests/mirror/test_neo4j_sync_integrity.py`",
-"type": "Acceptance Test",
-"Input": "",
-"acceptanceCriteria": "",
-"TestResults": ""
-}
-]
-},
-{
-"id": "{995F2B7F-86A7-4775-A17C-AB426A0E0DDB}",
-"name": "CONNECTORS"
-,"type": "ArchiMate_ApplicationComponent"
-,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CONNECTORS"
+"id": "1210",
+"name": "TechnologyLayer"
+,"type": "ArchiMate_Assessment"
+,"browser_path": "Model/System/TechnologyLayer/TechnologyLayer"
 ,"subdiagram_views": [
 {
-"view_id": "{58496187-E2C1-49a2-A95A-399BB7EB0E7A}",
-"view_name": "CONNECTORS"
+"view_id": "162",
+"view_name": "TechnologyLayer"
 }
 ]
 },
 {
-"id": "{F16836BB-B5AD-427f-BBFB-653B403CF9E0}",
+"id": "1211",
+"name": "ProjectManagement"
+,"type": "ArchiMate_Assessment"
+,"browser_path": "Model/System/ProjectManagement/ProjectManagement"
+,"subdiagram_views": [
+{
+"view_id": "163",
+"view_name": "ProjectManagement"
+}
+]
+},
+{
+"id": "1234",
 "name": "MITRE ATT&CK"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/MITRE ATT&CK"
@@ -90,7 +86,7 @@
 ]
 },
 {
-"id": "{7CC107A9-989C-4e25-9CE7-B1DBBAFF6F63}",
+"id": "1235",
 "name": "NIST NVD CVE"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/NIST NVD CVE"
@@ -113,7 +109,7 @@
 ]
 },
 {
-"id": "{3862B850-2927-4727-A0DB-AB48414D00C6}",
+"id": "1236",
 "name": "Google Threat Intelligence (GTI)"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Google Threat Intelligence (GTI)"
@@ -136,7 +132,7 @@
 ]
 },
 {
-"id": "{0D953003-0F28-42c4-A62B-0E30E4F013DE}",
+"id": "1237",
 "name": "CrowdStrike Falcon Intelligence"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CrowdStrike Falcon Intelligence"
@@ -159,7 +155,7 @@
 ]
 },
 {
-"id": "{9D79C54A-5215-4929-8C2A-E0EC4F3FB065}",
+"id": "1238",
 "name": "Ransomware.live"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Ransomware.live"
@@ -182,7 +178,7 @@
 ]
 },
 {
-"id": "{3721856F-866C-44b6-8787-F8B364DAC5E5}",
+"id": "1239",
 "name": "CISA Known Exploited Vulnerabilities (KEV)"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CISA Known Exploited Vulnerabilities (KEV)"
@@ -205,7 +201,7 @@
 ]
 },
 {
-"id": "{C80C2E68-7BA1-4f7d-86AB-C22D382AD185}",
+"id": "1240",
 "name": "Mandiant"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Mandiant"
@@ -228,7 +224,7 @@
 ]
 },
 {
-"id": "{79E5A8ED-4925-4776-9790-4A2A5A7D55C0}",
+"id": "1241",
 "name": "ThreatFox"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/ThreatFox"
@@ -251,7 +247,7 @@
 ]
 },
 {
-"id": "{50435384-6C9E-49e7-A7B1-9AC24CD3972E}",
+"id": "1242",
 "name": "Kaspersky Enrichment"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/Kaspersky Enrichment"
@@ -264,7 +260,7 @@
 ]
 },
 {
-"id": "{46F4A252-948E-442d-AABD-6609B54763DF}",
+"id": "1243",
 "name": "VirusTotal"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/VirusTotal"
@@ -277,7 +273,7 @@
 ]
 },
 {
-"id": "{15A815E6-AC3C-4b7a-AC7D-6A4147F13BFC}",
+"id": "1244",
 "name": "MISP Intel"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/MISP Intel"
@@ -300,26 +296,30 @@
 ]
 },
 {
-"id": "{03048AE3-88C4-4893-88CD-DC244C7163B0}",
-"name": "TechnologyLayer"
-,"type": "ArchiMate_Assessment"
-,"browser_path": "Model/System/TechnologyLayer/TechnologyLayer"
+"id": "1245",
+"name": "CONNECTORS"
+,"type": "ArchiMate_ApplicationComponent"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CONNECTORS"
 ,"subdiagram_views": [
 {
-"view_id": "{DA69C86F-94DB-40e1-A44F-6EBA0BF7EC79}",
-"view_name": "TechnologyLayer"
+"view_id": "165",
+"view_name": "CONNECTORS"
 }
 ]
 },
 {
-"id": "{CA7350B0-1F62-4053-9833-685F6A12B3B5}",
-"name": "ProjectManagement"
-,"type": "ArchiMate_Assessment"
-,"browser_path": "Model/System/ProjectManagement/ProjectManagement"
-,"subdiagram_views": [
+"id": "1246",
+"name": "OpenCTIToNeo4jMirrorSync"
+,"type": "ArchiMate_ApplicationComponent"
+,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/OpenCTIToNeo4jMirrorSync"
+,"testcases": [
 {
-"view_id": "{107597C2-E3D5-4de3-922F-05E901E97684}",
-"view_name": "ProjectManagement"
+"name": "OpenCTI 情报数据镜像至 Neo4j 完整性验证",
+"description": "*   **测试场景（GIVEN）：**\r\n    1.  OpenCTI 容器环境已启动。\r\n    2.  镜像专用 Neo4j 容器已启动（监听端口需与车辆资产库隔离，例如 7687）。\r\n    3.  同步插件/脚本（Connector）已配置 Live Stream 权限。\r\n*   **操作步骤（WHEN）：**\r\n    1.  在 OpenCTI 界面上手动创建一个 `IPv4-Addr` (1.2.3.4)。\r\n    2.  创建一个 `Malware` (Mirai-Botnet)。\r\n    3.  在两者之间建立 `Relationship` (indicates)。\r\n*   **预期结果（THEN）：**\r\n    1.  **节点校验：** Neo4j 中必须出现标签为 `:ipv4-addr` 且属性 `value='1.2.3.4'` 的节点。\r\n    2.  **属性映射：** 节点的 `standard_id` (STIX ID) 必须与 OpenCTI 中一致。\r\n    3.  **关系校验：** 执行 `MATCH (a:ipv4-addr)-[r:indicates]-&gt;(b:malware) RETURN r` 必须能查询到该关系。\r\n*   **验收标准文件：** `OPENCTI-TEST/tests/mirror/test_neo4j_sync_integrity.py`",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "",
+"TestResults": ""
 }
 ]
 }
@@ -329,10 +329,10 @@
 ],
 "views": [
 {
-"view_id": "{0B4C49ED-9F3D-497e-B726-A45491B6C57E}",
+"view_id": "159",
 "view_name": "StrategyLayerAndMotivationAspect"
 ,"browser_path": "Model/System/StrategyLayerAndMotivationAspect/StrategyLayerAndMotivationAspect/StrategyLayerAndMotivationAspect"
-,"parent_element_id": "{A437C67D-90A3-4a48-B9A9-D17F90FC18F0}"
+,"parent_element_id": "1207"
 ,"parent_element_name": "StrategyLayerAndMotivationAspect"
 ,"included_elements": [
 
@@ -342,10 +342,10 @@
 ]
 },
 {
-"view_id": "{B7341552-BD0E-4e40-95A3-5224AAB12BF1}",
+"view_id": "160",
 "view_name": "BusinessLayer"
 ,"browser_path": "Model/System/BusinessLayer/BusinessLayer/BusinessLayer"
-,"parent_element_id": "{47D7DB7E-CB3F-4111-A116-B34A234A10D5}"
+,"parent_element_id": "1208"
 ,"parent_element_name": "BusinessLayer"
 ,"included_elements": [
 
@@ -355,47 +355,47 @@
 ]
 },
 {
-"view_id": "{58496187-E2C1-49a2-A95A-399BB7EB0E7A}",
+"view_id": "165",
 "view_name": "CONNECTORS"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/CONNECTORS/CONNECTORS"
-,"parent_element_id": "{995F2B7F-86A7-4775-A17C-AB426A0E0DDB}"
+,"parent_element_id": "1245"
 ,"parent_element_name": "CONNECTORS"
 ,"included_elements": [
-"{F16836BB-B5AD-427f-BBFB-653B403CF9E0}",
-"{7CC107A9-989C-4e25-9CE7-B1DBBAFF6F63}",
-"{3862B850-2927-4727-A0DB-AB48414D00C6}",
-"{0D953003-0F28-42c4-A62B-0E30E4F013DE}",
-"{9D79C54A-5215-4929-8C2A-E0EC4F3FB065}",
-"{3721856F-866C-44b6-8787-F8B364DAC5E5}",
-"{C80C2E68-7BA1-4f7d-86AB-C22D382AD185}",
-"{79E5A8ED-4925-4776-9790-4A2A5A7D55C0}",
-"{50435384-6C9E-49e7-A7B1-9AC24CD3972E}",
-"{46F4A252-948E-442d-AABD-6609B54763DF}",
-"{15A815E6-AC3C-4b7a-AC7D-6A4147F13BFC}"
+"1234",
+"1235",
+"1236",
+"1237",
+"1238",
+"1239",
+"1240",
+"1241",
+"1242",
+"1243",
+"1244"
 ]
 ,"included_relationships": [
 
 ]
 },
 {
-"view_id": "{84DFE546-E90B-44a6-BEB7-5470ED13B5B5}",
+"view_id": "161",
 "view_name": "ApplicationLayer"
 ,"browser_path": "Model/System/ApplicationLayer/ApplicationLayer/ApplicationLayer"
-,"parent_element_id": "{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}"
+,"parent_element_id": "1209"
 ,"parent_element_name": "ApplicationLayer"
 ,"included_elements": [
-"{4F6CBDCD-0E9A-44c7-A1AC-AAC670B36538}",
-"{995F2B7F-86A7-4775-A17C-AB426A0E0DDB}"
+"1246",
+"1245"
 ]
 ,"included_relationships": [
 
 ]
 },
 {
-"view_id": "{DA69C86F-94DB-40e1-A44F-6EBA0BF7EC79}",
+"view_id": "162",
 "view_name": "TechnologyLayer"
 ,"browser_path": "Model/System/TechnologyLayer/TechnologyLayer/TechnologyLayer"
-,"parent_element_id": "{03048AE3-88C4-4893-88CD-DC244C7163B0}"
+,"parent_element_id": "1210"
 ,"parent_element_name": "TechnologyLayer"
 ,"included_elements": [
 
@@ -405,10 +405,10 @@
 ]
 },
 {
-"view_id": "{107597C2-E3D5-4de3-922F-05E901E97684}",
+"view_id": "163",
 "view_name": "ProjectManagement"
 ,"browser_path": "Model/System/ProjectManagement/ProjectManagement/ProjectManagement"
-,"parent_element_id": "{CA7350B0-1F62-4053-9833-685F6A12B3B5}"
+,"parent_element_id": "1211"
 ,"parent_element_name": "ProjectManagement"
 ,"included_elements": [
 
@@ -418,15 +418,15 @@
 ]
 },
 {
-"view_id": "{98C55C09-9C9B-4f53-A566-D92C9FF20805}",
+"view_id": "158",
 "view_name": "SystemArchitecture"
 ,"browser_path": "Model/System/SystemArchitecture"
 ,"included_elements": [
-"{A437C67D-90A3-4a48-B9A9-D17F90FC18F0}",
-"{47D7DB7E-CB3F-4111-A116-B34A234A10D5}",
-"{11B31EBE-2D74-42a1-ABC1-C0D0A9EBCAD8}",
-"{03048AE3-88C4-4893-88CD-DC244C7163B0}",
-"{CA7350B0-1F62-4053-9833-685F6A12B3B5}"
+"1207",
+"1208",
+"1209",
+"1210",
+"1211"
 ]
 ,"included_relationships": [
 
