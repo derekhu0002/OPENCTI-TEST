@@ -1,0 +1,45 @@
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CONNECTOR_SOURCE = ROOT / "connectors" / "automotive-security-timeline" / "src" / "main.py"
+SCRIPTS_DIR = ROOT / "scripts"
+
+
+def test_custom_connector_does_not_import_repo_internal_layers() -> None:
+    tree = ast.parse(CONNECTOR_SOURCE.read_text(encoding="utf-8"))
+    import_roots: set[str] = set()
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            import_roots.update(alias.name.split(".", 1)[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            import_roots.add(node.module.split(".", 1)[0])
+
+    disallowed = {"tests", "scripts"}
+    assert disallowed.isdisjoint(import_roots), f"Connector source must not depend on repo internal layers: {import_roots}"
+
+
+def test_scripts_do_not_reference_connector_or_pytest_internals() -> None:
+    disallowed_markers = [
+        "connectors/automotive-security-timeline/src",
+        "connectors\\automotive-security-timeline\\src",
+        "tests/test_architecture_connector_support.py",
+        "tests\\test_architecture_connector_support.py",
+        "pytest",
+    ]
+
+    for script_path in SCRIPTS_DIR.glob("*.ps1"):
+        text = script_path.read_text(encoding="utf-8")
+        for marker in disallowed_markers:
+            assert marker not in text, f"{script_path} must not depend on {marker}"
+
+
+def test_mirror_acceptance_entry_uses_local_protected_paths() -> None:
+    mirror_test_path = ROOT / "tests" / "mirror" / "test_neo4j_sync_integrity.py"
+    text = mirror_test_path.read_text(encoding="utf-8")
+    assert "protected_fixtures" in text
+    assert "protected_baselines" in text
