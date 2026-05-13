@@ -323,7 +323,7 @@
 "description": "*   **测试场景（GIVEN）：**\r\n    1.  OpenCTI 容器环境已启动。\r\n    2.  镜像专用 Neo4j 容器已启动（监听端口需与车辆资产库隔离，例如 7687）。\r\n    3.  同步插件/脚本（Connector）已配置 Live Stream 权限。\r\n*   **操作步骤（WHEN）：**\r\n    1.  在 OpenCTI 界面上手动创建一个 `IPv4-Addr` (1.2.3.4)。\r\n    2.  创建一个 `Malware` (Mirai-Botnet)。\r\n    3.  在两者之间建立 `Relationship` (indicates)。\r\n*   **预期结果（THEN）：**\r\n    1.  **节点校验：** Neo4j 中必须出现标签为 `:ipv4-addr` 且属性 `value='1.2.3.4'` 的节点。\r\n    2.  **属性映射：** 节点的 `standard_id` (STIX ID) 必须与 OpenCTI 中一致。\r\n    3.  **关系校验：** 执行 `MATCH (a:ipv4-addr)-[r:indicates]-&gt;(b:malware) RETURN r` 必须能查询到该关系。\r\n*   **验收标准文件：** `OPENCTI-TEST/tests/mirror/test_neo4j_sync_integrity.py`",
 "type": "Acceptance Test",
 "Input": "",
-"acceptanceCriteria": "",
+"acceptanceCriteria": "tests/mirror/test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
 "TestResults": ""
 }
 ]
@@ -380,7 +380,7 @@
 "description": "*   **测试场景（GIVEN）：**\\r\\n    1.  远端 AI Agent 可以自由生成 Cypher。\\r\\n    2.  后端查询服务启用了只读强制、schema 白名单、预算控制和审计日志。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  Agent 提交包含写操作、越界 schema 访问或明显超预算特征的 Cypher。\\r\\n    2.  后端执行层对该请求进行策略校验并做出拒绝。\\r\\n*   **预期结果（THEN）：**\\r\\n    1. 查询不会在副本上被执行。\\r\\n    2.  响应中返回结构化 `rejection_reason`、适用预算策略和必要的纠正线索。\\r\\n    3.  审计链路中能够追踪到 Agent 输入、后端裁决和拒绝原因。",
 "type": "Acceptance Test",
 "Input": "",
-"acceptanceCriteria": "",
+"acceptanceCriteria": "tests/query_backend/test_query_backend_acceptance.py::test_controlled_cypher_rejection_returns_structured_feedback",
 "TestResults": ""
 },
 {
@@ -388,7 +388,7 @@
 "description": "*   **测试场景（GIVEN）：**\\r\\n    1.  远端 AI Agent 通过后端查询服务访问图副本。\\r\\n    2.  副本出现不可达、同步故障或新鲜度超阈值情况。\\r\\n*  **操作步骤（WHEN）：**\\r\\n    1.  Agent 发起一条需要多跳遍历或路径分析的图查询。\\r\\n    2.  后端检测到副本不可安全使用。\\r\\n*   **预期结果（THEN）：**\\r\\n    1.  后端返回明确的降级状态、freshness 信息或同步异常状态。\\r\\n    2.  后端不会静默改走不等价的 GraphQL 翻译路径并伪装成成功结果。\\r\\n    3.  Agent 能基于返回状态决定等待、缩小查询范围或终止调查。",
 "type": "Acceptance Test",
 "Input": "",
-"acceptanceCriteria": "",
+"acceptanceCriteria": "tests/query_backend/test_query_backend_acceptance.py::test_replica_degradation_does_not_fall_back_silently",
 "TestResults": ""
 }
 ]

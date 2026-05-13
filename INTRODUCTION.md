@@ -241,10 +241,12 @@
 已证实：
 
 - `tests/test_architecture_connector_support.py` 是主要验收入口。
+- `tests/query_backend/test_query_backend_acceptance.py` 是查询后端接口契约的显性验收入口。
 
 业务意义：
 
 - 外部采用方可以用它快速验证“仓库声明的能力是否真的可以跑起来”。
+- 对查询后端而言，显性入口同时冻结了正常成功、结构化拒绝和副本降级三类响应规格。
 
 ## 7. VS Code 扩展命令
 
@@ -276,6 +278,242 @@
 - Python / pytest（用于验证）
 
 根据现有代码推断，某些连接器还依赖各自上游服务或密钥，例如 MISP、NVD、Google TI、CrowdStrike、Mandiant，但仓库并没有提供这些第三方服务本身。
+
+## 10. 查询后端接口契约
+
+已证实：
+
+- 实现架构已经为独立查询后端定义了稳定边界，见 `query-backend/ARCHITECTURE.md`。
+- 当前唯一已冻结的调用接口是 `POST /graph/query`。
+- 当前仓库还没有交付对应运行时代码或 compose 服务，因此这里描述的是“已冻结的实现架构接口契约”，不是“已上线的可直接运行服务”。
+
+仓库证据：
+
+- `query-backend/ARCHITECTURE.md`
+- `tests/query_backend/test_query_backend_acceptance.py`
+- `tests/query_backend/protected_fixtures/rejected_cypher_and_degraded_probe.md`
+- `tests/query_backend/protected_baselines/response_contract.md`
+
+### 10.1 接口定义
+
+当前冻结的接口入口：
+
+- 方法：`POST`
+- 路径：`/graph/query`
+- 认证：可选 `Authorization: Bearer <token>`
+- 载荷类型：`application/json`
+
+当前已冻结的请求字段：
+
+- `investigation_id`：调查会话标识，用于串联一次调查中的多次查询和审计链路。
+- `cypher`：调用方提交的只读图查询或待后端裁决的 Cypher。
+
+当前已冻结的响应字段：
+
+- 成功或降级路径共同需要的元数据：`backend`、`investigation_id`、`freshness_ts`、`staleness_seconds`、`sync_status`
+- 成功路径需要的结果载荷：`results`
+- 拒绝路径需要的控制元数据：`rejection_reason`、`budget_policy`
+- 可选结果裁剪标记：`result_truncated`
+
+### 10.2 成功响应规格
+
+当副本可用且新鲜度处于允许范围时，查询后端必须：
+
+- 返回 `backend=neo4j-replica`
+- 原样返回调用方提交的 `investigation_id`
+- 返回 `freshness_ts`、`staleness_seconds`、`sync_status`
+- 返回机器可消费的 `results` 列表
+- 不返回 `rejection_reason`
+
+当前推荐把 `results` 设计为“结果项数组”，每个结果项对应一次 Cypher 返回记录，至少应满足以下格式约束：
+
+- `results` 顶层必须是数组。
+- 数组中的每一项必须是对象，而不是裸字符串或位置敏感数组。
+- 每个结果项建议按返回语义显式命名字段，例如 `nodes`、`relationships`、`paths`、`metrics`、`evidence`。
+- 当查询返回节点或关系时，建议保留稳定标识字段，例如 `standard_id`、内部追踪 ID、类型标签和关键属性，避免只返回展示文本。
+- 当查询返回路径或子图时，建议把节点集合和关系集合拆开返回，而不是把整段路径压成不可解析字符串。
+
+推荐的成功响应结果项格式示例：
+
+```json
+{
+	"backend": "neo4j-replica",
+	"investigation_id": "case-2026-05-13-001",
+	"freshness_ts": "2026-05-13T08:00:00Z",
+	"staleness_seconds": 42,
+	"sync_status": "healthy",
+	"results": [
+		{
+			"nodes": [
+				{
+					"entity_type": "ipv4-addr",
+					"standard_id": "ipv4-addr--11111111-2222-3333-4444-555555555555",
+					"id": "opencti--aaaa-bbbb-cccc",
+					"value": "1.2.3.4"
+				},
+				{
+					"entity_type": "malware",
+					"standard_id": "malware--99999999-8888-7777-6666-555555555555",
+					"id": "opencti--dddd-eeee-ffff",
+					"name": "Mirai-Botnet"
+				}
+			],
+			"relationships": [
+				{
+					"relationship_type": "indicates",
+					"source_standard_id": "ipv4-addr--11111111-2222-3333-4444-555555555555",
+					"target_standard_id": "malware--99999999-8888-7777-6666-555555555555"
+				}
+			],
+			"evidence": {
+				"summary": "IPv4 observable indicates Mirai-Botnet in the current replica view."
+			}
+		}
+	],
+	"result_truncated": false
+}
+```
+
+如果调用方只需要聚合结果而不是子图明细，也应保持对象结构稳定，例如：
+
+```json
+{
+	"backend": "neo4j-replica",
+	"investigation_id": "case-2026-05-13-001",
+	"freshness_ts": "2026-05-13T08:00:00Z",
+	"staleness_seconds": 42,
+	"sync_status": "healthy",
+	"results": [
+		{
+			"metrics": {
+				"match_count": 17,
+				"relationship_count": 24
+			}
+		}
+	]
+}
+```
+
+### 10.3 拒绝响应规格
+
+当调用方提交写操作、越界 schema 访问或明显超预算特征的 Cypher 时，查询后端必须：
+
+- 不在副本上执行该请求
+- 返回结构化 `rejection_reason`
+- 返回本次裁决使用的 `budget_policy`
+- 返回本次请求关联的 `investigation_id`
+
+### 10.4 降级响应规格
+
+当副本不可达、同步故障或新鲜度超阈值时，查询后端必须：
+
+- 返回 `backend=neo4j-replica`
+- 返回 `freshness_ts`、`staleness_seconds`、`sync_status`
+- 不得静默回退到 GraphQL 翻译路径并伪装为成功结果
+
+### 10.5 调用示例
+
+请求示例：
+
+```http
+POST /graph/query
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+	"investigation_id": "case-2026-05-13-001",
+	"results": [
+		{
+			"nodes": [
+				{
+					"entity_type": "ipv4-addr",
+					"standard_id": "ipv4-addr--11111111-2222-3333-4444-555555555555",
+					"value": "1.2.3.4"
+				},
+				{
+					"entity_type": "malware",
+					"standard_id": "malware--99999999-8888-7777-6666-555555555555",
+					"name": "Mirai-Botnet"
+				}
+			],
+			"relationships": [
+				{
+					"relationship_type": "indicates",
+					"source_standard_id": "ipv4-addr--11111111-2222-3333-4444-555555555555",
+					"target_standard_id": "malware--99999999-8888-7777-6666-555555555555"
+				}
+			]
+		}
+	],
+}
+```
+
+成功响应示例：
+
+```json
+{
+	"backend": "neo4j-replica",
+	"investigation_id": "case-2026-05-13-001",
+	"freshness_ts": "2026-05-13T08:00:00Z",
+	"staleness_seconds": 42,
+	"sync_status": "healthy",
+	"results": [
+		{
+			"kind": "node",
+			"id": "ipv4--1.2.3.4",
+			"labels": ["ipv4-addr"],
+			"properties": {
+				"value": "1.2.3.4",
+				"standard_id": "ipv4-addr--7dd44d27-f473-5ba9-b12b-0d3a61bbed2e"
+			}
+		},
+		{
+			"kind": "node",
+			"id": "malware--mirai-botnet",
+			"labels": ["malware"],
+			"properties": {
+				"name": "Mirai-Botnet",
+				"standard_id": "malware--11111111-2222-3333-4444-555555555555"
+			}
+		},
+		{
+			"kind": "relationship",
+			"type": "indicates",
+			"source_id": "ipv4--1.2.3.4",
+			"target_id": "malware--mirai-botnet",
+			"properties": {
+				"confidence": 75
+			}
+		}
+	],
+	"result_truncated": false
+}
+```
+
+这里的 `results` 示例只用于说明调用方应期待的最小结果形态：后端至少需要返回可机器消费的节点/关系载荷，使调用方能够继续做图遍历、证据提取或人工复核。具体字段名可以在后续实现中扩展，但不应退化成仅有自然语言摘要而没有结构化图结果。
+
+拒绝响应示例：
+
+```json
+{
+	"backend": "neo4j-replica",
+	"investigation_id": "case-2026-05-13-001",
+	"rejection_reason": "write_operation_not_allowed",
+	"budget_policy": "readonly-default"
+}
+```
+
+降级响应示例：
+
+```json
+{
+	"backend": "neo4j-replica",
+	"investigation_id": "case-2026-05-13-001",
+	"freshness_ts": "2026-05-13T07:52:00Z",
+	"staleness_seconds": 960,
+	"sync_status": "stale"
+}
+```
 
 ## 调用与使用方法
 
@@ -354,6 +592,38 @@ d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/test_architect
 - 架构图谱是否与运行配置一致
 - 关键连接器是否已在仓库中落地
 - 部分连接器是否能达到真实容器运行覆盖
+
+### 6. 查询后端调用方关键流程
+
+注意：以下流程描述的是当前已经在实现架构和显性测试中冻结的调用方式；仓库尚未交付 query backend 运行时代码，因此调用方应把它视为后续实现必须满足的契约。
+
+#### 成功查询流程
+
+1. 调用方向 `POST /graph/query` 发送只读 Cypher 和 `investigation_id`。
+2. 查询后端使用副本读模型和 freshness 状态进行执行前校验。
+3. 若副本健康且查询被允许执行，后端返回 `results`、`freshness_ts`、`staleness_seconds` 和 `sync_status`。
+4. 调用方继续消费 `results`，并把 `investigation_id` 作为后续多次查询的统一会话标识。
+
+#### 拒绝查询流程
+
+1. 调用方向 `POST /graph/query` 发送包含写操作或越界特征的 Cypher。
+2. 查询后端在执行前进行只读、schema 白名单和预算裁决。
+3. 后端拒绝执行，并返回结构化 `rejection_reason` 与 `budget_policy`。
+4. 调用方根据拒绝原因修正查询，而不是假定后端会自动改写 Cypher。
+
+#### 副本降级流程
+
+1. 调用方向 `POST /graph/query` 发送需要图遍历的查询。
+2. 查询后端在执行前发现副本不可达、同步故障或 freshness 超阈值。
+3. 后端返回 `freshness_ts`、`staleness_seconds`、`sync_status` 等降级元数据。
+4. 调用方根据降级状态决定等待、缩小范围或终止调查，而不是把返回结果当作等价成功。
+
+#### 调用方最小接入注意事项
+
+- 调用方必须自行生成并稳定传递 `investigation_id`。
+- 调用方不应直接持有 Neo4j 凭证，也不应绕过后端直连副本。
+- 调用方必须区分成功、拒绝、降级三种路径，不能把所有 `200/非200` 响应简单折叠成“成功/失败”二元模型。
+- 调用方应把 freshness 元数据纳入结果消费逻辑，而不是忽略副本时效性。
 
 ## 评估采用时应关注的约束
 

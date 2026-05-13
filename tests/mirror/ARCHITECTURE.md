@@ -19,11 +19,12 @@
 - `test_neo4j_sync_integrity.py`：只读显性入口。
 - `protected_fixtures/manual_seed_steps.md`：受保护的场景夹具描述。
 - `protected_baselines/cypher_assertions.md`：受保护的查询断言基线。
+- `test_fixture_setup_support.py`：镜像自动建夹具支撑测试入口。
 
 ## 4. 接口边界
 
-- 输入边界：`.env` 中的 Neo4j mirror 配置，以及运行时覆盖变量 `OPENCTI_MIRROR_VALIDATE`、`MIRROR_EXPECTED_IPV4_VALUE`、`MIRROR_EXPECTED_IPV4_STANDARD_ID`、`MIRROR_EXPECTED_MALWARE_NAME`。
-- 输出边界：只读验证 Neo4j HTTP 查询结果，不负责创建业务数据。
+- 输入边界：`.env` 中的 OpenCTI 与 Neo4j mirror 配置，以及运行时覆盖变量 `MIRROR_EXPECTED_IPV4_VALUE`、`MIRROR_EXPECTED_MALWARE_NAME`、`MIRROR_ASSERT_TIMEOUT_SECONDS`。
+- 输出边界：显性入口测试体只读验证 Neo4j HTTP 查询结果；场景数据必须由本目录支撑 fixture 在断言前通过真实 OpenCTI GraphQL 自动建立。
 
 ## 5. 依赖方向
 
@@ -45,7 +46,8 @@
 
 ## 9. 普通非显性测试
 
-- 当前无普通非显性测试；后续若需要补充 mirror 支撑测试，应放在本目录或未来 mirror 实现目录的 `tests/` 下，并在局部契约中回填归属。
+- `test_fixture_setup_support.py`：自动建夹具支撑测试，用于在显性验收前通过 OpenCTI GraphQL 建立固定场景数据。
+- 后续若需要补充更多 mirror 支撑测试，应放在本目录或未来 mirror 实现目录的 `tests/` 下，并在局部契约中回填归属。
 
 ## 10. 保护对象
 

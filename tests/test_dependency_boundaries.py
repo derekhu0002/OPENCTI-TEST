@@ -7,6 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONNECTOR_SOURCE = ROOT / "connectors" / "automotive-security-timeline" / "src" / "main.py"
 SCRIPTS_DIR = ROOT / "scripts"
+MIRROR_SYNC_CONTRACT = ROOT / "mirror-sync" / "ARCHITECTURE.md"
+QUERY_BACKEND_CONTRACT = ROOT / "query-backend" / "ARCHITECTURE.md"
 
 
 def test_custom_connector_does_not_import_repo_internal_layers() -> None:
@@ -43,3 +45,22 @@ def test_mirror_acceptance_entry_uses_local_protected_paths() -> None:
     text = mirror_test_path.read_text(encoding="utf-8")
     assert "protected_fixtures" in text
     assert "protected_baselines" in text
+
+
+def test_query_backend_acceptance_entry_uses_local_protected_paths() -> None:
+    query_backend_test_path = ROOT / "tests" / "query_backend" / "test_query_backend_acceptance.py"
+    text = query_backend_test_path.read_text(encoding="utf-8")
+    assert "protected_fixtures" in text
+    assert "protected_baselines" in text
+
+
+def test_query_backend_contract_forbids_direct_opencti_fallback_dependency() -> None:
+    text = QUERY_BACKEND_CONTRACT.read_text(encoding="utf-8")
+    assert "不得直接依赖 OpenCTI" in text
+    assert "不得静默回退到 GraphQL" in text
+
+
+def test_mirror_sync_contract_keeps_opencti_ingress_separate_from_query_backend() -> None:
+    text = MIRROR_SYNC_CONTRACT.read_text(encoding="utf-8")
+    assert "OpenCTI" in text
+    assert "不得向 `query-backend/` 暴露 Agent 查询接口" in text

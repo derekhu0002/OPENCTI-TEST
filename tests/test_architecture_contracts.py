@@ -9,9 +9,12 @@ REQUIRED_CONTRACTS = [
     ROOT / "OVERALL_ARCHITECTURE.md",
     ROOT / "connectors" / "ARCHITECTURE.md",
     ROOT / "connectors" / "automotive-security-timeline" / "ARCHITECTURE.md",
+    ROOT / "mirror-sync" / "ARCHITECTURE.md",
+    ROOT / "query-backend" / "ARCHITECTURE.md",
     ROOT / "scripts" / "ARCHITECTURE.md",
     ROOT / "tests" / "ARCHITECTURE.md",
     ROOT / "tests" / "mirror" / "ARCHITECTURE.md",
+    ROOT / "tests" / "query_backend" / "ARCHITECTURE.md",
     ROOT / "tests" / "runtime" / "ARCHITECTURE.md",
 ]
 

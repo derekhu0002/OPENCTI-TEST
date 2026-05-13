@@ -8,10 +8,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURE_GRAPH = ROOT / "design" / "KG" / "SystemArchitecture.json"
+ROOT_CONTRACT = ROOT / "OVERALL_ARCHITECTURE.md"
 CONNECTOR_ACCEPTANCE_FILE = ROOT / "tests" / "test_architecture_connector_support.py"
 MIRROR_ACCEPTANCE_FILE = ROOT / "tests" / "mirror" / "test_neo4j_sync_integrity.py"
 MIRROR_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures" / "manual_seed_steps.md"
 MIRROR_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "cypher_assertions.md"
+QUERY_BACKEND_ACCEPTANCE_FILE = ROOT / "tests" / "query_backend" / "test_query_backend_acceptance.py"
+QUERY_BACKEND_FIXTURE_FILE = ROOT / "tests" / "query_backend" / "protected_fixtures" / "rejected_cypher_and_degraded_probe.md"
+QUERY_BACKEND_BASELINE_FILE = ROOT / "tests" / "query_backend" / "protected_baselines" / "response_contract.md"
 
 
 def _load_graph() -> dict:
@@ -58,11 +62,13 @@ def test_mirror_acceptance_entry_is_physicalized() -> None:
     cases = _collect_testcases()
     mirror_case = cases["OpenCTI 情报数据镜像至 Neo4j 完整性验证"]
     description = mirror_case["description"]
+    acceptance = mirror_case["acceptance"]
     match = re.search(
         r"(?P<path>(?:OPENCTI-TEST/)?tests/mirror/test_neo4j_sync_integrity\.py)",
         description,
     )
     assert match, "Mirror testcase must declare its physical test file in the architecture graph"
+    assert acceptance == "tests/mirror/test_neo4j_sync_integrity.py::test_neo4j_sync_integrity"
     assert MIRROR_ACCEPTANCE_FILE.is_file(), "Mirror acceptance entry file is missing"
     assert "test_neo4j_sync_integrity" in _load_test_function_names(MIRROR_ACCEPTANCE_FILE)
 
@@ -70,3 +76,35 @@ def test_mirror_acceptance_entry_is_physicalized() -> None:
 def test_mirror_protected_fixture_and_baseline_files_exist() -> None:
     assert MIRROR_FIXTURE_FILE.is_file(), "Mirror protected fixture file is missing"
     assert MIRROR_BASELINE_FILE.is_file(), "Mirror protected baseline file is missing"
+
+
+def test_query_backend_acceptance_entries_are_physicalized() -> None:
+    cases = _collect_testcases()
+    controlled_rejection_case = cases["受控 Cypher 拒绝与结构化反馈"]
+    degraded_case = cases["副本降级不静默回退"]
+    root_contract_text = ROOT_CONTRACT.read_text(encoding="utf-8")
+
+    assert controlled_rejection_case["description"], "Controlled Cypher rejection testcase must remain declared in the architecture graph"
+    assert degraded_case["description"], "Replica degradation testcase must remain declared in the architecture graph"
+    assert controlled_rejection_case["acceptance"] == (
+        "tests/query_backend/test_query_backend_acceptance.py::"
+        "test_controlled_cypher_rejection_returns_structured_feedback"
+    )
+    assert degraded_case["acceptance"] == (
+        "tests/query_backend/test_query_backend_acceptance.py::"
+        "test_replica_degradation_does_not_fall_back_silently"
+    )
+    assert "受控 Cypher 拒绝与结构化反馈" in root_contract_text
+    assert "副本降级不静默回退" in root_contract_text
+    assert "tests/query_backend/test_query_backend_acceptance.py" in root_contract_text
+    assert QUERY_BACKEND_ACCEPTANCE_FILE.is_file(), "Query backend acceptance entry file is missing"
+
+    function_names = _load_test_function_names(QUERY_BACKEND_ACCEPTANCE_FILE)
+    assert "test_successful_query_returns_graph_payload_and_freshness_metadata" in function_names
+    assert "test_controlled_cypher_rejection_returns_structured_feedback" in function_names
+    assert "test_replica_degradation_does_not_fall_back_silently" in function_names
+
+
+def test_query_backend_protected_fixture_and_baseline_files_exist() -> None:
+    assert QUERY_BACKEND_FIXTURE_FILE.is_file(), "Query backend protected fixture file is missing"
+    assert QUERY_BACKEND_BASELINE_FILE.is_file(), "Query backend protected baseline file is missing"

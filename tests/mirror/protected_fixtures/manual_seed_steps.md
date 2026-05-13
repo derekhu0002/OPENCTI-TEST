@@ -13,3 +13,5 @@
 1. 在 OpenCTI 中创建 `IPv4-Addr`，值为 `1.2.3.4`。
 2. 在 OpenCTI 中创建 `Malware`，名称为 `Mirai-Botnet`。
 3. 在两者之间建立 `indicates` 关系。
+
+说明：上述 WHEN 必须由镜像测试流中的自动建夹具支撑步骤通过真实 OpenCTI GraphQL 完成；但场景本身不得变更。
