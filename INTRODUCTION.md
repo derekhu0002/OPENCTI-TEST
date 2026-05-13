@@ -61,7 +61,7 @@
 仓库证据：
 
 - `docker-compose.yml` 中存在 `redis`、`elasticsearch`、`minio`、`rabbitmq`、`caddy` 服务。
-- `Caddyfile` 将 `https://localhost` 反向代理到 `opencti:8080`。
+- `Caddyfile` 将 `https://localhost` 统一作为反向代理入口，其中 OpenCTI UI 代理到 `opencti:8080`，查询后端 `POST /graph/query` 代理到 `query-backend:8088`。
 
 ### 3. OpenCTI 内置连接器能力
 
@@ -286,14 +286,20 @@
 - 实现架构已经为独立查询后端定义了稳定边界，见 `query-backend/ARCHITECTURE.md`。
 - 当前唯一已冻结的调用接口是 `POST /graph/query`。
 - 当前仓库已经交付最小可运行查询后端实现，入口为 `query-backend/server.py`，外部接口说明见 `query-backend/API.md`。
-- 当前仓库尚未把该后端接入 compose 编排，因此默认运行方式是直接启动 Python HTTP 服务。
+- 当前仓库已经把该后端接入 `docker-compose.yml`，以独立 `query-backend` 容器对外暴露 API 端点；同时保留直接启动 `query-backend/server.py` 的最小本地运行方式用于开发与支撑测试。
+- 当前仓库还新增了 Docker 统一代理显性验收入口，用于冻结 `https://localhost/graph/query` 这条经由 Caddy 的容器化访问路径。
 
 仓库证据：
 
 - `query-backend/ARCHITECTURE.md`
+- `docker-compose.yml`
+- `query-backend/Dockerfile`
 - `tests/query_backend/test_query_backend_acceptance.py`
+- `tests/query_backend/test_query_backend_docker_acceptance.py`
 - `tests/query_backend/protected_fixtures/rejected_cypher_and_degraded_probe.md`
+- `tests/query_backend/protected_fixtures/docker_proxy_probe.md`
 - `tests/query_backend/protected_baselines/response_contract.md`
+- `tests/query_backend/protected_baselines/docker_proxy_contract.md`
 
 ### 10.1 接口定义
 
@@ -549,6 +555,12 @@ d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/test_architect
 d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/query_backend/test_query_backend_acceptance.py -vv
 ```
 
+查询后端 Docker 统一代理显性验收路径：
+
+```powershell
+d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/query_backend/test_query_backend_docker_acceptance.py -vv
+```
+
 这条路径适合外部采用方在接入前验证：
 
 - 架构图谱是否与运行配置一致
@@ -562,8 +574,9 @@ d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/query_backend/
 
 补充说明：
 
-- 对外运行时入口仍然是直接启动 `query-backend/server.py`。
-- 查询后端显性验收 `tests/query_backend/test_query_backend_acceptance.py` 现在会在测试期自动装配真实的健康实例和降级实例；当默认端口已被其他本地进程占用时，测试会自动切换到空闲端口，而不是要求调用方手工设置 `QUERY_BACKEND_DEGRADED_BASE_URL`。
+- 运行时平台已经把查询后端纳入统一反向代理入口：默认通过 `https://localhost/graph/query` 对外暴露 `POST /graph/query`，后端容器仍由 `docker compose up -d query-backend` 独立启动。
+- 直接启动 `query-backend/server.py` 仍保留为开发与支撑测试入口。
+- 查询后端显性验收 `tests/query_backend/test_query_backend_acceptance.py` 会优先复用已运行的健康容器实例；当未提供降级实例地址时，测试期仍可自动装配隔离降级实例，而不是要求调用方手工设置 `QUERY_BACKEND_DEGRADED_BASE_URL`。
 
 最小启动示例：
 
@@ -571,9 +584,17 @@ d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/query_backend/
 d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe query-backend/server.py
 ```
 
+容器启动示例：
+
+```powershell
+docker compose up -d query-backend
+```
+
 默认监听地址：
 
 - `http://127.0.0.1:8088/graph/query`
+- 统一反向代理入口：`https://localhost/graph/query`
+- 默认 compose 暴露端口由 `.env` / `.env.sample` 中的 `QUERY_BACKEND_PORT` 控制
 - 通过环境变量 `QUERY_BACKEND_HOST`、`QUERY_BACKEND_PORT`、`QUERY_BACKEND_SYNC_STATUS`、`QUERY_BACKEND_STALENESS_SECONDS` 调整监听地址和降级模拟状态
 
 #### 成功查询流程

@@ -7,5 +7,9 @@
 }
 
 https://localhost {
+    handle /graph/query* {
+        reverse_proxy query-backend:8088
+    }
+
     reverse_proxy opencti:8080
 }

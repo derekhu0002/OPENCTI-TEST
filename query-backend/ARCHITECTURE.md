@@ -2,7 +2,7 @@
 
 ## 1. 角色
 
-本目录承载面向远端 AI Agent 的查询后端稳定边界，负责受控 Cypher、schema 视图、预算、审计、调查会话和结构化拒绝。
+本目录承载面向远端 AI Agent 的查询后端稳定边界，负责受控 Cypher、schema 视图、预算、审计、调查会话和结构化拒绝。容器交付是运行时平台职责，但本目录必须提供可被独立容器直接装配的单一服务入口。
 
 ## 2. 作用域
 
@@ -13,12 +13,14 @@
 ## 3. 稳定元素
 
 - `query-backend/`：承载查询 API、schema 视图、预算控制、审计与调查会话的稳定目录边界。
+- `Dockerfile`：查询后端独立容器的固定构建入口，负责把本目录服务入口物理化为运行时平台可装配的镜像。
 - `tests/`：后续编码阶段用于挂载查询后端支撑护栏的默认位置，不是显性 testcase 主入口。
 
 ## 4. 接口边界
 
 - 输入边界：Agent 图查询请求、受控 Cypher、调查会话上下文、`investigation_id`、副本 freshness 状态与裁剪后 schema 视图。
 - 输出边界：机器可消费的图结果、人类可复核的证据视图、`rejection_reason`、`budget_policy`、`freshness_ts`、`staleness_seconds` 与 `sync_status`。
+- 运行时装配边界：容器内部服务入口固定为 `server.py`，监听地址由 `QUERY_BACKEND_HOST`、`QUERY_BACKEND_PORT` 决定，对 Neo4j 的读访问由 `NEO4J_MIRROR_HTTP_*` 与 `NEO4J_MIRROR_PASSWORD` 注入，审计输出由 `QUERY_BACKEND_AUDIT_LOG` 决定；统一外部入口由运行时平台中的 Caddy 在 `https://localhost/graph/query` 反向代理到本服务。
 - 本目录不得直接依赖 OpenCTI，不得静默回退到 GraphQL 翻译路径；副本不可用时只能返回降级状态或结构化拒绝。
 
 ## 5. 依赖方向
@@ -31,25 +33,29 @@
 - 本目录直接 implements `ReplicaGraphQueryBackend`。
 - 本目录直接 implements `AIAgentGraphInvestigation`。
 - 显性入口中的正常成功路径规格、`受控 Cypher 拒绝与结构化反馈` 与 `副本降级不静默回退` 固定由 `../tests/query_backend/test_query_backend_acceptance.py` 直接承载，本目录后续实现必须满足该入口而不是改写入口。
+- `Docker统一代理查询入口可用性验证` 固定由 `../tests/query_backend/test_query_backend_docker_acceptance.py` 直接承载，本目录后续实现必须同时满足统一代理入口与容器化路径。
 
 ## 7. 显性 testcase 入口
 
-本目录无显性 testcase 主入口；与本目录相关的显性验收固定收口在 `../tests/query_backend/test_query_backend_acceptance.py`。
+本目录无显性 testcase 主入口；与本目录相关的显性验收固定收口在 `../tests/query_backend/test_query_backend_acceptance.py` 和 `../tests/query_backend/test_query_backend_docker_acceptance.py`。
 
 ## 8. 关键非显性测试
 
 - `../tests/test_architecture_contracts.py` 冻结本目录必须存在局部契约并沿用共享骨架。
-- `../tests/test_dependency_boundaries.py` 冻结本目录不得直接依赖 OpenCTI 或静默回退到 GraphQL。
+- `../tests/test_dependency_boundaries.py` 冻结本目录不得直接依赖 OpenCTI 或静默回退到 GraphQL，并冻结本目录只能内连 `neo4j`；Caddy 仅作为统一外部入口，不得成为内部查询语义依赖。
 - `../tests/test_implementation_traceability.py` 冻结本目录与 `ReplicaGraphQueryBackend`、`AIAgentGraphInvestigation` 的直接实现关系。
 
 ## 9. 普通非显性测试
 
-- 后续编码阶段默认在 `query-backend/tests/` 下补充 schema 视图、预算策略、响应元数据与调查会话支撑测试。
+- 已保留 `tests/test_server_support.py` 作为当前普通支撑护栏，覆盖只读分类和降级结构。
+- 后续编码阶段默认在 `query-backend/tests/` 下补充容器启动冒烟、健康探针、审计日志、schema 视图、预算策略、响应元数据与调查会话支撑测试。
 
 ## 10. 保护对象
 
 - 本局部契约对 `ReplicaGraphQueryBackend` 与 `AIAgentGraphInvestigation` 的直接 implements 声明。
 - `../tests/query_backend/test_query_backend_acceptance.py` 作为只读显性入口的挂载关系。
+- `../tests/query_backend/test_query_backend_docker_acceptance.py` 作为 Docker 统一代理显性入口的挂载关系。
+- `Dockerfile` 作为独立容器固定构建入口的存在性与路径。
 
 ## 11. 变更规则
 

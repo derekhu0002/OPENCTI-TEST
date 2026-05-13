@@ -4,13 +4,13 @@
 
 本文件是工作区唯一的根级实现架构入口。它负责定义一级稳定实现元素、全局依赖方向、implements 追溯链、显性 testcase 的唯一物理入口，以及关键非显性测试冻结规则。
 
-本版基于仓库事实与人工拍板结果，采用“运行时平台 + 副本同步 + 查询后端 + 集成扩展 + 运维脚本 + 验证护栏”的一级分层，不把私有函数、普通 helper、机械拆分出来的文件级模块提升为稳定实现元素。
+本版基于仓库事实与人工拍板结果，采用“运行时平台 + 副本同步 + 查询后端 + 集成扩展 + 运维脚本 + 验证护栏”的一级分层，不把私有函数、普通 helper、机械拆分出来的文件级模块提升为稳定实现元素。query-backend 作为独立容器交付，但不额外升格出新的一级 Delivery 层；容器交付面继续收口在运行时平台，查询语义边界继续收口在 `query-backend/`，统一外部入口继续由 Caddy 承载。
 
 ## 2. 作用域
 
 本契约覆盖下列稳定实现元素：
 
-- 运行时平台：`.env`、`docker-compose.yml`、`docker-compose.opensearch.yml`、`docker-compose.misp-test.yml`、`Caddyfile`、`rabbitmq.conf`
+- 运行时平台：`.env`、`.env.sample`、`docker-compose.yml`、`docker-compose.opensearch.yml`、`docker-compose.misp-test.yml`、`Caddyfile`、`rabbitmq.conf`
 - 副本同步：`mirror-sync/`
 - 查询后端：`query-backend/`
 - 集成扩展：`connectors/`
@@ -23,7 +23,7 @@
 
 | 一级元素 | 稳定职责 | 主要物理载体 | 局部契约 |
 | --- | --- | --- | --- |
-| 运行时平台 | 承载 OpenCTI、Neo4j、副本依赖基础设施、connector profile 与容器化集成入口 | 根目录 compose 与配置文件 | 本文件直接管理 |
+| 运行时平台 | 承载 OpenCTI、Neo4j、副本依赖基础设施、connector profile 与 query-backend 容器化集成交付入口 | 根目录 compose 与配置文件 | 本文件直接管理 |
 | 副本同步 | 承载 OpenCTI 到 Neo4j 热子图副本的同步边界、新鲜度状态与对账职责 | `mirror-sync/` | `mirror-sync/ARCHITECTURE.md` |
 | 查询后端 | 承载面向远端 AI Agent 的受控查询、schema 视图、预算与审计边界 | `query-backend/` | `query-backend/ARCHITECTURE.md` |
 | 集成扩展 | 承载仓库自研扩展及其与运行时平台的稳定边界 | `connectors/` | `connectors/ARCHITECTURE.md` |
@@ -44,8 +44,10 @@
 - Compose 服务名、profile、环境变量边界。
 - OpenCTI HTTPS 入口与管理员 token 配置边界。
 - `docker-compose.yml` 中 `opencti` 与 `neo4j` 同属默认 compose 内部网络，副本同步与后续查询实现必须优先复用该容器内连通性，而不是把 Neo4j 视为独立外置前提。
+- `docker-compose.yml` 中 `query-backend` 作为独立容器服务运行；统一外部入口由 `Caddyfile` 在 `https://localhost/graph/query` 反向代理到 `query-backend:8088`，内部仍通过 compose 网络访问 `neo4j` 与 `mirror-sync/runtime/freshness.json` 绑定目录。
 - MISP 测试专用 compose 变体入口。
 - Neo4j 容器与 mirror 环境变量边界：服务名 `neo4j`、`NEO4J_ADVERTISED_HOST`、`NEO4J_HTTP_PORT`、`NEO4J_BOLT_PORT`、`NEO4J_PASSWORD`、`MIRROR_*`。
+- query-backend 容器与运行时装配边界：`QUERY_BACKEND_PORT`、`QUERY_BACKEND_HOST`、`QUERY_BACKEND_AUDIT_LOG`、`NEO4J_MIRROR_HTTP_HOST`、`NEO4J_MIRROR_HTTP_PORT`、`NEO4J_MIRROR_USERNAME`、`NEO4J_MIRROR_PASSWORD`，以及 `Caddyfile` 中 `https://localhost/graph/query` 到 `query-backend:8088` 的统一反向代理规则。
 
 ### 4.2 副本同步暴露的稳定接口
 
@@ -79,7 +81,7 @@
 
 ## 5. 依赖方向
 
-全局依赖方向固定为：验证护栏、运维脚本、集成扩展、副本同步、查询后端 单向依赖 运行时平台契约；查询后端允许依赖副本同步暴露的读模型与 freshness 状态契约，但不得反向依赖 OpenCTI 或测试内部实现。
+全局依赖方向固定为：验证护栏、运维脚本、集成扩展、副本同步、查询后端 单向依赖 运行时平台契约；查询后端允许依赖副本同步暴露的读模型与 freshness 状态契约，但不得反向依赖 OpenCTI 或测试内部实现。运行时平台允许为 `query-backend` 提供容器 build、统一反向代理入口、只读 freshness 绑定与 `.env` 只读挂载，但这些交付细节不得反向侵入 `query-backend/` 的查询语义契约。
 
 必须满足：
 
@@ -103,10 +105,12 @@
 | `ReplicaGraphQueryBackend` 与 `AIAgentGraphInvestigation` 的正常成功路径规格 | `tests/query_backend/test_query_backend_acceptance.py::test_successful_query_returns_graph_payload_and_freshness_metadata` | 查询后端显性入口现在同时冻结成功路径的结果载荷与 freshness 元数据，不再只覆盖异常路径 |
 | `受控 Cypher 拒绝与结构化反馈` | `tests/query_backend/test_query_backend_acceptance.py::test_controlled_cypher_rejection_returns_structured_feedback` | 本阶段先把查询后端显性入口物理化并冻结保护基线，后续编码阶段不得迁移入口 |
 | `副本降级不静默回退` | `tests/query_backend/test_query_backend_acceptance.py::test_replica_degradation_does_not_fall_back_silently` | 本阶段先把降级语义显性入口物理化并冻结保护基线，后续编码阶段不得改写为 GraphQL 回退 |
+| `Docker统一代理查询入口可用性验证` | `tests/query_backend/test_query_backend_docker_acceptance.py::test_docker_proxy_entry_preserves_structured_rejection_contract` | 统一 HTTPS 反向代理入口下的容器化查询路径单独冻结为显性入口，后续编码阶段不得把该入口降级为非代理或非容器路径 |
 
 ### 6.2 通过实现链间接承载意图元素的稳定实现元素
 
 - `mirror-sync/` 通过写入 Neo4j 热子图与 freshness 状态，间接承载 `ReplicaGraphQueryBackend` 的可查询前提。
+- 运行时平台通过 `docker-compose.yml` 中的 `query-backend` 独立容器服务、`.env.sample` 与 `.env` 配置入口、`Caddyfile` 中的统一反向代理规则和只读运行时绑定，间接承载 `ReplicaGraphQueryBackend` 与 `AIAgentGraphInvestigation` 的容器化交付前提。
 - `scripts/` 通过维护运行时平台生命周期、备份与恢复，间接承载 connector、mirror 与 query backend 显性 testcase 的可执行环境。
 - `tests/test_architecture_contracts.py`、`tests/test_acceptance_baselines.py`、`tests/test_dependency_boundaries.py`、`tests/test_implementation_traceability.py` 通过守住根契约、局部契约、入口定位和依赖方向，间接承载全部显性 testcase 的只读验收基线。
 - `connectors/automotive-security-timeline/` 是当前仓库内的自研扩展能力，但在当前意图图谱中未见对应显性 testcase，因此仅作为实现侧稳定扩展元素存在，不强行直连意图层。
@@ -117,7 +121,9 @@
 
 - connector 类显性 testcase 继续只读收口在 `tests/test_architecture_connector_support.py`，后续编码阶段只能补齐运行时与实现，不得拆分、迁移或重命名该入口。
 - Neo4j mirror 显性 testcase 固定落在 `tests/mirror/test_neo4j_sync_integrity.py`，后续编码阶段必须直接调用该文件，不得重定向到其他入口。
-- 查询后端显性 testcase 固定落在 `tests/query_backend/test_query_backend_acceptance.py`，其中正常成功路径、“受控 Cypher 拒绝与结构化反馈”与“副本降级不静默回退”分别对应单一测试函数入口，后续编码阶段必须直接调用而不是重建入口。
+- 查询后端 API 契约显性 testcase 固定落在 `tests/query_backend/test_query_backend_acceptance.py`，其中正常成功路径、“受控 Cypher 拒绝与结构化反馈”与“副本降级不静默回退”分别对应单一测试函数入口，后续编码阶段必须直接调用而不是重建入口。
+- 查询后端 Docker 统一代理显性 testcase 固定落在 `tests/query_backend/test_query_backend_docker_acceptance.py`，后续编码阶段必须直接通过统一代理入口满足该入口，而不是把它回退成本机直连或辅助脚本。
+- 查询后端 API 契约显性 testcase 的装配固定由 `tests/query_backend/conftest.py` 负责优先对接已运行的容器化健康实例；只有在显式环境变量缺位或降级实例不存在时，才允许为测试期补位独立实例。
 
 ## 8. 关键非显性测试
 
@@ -127,10 +133,11 @@
 | --- | --- | --- |
 | 架构边界 | `tests/test_architecture_contracts.py` | 根契约、局部契约、共享骨架与根契约引用关系 |
 | 显性入口正确性 | `tests/test_acceptance_baselines.py` | 意图层 acceptanceCriteria 或根契约声明的显性入口与实际物理入口的一致性 |
-| 依赖方向 | `tests/test_dependency_boundaries.py` | `tests/`、`scripts/`、`connectors/`、`mirror-sync/`、`query-backend/` 的稳定依赖方向 |
-| 关键实现追溯 | `tests/test_implementation_traceability.py` | `mirror-sync/`、`query-backend/`、`tests/mirror/`、`tests/query_backend/` 与意图元素、显性 testcase 的实现链可追溯性 |
+| 依赖方向 | `tests/test_dependency_boundaries.py` | `tests/`、`scripts/`、`connectors/`、`mirror-sync/`、`query-backend/` 的稳定依赖方向，以及 query-backend 统一外部入口只能经 Caddy 暴露、内部仍不得反向依赖 OpenCTI |
+| 关键实现追溯 | `tests/test_implementation_traceability.py` | `mirror-sync/`、`query-backend/`、`tests/mirror/`、`tests/query_backend/` 与意图元素、显性 testcase 的实现链可追溯性，以及运行时平台对 query-backend 的间接交付链 |
 | 显性入口冻结 | `tests/mirror/test_neo4j_sync_integrity.py` + `tests/mirror/protected_*` | mirror 显性入口、保护夹具与保护基线的存在性与查询断言边界 |
-| 显性入口冻结 | `tests/query_backend/test_query_backend_acceptance.py` + `tests/query_backend/protected_*` | query backend 显性入口、保护夹具与保护基线的存在性与成功/拒绝/降级断言边界 |
+| 显性入口冻结 | `tests/query_backend/test_query_backend_acceptance.py` + `tests/query_backend/protected_fixtures/rejected_cypher_and_degraded_probe.md` + `tests/query_backend/protected_baselines/response_contract.md` | query backend API 契约显性入口、保护夹具与保护基线的存在性与成功/拒绝/降级断言边界 |
+| 显性入口冻结 | `tests/query_backend/test_query_backend_docker_acceptance.py` + `tests/query_backend/protected_fixtures/docker_proxy_probe.md` + `tests/query_backend/protected_baselines/docker_proxy_contract.md` | query backend Docker 统一代理显性入口、保护夹具与保护基线的存在性与代理路径断言边界 |
 
 ## 9. 普通非显性测试
 
@@ -139,7 +146,8 @@
 - 已创建：`connectors/automotive-security-timeline/tests/test_support_guardrails.py`
 - 已保留：`tests/runtime/restore-validation/` 下的运行时恢复基线可继续作为后续 restore 类支撑测试挂载点
 - 预留给后续编码阶段：`mirror-sync/tests/` 下的增量同步、watermark、删除或 tombstone、reconcile 支撑测试
-- 预留给后续编码阶段：`query-backend/tests/` 下的 schema 视图、预算策略、响应元数据与调查会话支撑测试
+- 已保留：`query-backend/tests/test_server_support.py` 作为本地支撑护栏，覆盖只读 Cypher 分类与降级响应结构
+- 预留给后续编码阶段：`query-backend/tests/` 下的容器启动冒烟、健康探针、审计日志、schema 视图、预算策略、响应元数据与调查会话支撑测试
 
 ## 10. 保护对象
 
@@ -150,12 +158,16 @@
 - `tests/mirror/protected_fixtures/manual_seed_steps.md`
 - `tests/mirror/protected_baselines/cypher_assertions.md`
 - `tests/query_backend/test_query_backend_acceptance.py`
+- `tests/query_backend/test_query_backend_docker_acceptance.py`
 - `tests/query_backend/protected_fixtures/rejected_cypher_and_degraded_probe.md`
+- `tests/query_backend/protected_fixtures/docker_proxy_probe.md`
 - `tests/query_backend/protected_baselines/response_contract.md`
+- `tests/query_backend/protected_baselines/docker_proxy_contract.md`
 - `tests/test_architecture_contracts.py`
 - `tests/test_acceptance_baselines.py`
 - `tests/test_dependency_boundaries.py`
 - `tests/test_implementation_traceability.py`
+- `query-backend/Dockerfile`
 
 ## 11. 变更规则
 

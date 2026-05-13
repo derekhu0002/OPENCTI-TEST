@@ -18,6 +18,11 @@ REQUIRED_CONTRACTS = [
     ROOT / "tests" / "runtime" / "ARCHITECTURE.md",
 ]
 
+RUNTIME_PLATFORM_FILES = [
+    ROOT / "docker-compose.yml",
+    ROOT / "query-backend" / "Dockerfile",
+]
+
 REQUIRED_HEADINGS = [
     "## 1. 角色",
     "## 2. 作用域",
@@ -52,3 +57,20 @@ def test_local_contracts_reference_root_contract() -> None:
             continue
         text = path.read_text(encoding="utf-8")
         assert "OVERALL_ARCHITECTURE.md" in text, f"{path} must reference the root contract"
+
+
+def test_query_backend_container_delivery_is_physicalized() -> None:
+    missing = [path for path in RUNTIME_PLATFORM_FILES if not path.is_file()]
+    assert not missing, f"Missing query-backend runtime delivery files: {missing}"
+
+    compose_text = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    dockerfile_text = (ROOT / "query-backend" / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "query-backend:" in compose_text
+    assert "dockerfile: query-backend/Dockerfile" in compose_text
+    assert "${QUERY_BACKEND_PORT:-8088}:8088" in compose_text
+    assert "./mirror-sync/runtime" in compose_text
+    assert "./query-backend/runtime" in compose_text
+    assert "query-backend:8088" in (ROOT / "Caddyfile").read_text(encoding="utf-8")
+    assert "FROM python:3.13-slim" in dockerfile_text
+    assert "server.py" in dockerfile_text

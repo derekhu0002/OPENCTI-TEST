@@ -14,8 +14,11 @@ MIRROR_ACCEPTANCE_FILE = ROOT / "tests" / "mirror" / "test_neo4j_sync_integrity.
 MIRROR_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures" / "manual_seed_steps.md"
 MIRROR_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "cypher_assertions.md"
 QUERY_BACKEND_ACCEPTANCE_FILE = ROOT / "tests" / "query_backend" / "test_query_backend_acceptance.py"
+QUERY_BACKEND_DOCKER_ACCEPTANCE_FILE = ROOT / "tests" / "query_backend" / "test_query_backend_docker_acceptance.py"
 QUERY_BACKEND_FIXTURE_FILE = ROOT / "tests" / "query_backend" / "protected_fixtures" / "rejected_cypher_and_degraded_probe.md"
+QUERY_BACKEND_DOCKER_FIXTURE_FILE = ROOT / "tests" / "query_backend" / "protected_fixtures" / "docker_proxy_probe.md"
 QUERY_BACKEND_BASELINE_FILE = ROOT / "tests" / "query_backend" / "protected_baselines" / "response_contract.md"
+QUERY_BACKEND_DOCKER_BASELINE_FILE = ROOT / "tests" / "query_backend" / "protected_baselines" / "docker_proxy_contract.md"
 
 
 def _load_graph() -> dict:
@@ -82,10 +85,12 @@ def test_query_backend_acceptance_entries_are_physicalized() -> None:
     cases = _collect_testcases()
     controlled_rejection_case = cases["受控 Cypher 拒绝与结构化反馈"]
     degraded_case = cases["副本降级不静默回退"]
+    docker_case = cases["Docker统一代理查询入口可用性验证"]
     root_contract_text = ROOT_CONTRACT.read_text(encoding="utf-8")
 
     assert controlled_rejection_case["description"], "Controlled Cypher rejection testcase must remain declared in the architecture graph"
     assert degraded_case["description"], "Replica degradation testcase must remain declared in the architecture graph"
+    assert docker_case["description"], "Docker proxy testcase must remain declared in the architecture graph"
     assert controlled_rejection_case["acceptance"] == (
         "tests/query_backend/test_query_backend_acceptance.py::"
         "test_controlled_cypher_rejection_returns_structured_feedback"
@@ -94,17 +99,29 @@ def test_query_backend_acceptance_entries_are_physicalized() -> None:
         "tests/query_backend/test_query_backend_acceptance.py::"
         "test_replica_degradation_does_not_fall_back_silently"
     )
+    assert docker_case["acceptance"] == (
+        "tests/query_backend/test_query_backend_docker_acceptance.py::"
+        "test_docker_proxy_entry_preserves_structured_rejection_contract"
+    )
     assert "受控 Cypher 拒绝与结构化反馈" in root_contract_text
     assert "副本降级不静默回退" in root_contract_text
     assert "tests/query_backend/test_query_backend_acceptance.py" in root_contract_text
+    assert "Docker统一代理查询入口可用性验证" in root_contract_text
+    assert "tests/query_backend/test_query_backend_docker_acceptance.py" in root_contract_text
     assert QUERY_BACKEND_ACCEPTANCE_FILE.is_file(), "Query backend acceptance entry file is missing"
+    assert QUERY_BACKEND_DOCKER_ACCEPTANCE_FILE.is_file(), "Query backend docker acceptance entry file is missing"
 
     function_names = _load_test_function_names(QUERY_BACKEND_ACCEPTANCE_FILE)
     assert "test_successful_query_returns_graph_payload_and_freshness_metadata" in function_names
     assert "test_controlled_cypher_rejection_returns_structured_feedback" in function_names
     assert "test_replica_degradation_does_not_fall_back_silently" in function_names
 
+    docker_function_names = _load_test_function_names(QUERY_BACKEND_DOCKER_ACCEPTANCE_FILE)
+    assert "test_docker_proxy_entry_preserves_structured_rejection_contract" in docker_function_names
+
 
 def test_query_backend_protected_fixture_and_baseline_files_exist() -> None:
     assert QUERY_BACKEND_FIXTURE_FILE.is_file(), "Query backend protected fixture file is missing"
     assert QUERY_BACKEND_BASELINE_FILE.is_file(), "Query backend protected baseline file is missing"
+    assert QUERY_BACKEND_DOCKER_FIXTURE_FILE.is_file(), "Query backend docker protected fixture file is missing"
+    assert QUERY_BACKEND_DOCKER_BASELINE_FILE.is_file(), "Query backend docker protected baseline file is missing"

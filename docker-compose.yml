@@ -103,6 +103,36 @@ services:
       interval: 15s
       timeout: 10s
       retries: 20
+  query-backend:
+    build:
+      context: .
+      dockerfile: query-backend/Dockerfile
+    environment:
+      - QUERY_BACKEND_HOST=0.0.0.0
+      - QUERY_BACKEND_PORT=8088
+      - QUERY_BACKEND_AUDIT_LOG=/app/query-backend/runtime/audit.log
+      - NEO4J_MIRROR_HTTP_HOST=neo4j
+      - NEO4J_MIRROR_HTTP_PORT=7474
+      - NEO4J_MIRROR_USERNAME=neo4j
+      - NEO4J_MIRROR_PASSWORD=${NEO4J_PASSWORD}
+    ports:
+      - "${QUERY_BACKEND_PORT:-8088}:8088"
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /app/.env
+        read_only: true
+      - type: bind
+        source: ./mirror-sync/runtime
+        target: /app/mirror-sync/runtime
+        read_only: true
+      - type: bind
+        source: ./query-backend/runtime
+        target: /app/query-backend/runtime
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    restart: always
   opencti:
     image: opencti/platform:6.9.0
     environment:
@@ -163,6 +193,8 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
+      query-backend:
+        condition: service_started
       opencti:
         condition: service_healthy
     restart: always

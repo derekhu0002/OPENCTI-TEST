@@ -21,6 +21,13 @@ DEFAULT_BASE_URL = "http://127.0.0.1:8088"
 DEFAULT_DEGRADED_BASE_URL = "http://127.0.0.1:8089"
 
 
+def _selected_items_only_use_docker_proxy_entry(request: pytest.FixtureRequest) -> bool:
+	items = getattr(request.session, "items", [])
+	if not items:
+		return False
+	return all(str(item.fspath).endswith("test_query_backend_docker_acceptance.py") for item in items)
+
+
 def _port_open(host: str, port: int) -> bool:
 	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
 		probe.settimeout(0.2)
@@ -122,7 +129,11 @@ def _start_backend(base_url: str, *, sync_status: str | None = None, staleness_s
 
 
 @pytest.fixture(scope="session", autouse=True)
-def query_backend_runtime() -> Iterator[None]:
+def query_backend_runtime(request: pytest.FixtureRequest) -> Iterator[None]:
+	if _selected_items_only_use_docker_proxy_entry(request):
+		yield
+		return
+
 	os.environ.setdefault("QUERY_BACKEND_BASE_URL", DEFAULT_BASE_URL)
 	os.environ.setdefault("QUERY_BACKEND_DEGRADED_BASE_URL", DEFAULT_DEGRADED_BASE_URL)
 	os.environ["QUERY_BACKEND_BASE_URL"] = _resolve_base_url(os.environ["QUERY_BACKEND_BASE_URL"])

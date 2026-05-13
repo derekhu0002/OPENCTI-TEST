@@ -9,6 +9,7 @@ CONNECTOR_SOURCE = ROOT / "connectors" / "automotive-security-timeline" / "src" 
 SCRIPTS_DIR = ROOT / "scripts"
 MIRROR_SYNC_CONTRACT = ROOT / "mirror-sync" / "ARCHITECTURE.md"
 QUERY_BACKEND_CONTRACT = ROOT / "query-backend" / "ARCHITECTURE.md"
+DOCKER_COMPOSE_FILE = ROOT / "docker-compose.yml"
 
 
 def test_custom_connector_does_not_import_repo_internal_layers() -> None:
@@ -58,6 +59,23 @@ def test_query_backend_contract_forbids_direct_opencti_fallback_dependency() -> 
     text = QUERY_BACKEND_CONTRACT.read_text(encoding="utf-8")
     assert "不得直接依赖 OpenCTI" in text
     assert "不得静默回退到 GraphQL" in text
+
+
+def test_query_backend_compose_delivery_uses_neo4j_without_caddy_or_opencti_hops() -> None:
+    text = DOCKER_COMPOSE_FILE.read_text(encoding="utf-8")
+    query_backend_section = text.split("  query-backend:\n", 1)[1].split("  opencti:\n", 1)[0]
+    assert "NEO4J_MIRROR_HTTP_HOST=neo4j" in query_backend_section
+    assert "NEO4J_MIRROR_HTTP_PORT=7474" in query_backend_section
+    assert "QUERY_BACKEND_HOST=0.0.0.0" in query_backend_section
+    assert "QUERY_BACKEND_PORT=8088" in query_backend_section
+    assert "OPENCTI_URL" not in query_backend_section
+
+
+def test_caddy_exposes_query_backend_as_unified_external_entry() -> None:
+    text = (ROOT / "Caddyfile").read_text(encoding="utf-8")
+    assert "https://localhost" in text
+    assert "path /graph/query" in text
+    assert "query-backend:8088" in text
 
 
 def test_mirror_sync_contract_keeps_opencti_ingress_separate_from_query_backend() -> None:

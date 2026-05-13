@@ -17,6 +17,7 @@ def test_root_contract_declares_replica_traceability_chain() -> None:
     assert "ReplicaGraphQueryBackend" in text
     assert "query-backend/" in text
     assert "AIAgentGraphInvestigation" in text
+    assert "运行时平台通过 `docker-compose.yml` 中的 `query-backend` 独立容器服务" in text
 
 
 def test_root_contract_declares_query_backend_acceptance_entries() -> None:
@@ -24,8 +25,10 @@ def test_root_contract_declares_query_backend_acceptance_entries() -> None:
     assert "test_successful_query_returns_graph_payload_and_freshness_metadata" in text
     assert "受控 Cypher 拒绝与结构化反馈" in text
     assert "副本降级不静默回退" in text
+    assert "Docker统一代理查询入口可用性验证" in text
     assert "tests/query_backend/test_query_backend_acceptance.py::test_controlled_cypher_rejection_returns_structured_feedback" in text
     assert "tests/query_backend/test_query_backend_acceptance.py::test_replica_degradation_does_not_fall_back_silently" in text
+    assert "tests/query_backend/test_query_backend_docker_acceptance.py::test_docker_proxy_entry_preserves_structured_rejection_contract" in text
 
 
 def test_local_contracts_keep_direct_implements_relationships() -> None:
@@ -36,6 +39,8 @@ def test_local_contracts_keep_direct_implements_relationships() -> None:
     assert "直接 implements `OpenCTIToNeo4jMirrorSync`" in mirror_text
     assert "直接 implements `ReplicaGraphQueryBackend`" in backend_text
     assert "直接 implements `AIAgentGraphInvestigation`" in backend_text
+    assert "Dockerfile" in backend_text
     assert "test_successful_query_returns_graph_payload_and_freshness_metadata" in test_text
     assert "直接 implements `受控 Cypher 拒绝与结构化反馈`" in test_text
     assert "直接 implements `副本降级不静默回退`" in test_text
+    assert "直接 implements `Docker统一代理查询入口可用性验证`" in test_text

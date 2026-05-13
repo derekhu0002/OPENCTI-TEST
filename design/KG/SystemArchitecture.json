@@ -376,6 +376,14 @@
 "Input": "",
 "acceptanceCriteria": "tests/query_backend/test_query_backend_acceptance.py::test_successful_query_returns_graph_payload_and_freshness_metadata",
 "TestResults": ""
+},
+{
+"name": "Docker统一代理查询入口可用性验证",
+"description": "*   **测试场景（GIVEN）：**\\r\\n    1.  查询后端以独立 Docker 容器方式运行。\\r\\n    2.  Caddy 作为统一 HTTPS 反向代理入口，把 `/graph/query` 转发到 `query-backend:8088`。\\r\\n    3.  调用方通过 `https://localhost/graph/query` 访问查询后端，而不是直连容器端口。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  调用方向统一代理入口提交一条包含写操作的 Cypher。\\r\\n    2.  请求经由 Caddy 转发到查询后端容器。\\r\\n*   **预期结果（THEN）：**\\r\\n    1.  统一代理入口可达且能够把请求转发到查询后端容器。\\r\\n    2.  查询后端仍返回结构化 `rejection_reason`、`budget_policy` 与 `investigation_id`。\\r\\n    3.  响应保持 `backend=neo4j-replica`，且不会因为统一代理入口而退化成 OpenCTI 或 GraphQL 路径。",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/query_backend/test_query_backend_docker_acceptance.py::test_docker_proxy_entry_preserves_structured_rejection_contract",
+"TestResults": ""
 }
 ]
 },
