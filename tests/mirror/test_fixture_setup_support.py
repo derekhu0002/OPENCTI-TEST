@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 
 def test_mirror_auto_seed_support_returns_expected_fixture_shape(prepared_mirror_seed: dict[str, str]) -> None:
     assert prepared_mirror_seed["ipv4_value"] == os.getenv("MIRROR_EXPECTED_IPV4_VALUE", "1.2.3.4")

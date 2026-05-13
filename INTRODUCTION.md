@@ -285,7 +285,8 @@
 
 - 实现架构已经为独立查询后端定义了稳定边界，见 `query-backend/ARCHITECTURE.md`。
 - 当前唯一已冻结的调用接口是 `POST /graph/query`。
-- 当前仓库还没有交付对应运行时代码或 compose 服务，因此这里描述的是“已冻结的实现架构接口契约”，不是“已上线的可直接运行服务”。
+- 当前仓库已经交付最小可运行查询后端实现，入口为 `query-backend/server.py`，外部接口说明见 `query-backend/API.md`。
+- 当前仓库尚未把该后端接入 compose 编排，因此默认运行方式是直接启动 Python HTTP 服务。
 
 仓库证据：
 
@@ -422,29 +423,7 @@ Authorization: Bearer <token>
 
 {
 	"investigation_id": "case-2026-05-13-001",
-	"results": [
-		{
-			"nodes": [
-				{
-					"entity_type": "ipv4-addr",
-					"standard_id": "ipv4-addr--11111111-2222-3333-4444-555555555555",
-					"value": "1.2.3.4"
-				},
-				{
-					"entity_type": "malware",
-					"standard_id": "malware--99999999-8888-7777-6666-555555555555",
-					"name": "Mirai-Botnet"
-				}
-			],
-			"relationships": [
-				{
-					"relationship_type": "indicates",
-					"source_standard_id": "ipv4-addr--11111111-2222-3333-4444-555555555555",
-					"target_standard_id": "malware--99999999-8888-7777-6666-555555555555"
-				}
-			]
-		}
-	],
+	"cypher": "MATCH (n) RETURN n LIMIT 1"
 }
 ```
 
@@ -455,42 +434,19 @@ Authorization: Bearer <token>
 	"backend": "neo4j-replica",
 	"investigation_id": "case-2026-05-13-001",
 	"freshness_ts": "2026-05-13T08:00:00Z",
-	"staleness_seconds": 42,
+	"staleness_seconds": 0,
 	"sync_status": "healthy",
 	"results": [
 		{
-			"kind": "node",
-			"id": "ipv4--1.2.3.4",
-			"labels": ["ipv4-addr"],
-			"properties": {
-				"value": "1.2.3.4",
-				"standard_id": "ipv4-addr--7dd44d27-f473-5ba9-b12b-0d3a61bbed2e"
-			}
-		},
-		{
-			"kind": "node",
-			"id": "malware--mirai-botnet",
-			"labels": ["malware"],
-			"properties": {
-				"name": "Mirai-Botnet",
-				"standard_id": "malware--11111111-2222-3333-4444-555555555555"
-			}
-		},
-		{
-			"kind": "relationship",
-			"type": "indicates",
-			"source_id": "ipv4--1.2.3.4",
-			"target_id": "malware--mirai-botnet",
-			"properties": {
-				"confidence": 75
-			}
+			"value": "1.2.3.4",
+			"standard_id": "ipv4-addr--7dd44d27-f473-5ba9-b12b-0d3a61bbed2e"
 		}
 	],
 	"result_truncated": false
 }
 ```
 
-这里的 `results` 示例只用于说明调用方应期待的最小结果形态：后端至少需要返回可机器消费的节点/关系载荷，使调用方能够继续做图遍历、证据提取或人工复核。具体字段名可以在后续实现中扩展，但不应退化成仅有自然语言摘要而没有结构化图结果。
+当前实现把 `results` 返回为“按 Cypher 返回列名映射后的记录对象数组”。调用方可以基于稳定列名继续做图遍历、证据提取或人工复核，不应假定这里只有自然语言摘要。
 
 拒绝响应示例：
 
@@ -587,15 +543,38 @@ powershell -ExecutionPolicy Bypass -File .\scripts\backup-opencti.ps1 -WhatIf
 d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/test_architecture_connector_support.py -vv
 ```
 
+查询后端显性验收路径：
+
+```powershell
+d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/query_backend/test_query_backend_acceptance.py -vv
+```
+
 这条路径适合外部采用方在接入前验证：
 
 - 架构图谱是否与运行配置一致
 - 关键连接器是否已在仓库中落地
 - 部分连接器是否能达到真实容器运行覆盖
+- 查询后端是否满足成功、结构化拒绝和副本降级三类冻结响应规格
 
 ### 6. 查询后端调用方关键流程
 
-注意：以下流程描述的是当前已经在实现架构和显性测试中冻结的调用方式；仓库尚未交付 query backend 运行时代码，因此调用方应把它视为后续实现必须满足的契约。
+以下流程描述的是当前已经在实现架构、显性测试和最小运行时代码中对齐的调用方式。默认启动入口为 `query-backend/server.py`，更细的接口字段见 `query-backend/API.md`。
+
+补充说明：
+
+- 对外运行时入口仍然是直接启动 `query-backend/server.py`。
+- 查询后端显性验收 `tests/query_backend/test_query_backend_acceptance.py` 现在会在测试期自动装配真实的健康实例和降级实例；当默认端口已被其他本地进程占用时，测试会自动切换到空闲端口，而不是要求调用方手工设置 `QUERY_BACKEND_DEGRADED_BASE_URL`。
+
+最小启动示例：
+
+```powershell
+d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe query-backend/server.py
+```
+
+默认监听地址：
+
+- `http://127.0.0.1:8088/graph/query`
+- 通过环境变量 `QUERY_BACKEND_HOST`、`QUERY_BACKEND_PORT`、`QUERY_BACKEND_SYNC_STATUS`、`QUERY_BACKEND_STALENESS_SECONDS` 调整监听地址和降级模拟状态
 
 #### 成功查询流程
 
@@ -714,6 +693,7 @@ d:/Projects/OPENCTI-TEST/.venv/Scripts/python.exe -m pytest tests/test_architect
 3. 访问 `https://localhost`
 4. 用 `.env` 中的管理员账号登录 OpenCTI
 5. 如需验证交付质量，再执行 pytest 验收套件
+6. 如需验证查询后端契约，再执行 `tests/query_backend/test_query_backend_acceptance.py`
 
 ### 采用前最需要验证的 3 个风险点是什么
 

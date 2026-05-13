@@ -23,7 +23,7 @@
 
 | 一级元素 | 稳定职责 | 主要物理载体 | 局部契约 |
 | --- | --- | --- | --- |
-| 运行时平台 | 承载 OpenCTI、基础设施、connector profile 与容器化集成入口 | 根目录 compose 与配置文件 | 本文件直接管理 |
+| 运行时平台 | 承载 OpenCTI、Neo4j、副本依赖基础设施、connector profile 与容器化集成入口 | 根目录 compose 与配置文件 | 本文件直接管理 |
 | 副本同步 | 承载 OpenCTI 到 Neo4j 热子图副本的同步边界、新鲜度状态与对账职责 | `mirror-sync/` | `mirror-sync/ARCHITECTURE.md` |
 | 查询后端 | 承载面向远端 AI Agent 的受控查询、schema 视图、预算与审计边界 | `query-backend/` | `query-backend/ARCHITECTURE.md` |
 | 集成扩展 | 承载仓库自研扩展及其与运行时平台的稳定边界 | `connectors/` | `connectors/ARCHITECTURE.md` |
@@ -43,8 +43,9 @@
 
 - Compose 服务名、profile、环境变量边界。
 - OpenCTI HTTPS 入口与管理员 token 配置边界。
+- `docker-compose.yml` 中 `opencti` 与 `neo4j` 同属默认 compose 内部网络，副本同步与后续查询实现必须优先复用该容器内连通性，而不是把 Neo4j 视为独立外置前提。
 - MISP 测试专用 compose 变体入口。
-- Neo4j mirror 预留环境变量边界：`NEO4J_ADVERTISED_HOST`、`NEO4J_HTTP_PORT`、`NEO4J_BOLT_PORT`、`NEO4J_PASSWORD`、`MIRROR_*`。
+- Neo4j 容器与 mirror 环境变量边界：服务名 `neo4j`、`NEO4J_ADVERTISED_HOST`、`NEO4J_HTTP_PORT`、`NEO4J_BOLT_PORT`、`NEO4J_PASSWORD`、`MIRROR_*`。
 
 ### 4.2 副本同步暴露的稳定接口
 

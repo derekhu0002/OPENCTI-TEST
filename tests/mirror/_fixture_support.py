@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import ssl
+import importlib.util
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -62,11 +63,23 @@ def _graphql_request(query: str, variables: dict[str, object]) -> dict[str, obje
     return body["data"]
 
 
+def _load_mirror_sync_runner():
+    module_path = ROOT / "mirror-sync" / "sync_once.py"
+    spec = importlib.util.spec_from_file_location("mirror_sync_sync_once", module_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError(f"Unable to load mirror sync runner from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def ensure_mirror_seed_fixture(ipv4_value: str, malware_name: str) -> dict[str, str]:
+    mirror_sync = _load_mirror_sync_runner()
+
     observable = _graphql_request(
         (
             "mutation SeedMirrorIPv4($value: String!) {"
-            " stixCyberObservableAdd(input: {type: \"IPv4-Addr\", observable_value: $value}) {"
+            " stixCyberObservableAdd(type: \"IPv4-Addr\", update: true, IPv4Addr: {value: $value}) {"
             "   id"
             "   standard_id"
             " }"
@@ -88,23 +101,72 @@ def ensure_mirror_seed_fixture(ipv4_value: str, malware_name: str) -> dict[str, 
         {"name": malware_name},
     )["malwareAdd"]
 
+    indicator = _graphql_request(
+        (
+            "mutation SeedMirrorIndicator($name: String!, $pattern: String!) {"
+            " indicatorAdd(input: {"
+            "   name: $name,"
+            "   pattern_type: \"stix\","
+            "   pattern: $pattern,"
+            "   x_opencti_main_observable_type: \"IPv4-Addr\","
+            "   update: true"
+            " }) {"
+            "   id"
+            "   standard_id"
+            "   name"
+            " }"
+            "}"
+        ),
+        {
+            "name": f"{malware_name} indicator for {ipv4_value}",
+            "pattern": f"[ipv4-addr:value = '{ipv4_value}']",
+        },
+    )["indicatorAdd"]
+
+    _graphql_request(
+        (
+            "mutation SeedMirrorBasedOn($fromId: StixRef!, $toId: StixRef!) {"
+            " stixCoreRelationshipAdd(input: {fromId: $fromId, toId: $toId, relationship_type: \"based-on\"}) {"
+            "   id"
+            " }"
+            "}"
+        ),
+        {"fromId": indicator["id"], "toId": observable["id"]},
+    )["stixCoreRelationshipAdd"]
+
     relationship = _graphql_request(
         (
-            "mutation SeedMirrorRelationship($fromId: String!, $toId: String!) {"
+            "mutation SeedMirrorIndicates($fromId: StixRef!, $toId: StixRef!) {"
             " stixCoreRelationshipAdd(input: {fromId: $fromId, toId: $toId, relationship_type: \"indicates\"}) {"
             "   id"
             "   relationship_type"
             " }"
             "}"
         ),
-        {"fromId": observable["id"], "toId": malware["id"]},
+        {"fromId": indicator["id"], "toId": malware["id"]},
     )["stixCoreRelationshipAdd"]
+
+    mirror_sync.sync_hot_subgraph(
+        {
+            "observable_id": observable["id"],
+            "observable_standard_id": observable["standard_id"],
+            "ipv4_value": ipv4_value,
+            "indicator_id": indicator["id"],
+            "indicator_standard_id": indicator["standard_id"],
+            "malware_id": malware["id"],
+            "malware_standard_id": malware["standard_id"],
+            "malware_name": malware["name"],
+            "relationship_id": relationship["id"],
+            "relationship_type": relationship["relationship_type"],
+        }
+    )
 
     return {
         "ipv4_value": ipv4_value,
         "ipv4_standard_id": observable["standard_id"],
         "malware_name": malware["name"],
         "observable_id": observable["id"],
+        "indicator_id": indicator["id"],
         "malware_id": malware["id"],
         "relationship_id": relationship["id"],
         "relationship_type": relationship["relationship_type"],

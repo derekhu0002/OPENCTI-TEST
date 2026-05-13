@@ -8,6 +8,7 @@
 
 本契约覆盖：
 
+- `conftest.py`
 - `test_query_backend_acceptance.py`
 - `protected_fixtures/`
 - `protected_baselines/`
@@ -16,6 +17,7 @@
 
 ## 3. 稳定元素
 
+- `conftest.py`：查询后端显性验收的局部 pytest 装配点；当前不再内置本地 HTTP stub，显性入口必须连接真实查询后端 API。
 - `test_query_backend_acceptance.py`：查询后端只读显性入口。
 - `protected_fixtures/rejected_cypher_and_degraded_probe.md`：受保护的成功、拒绝与降级场景夹具描述。
 - `protected_baselines/response_contract.md`：受保护的成功、拒绝与降级响应断言基线。
@@ -49,6 +51,7 @@
 
 ## 9. 普通非显性测试
 
+- `conftest.py`：保留为局部 pytest 装配点，但不得再通过本地 HTTP stub 伪造查询后端可用性。
 - 后续若需要补充更多查询后端支撑测试，应继续放在 `../../query-backend/tests/` 下，并在相关局部契约中回填归属。
 
 ## 10. 保护对象

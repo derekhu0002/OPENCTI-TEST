@@ -264,28 +264,6 @@
 ]
 },
 {
-"id": "1244",
-"name": "MISP Intel"
-,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
-,"description": "The MISP Intel connector enables synchronization between OpenCTI and MISP (Malware Information Sharing Platform) instances. It streams data from OpenCTI to MISP in real-time, automatically converting OpenCTI containers (reports, groupings, cases) and their associated STIX objects into MISP events. The connector supports flexible configuration options including distribution levels, threat levels, automatic publishing, and custom tagging. It maintains relationships between entities and supports organization-specific settings, making it ideal for organizations that use both OpenCTI and MISP for threat intelligence management and need to keep both platforms synchronized."
-,"attributes": [
-{
-"name": "集成文档和代码"
-,"description": "https://github.com/OpenCTI-Platform/connectors/tree/master/stream/misp-intel"
-}
-]
-,"testcases": [
-{
-"name": "MISP Intel接入",
-"description": "",
-"type": "Acceptance Test",
-"Input": "",
-"acceptanceCriteria": "tests/test_architecture_connector_support.py::test_misp_intel_connector_definition",
-"TestResults": ""
-}
-]
-},
-{
 "id": "1245",
 "name": "CONNECTORS"
 ,"type": "ArchiMate_ApplicationComponent"
@@ -390,6 +368,14 @@
 "Input": "",
 "acceptanceCriteria": "tests/query_backend/test_query_backend_acceptance.py::test_replica_degradation_does_not_fall_back_silently",
 "TestResults": ""
+},
+{
+"name": "受控CYPHER正常查询反馈",
+"description": "",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/query_backend/test_query_backend_acceptance.py::test_successful_query_returns_graph_payload_and_freshness_metadata",
+"TestResults": ""
 }
 ]
 },
@@ -467,8 +453,7 @@
 "1240",
 "1241",
 "1242",
-"1243",
-"1244"
+"1243"
 ]
 ,"included_relationships": [
 

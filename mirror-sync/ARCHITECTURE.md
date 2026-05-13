@@ -17,7 +17,7 @@
 
 ## 4. 接口边界
 
-- 输入边界：OpenCTI live stream、增量拉取能力、`.env` 中的 `MIRROR_*` 与 Neo4j 连接变量。
+- 输入边界：OpenCTI live stream、增量拉取能力、主 compose 默认网络中的 `opencti`/`neo4j` 服务，以及 `.env` 中的 `MIRROR_*` 与 Neo4j 连接变量。
 - 输出边界：Neo4j 热子图、副本 freshness 状态、watermark、对账结果与删除或失效对齐状态。
 - 本目录不得向 `query-backend/` 暴露 Agent 查询接口；它只暴露副本读模型与 freshness 契约。
 

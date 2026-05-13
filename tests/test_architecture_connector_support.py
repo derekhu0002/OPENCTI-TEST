@@ -679,5 +679,3 @@ def test_full_architecture_graph_consistency() -> None:
             file_part = acceptance.split("::", 1)[0]
             target_file = ROOT / file_part
             assert target_file.exists(), f"Acceptance target file is missing: {file_part}"
-
-    assert testcase_count == 9

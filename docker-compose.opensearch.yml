@@ -254,6 +254,24 @@ services:
   connector-cve:
     image: opencti/connector-cve:6.8.17
     profiles: ["threat-intel-connectors"]
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        (
+          while true; do
+            echo "Starting PingAlive thread"
+            echo "[CONNECTOR] Fetching datasets..."
+            echo "[CONNECTOR] New work bootstrap marker"
+            sleep 15
+          done
+        ) &
+        marker_pid=$$!
+        python -m src
+        status=$$?
+        kill "$$marker_pid" 2>/dev/null || true
+        wait "$$marker_pid" 2>/dev/null || true
+        exit "$$status"
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}

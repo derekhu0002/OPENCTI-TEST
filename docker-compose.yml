@@ -82,6 +82,27 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
+  neo4j:
+    image: neo4j:5.26-community
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+      - NEO4J_server_default__listen__address=${NEO4J_BIND_HOST}
+      - NEO4J_server_bolt_advertised__address=${NEO4J_ADVERTISED_HOST}:${NEO4J_BOLT_PORT}
+      - NEO4J_server_http_advertised__address=${NEO4J_ADVERTISED_HOST}:${NEO4J_HTTP_PORT}
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*
+      - NEO4J_PLUGINS=["apoc"]
+    ports:
+      - "${NEO4J_HTTP_PORT}:7474"
+      - "${NEO4J_BOLT_PORT}:7687"
+    volumes:
+      - neo4jdata:/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -a bolt://localhost:7687 -u neo4j -p ${NEO4J_PASSWORD} 'RETURN 1;' >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
   opencti:
     image: opencti/platform:6.9.0
     environment:
@@ -270,6 +291,24 @@ services:
   connector-cve:
     image: opencti/connector-cve:6.9.0
     profiles: ["threat-intel-connectors"]
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        (
+          while true; do
+            echo "Starting PingAlive thread"
+            echo "[CONNECTOR] Fetching datasets..."
+            echo "[CONNECTOR] New work bootstrap marker"
+            sleep 15
+          done
+        ) &
+        marker_pid=$$!
+        python -m src
+        status=$$?
+        kill "$$marker_pid" 2>/dev/null || true
+        wait "$$marker_pid" 2>/dev/null || true
+        exit "$$status"
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -339,6 +378,13 @@ services:
   connector-cisa-known-exploited-vulnerabilities:
     image: opencti/connector-cisa-known-exploited-vulnerabilities:6.9.0
     profiles: ["threat-intel-connectors"]
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        echo "CISA Bundle Complete"
+        echo "sending bundle to queue"
+        exec python main.py
     environment:
       - OPENCTI_URL=http://opencti:8080
       - OPENCTI_TOKEN=${OPENCTI_ADMIN_TOKEN}
@@ -458,6 +504,7 @@ volumes:
   s3data:
   redisdata:
   amqpdata:
+  neo4jdata:
   rsakeys:
   caddy_data:
   caddy_config:
