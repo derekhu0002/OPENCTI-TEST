@@ -22,7 +22,11 @@
 ## 3. 稳定元素
 
 - `test_architecture_connector_support.py`：当前 connector 类显性 testcase 唯一主入口。
-- `mirror/test_neo4j_sync_integrity.py`：Neo4j mirror 显性 testcase 唯一主入口。
+- `mirror/test_neo4j_sync_integrity.py`：Neo4j mirror 最小链路显性 testcase 主入口。
+- `mirror/test_bootstrap_window_acceptance.py`：Neo4j mirror 时间窗与邻域显性 testcase 主入口。
+- `mirror/test_live_incremental_acceptance.py`：Neo4j mirror 增量与恢复显性 testcase 主入口。
+- `mirror/test_projection_policy_acceptance.py`：Neo4j mirror 属性投影显性 testcase 主入口。
+- `mirror/test_reconcile_acceptance.py`：Neo4j mirror 删除与修复显性 testcase 主入口。
 - `query_backend/test_query_backend_acceptance.py`：查询后端 API 契约显性 testcase 主入口。
 - `query_backend/test_query_backend_docker_acceptance.py`：查询后端 Docker 统一代理显性 testcase 主入口。
 - `query_backend/conftest.py`：查询后端显性 testcase 的固定装配点，优先对接容器化健康实例。
@@ -46,6 +50,10 @@
 
 - `test_architecture_connector_support.py` 直接 implements 当前图谱中的 connector 显性 testcase。
 - `mirror/test_neo4j_sync_integrity.py` 直接 implements `OpenCTI 情报数据镜像至 Neo4j 完整性验证`。
+- `mirror/test_bootstrap_window_acceptance.py` 直接 implements `近一年窗口热子图初始化同步` 与 `二跳邻域补齐完整性`。
+- `mirror/test_live_incremental_acceptance.py` 直接 implements `Live Stream 增量实时同步` 与 `Watermark 恢复后幂等补偿`。
+- `mirror/test_projection_policy_acceptance.py` 直接 implements `属性名称与默认基线投影一致性`。
+- `mirror/test_reconcile_acceptance.py` 直接 implements `删除与撤销状态对齐`。
 - `query_backend/test_query_backend_acceptance.py` 直接 implements `受控 Cypher 拒绝与结构化反馈` 与 `副本降级不静默回退`，并直接看护正常成功路径规格。
 - `query_backend/test_query_backend_docker_acceptance.py` 直接 implements `Docker统一代理查询入口可用性验证`。
 - 其余四个冻结测试通过守护边界与入口，间接承载上述显性 testcase 的稳定性。
@@ -53,7 +61,11 @@
 ## 7. 显性 testcase 入口
 
 - connector 类显性 testcase 固定在 `test_architecture_connector_support.py`。
-- mirror 显性 testcase 固定在 `mirror/test_neo4j_sync_integrity.py`。
+- mirror 最小链路显性 testcase 固定在 `mirror/test_neo4j_sync_integrity.py`。
+- mirror 时间窗与邻域显性 testcase 固定在 `mirror/test_bootstrap_window_acceptance.py`。
+- mirror 增量与恢复显性 testcase 固定在 `mirror/test_live_incremental_acceptance.py`。
+- mirror 属性投影显性 testcase 固定在 `mirror/test_projection_policy_acceptance.py`。
+- mirror 删除与修复显性 testcase 固定在 `mirror/test_reconcile_acceptance.py`。
 - query backend API 契约显性 testcase 固定在 `query_backend/test_query_backend_acceptance.py`。
 - query backend Docker 统一代理显性 testcase 固定在 `query_backend/test_query_backend_docker_acceptance.py`。
 

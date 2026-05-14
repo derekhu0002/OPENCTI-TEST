@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_CONTRACT = ROOT / "OVERALL_ARCHITECTURE.md"
 MIRROR_SYNC_CONTRACT = ROOT / "mirror-sync" / "ARCHITECTURE.md"
+MIRROR_TEST_CONTRACT = ROOT / "tests" / "mirror" / "ARCHITECTURE.md"
 QUERY_BACKEND_CONTRACT = ROOT / "query-backend" / "ARCHITECTURE.md"
 QUERY_BACKEND_TEST_CONTRACT = ROOT / "tests" / "query_backend" / "ARCHITECTURE.md"
 
@@ -14,6 +15,10 @@ def test_root_contract_declares_replica_traceability_chain() -> None:
     text = ROOT_CONTRACT.read_text(encoding="utf-8")
     assert "OpenCTIToNeo4jMirrorSync" in text
     assert "mirror-sync/" in text
+    assert "test_bootstrap_window_acceptance.py" in text
+    assert "test_live_incremental_acceptance.py" in text
+    assert "test_projection_policy_acceptance.py" in text
+    assert "test_reconcile_acceptance.py" in text
     assert "ReplicaGraphQueryBackend" in text
     assert "query-backend/" in text
     assert "AIAgentGraphInvestigation" in text
@@ -33,6 +38,7 @@ def test_root_contract_declares_query_backend_acceptance_entries() -> None:
 
 def test_local_contracts_keep_direct_implements_relationships() -> None:
     mirror_text = MIRROR_SYNC_CONTRACT.read_text(encoding="utf-8")
+    mirror_test_text = MIRROR_TEST_CONTRACT.read_text(encoding="utf-8")
     backend_text = QUERY_BACKEND_CONTRACT.read_text(encoding="utf-8")
     test_text = QUERY_BACKEND_TEST_CONTRACT.read_text(encoding="utf-8")
 
@@ -40,6 +46,12 @@ def test_local_contracts_keep_direct_implements_relationships() -> None:
     assert "直接 implements `ReplicaGraphQueryBackend`" in backend_text
     assert "直接 implements `AIAgentGraphInvestigation`" in backend_text
     assert "Dockerfile" in backend_text
+    assert "近一年窗口热子图初始化同步" in mirror_test_text
+    assert "二跳邻域补齐完整性" in mirror_test_text
+    assert "Live Stream 增量实时同步" in mirror_test_text
+    assert "Watermark 恢复后幂等补偿" in mirror_test_text
+    assert "属性名称与默认基线投影一致性" in mirror_test_text
+    assert "删除与撤销状态对齐" in mirror_test_text
     assert "test_successful_query_returns_graph_payload_and_freshness_metadata" in test_text
     assert "直接 implements `受控 Cypher 拒绝与结构化反馈`" in test_text
     assert "直接 implements `副本降级不静默回退`" in test_text

@@ -11,8 +11,20 @@ ARCHITECTURE_GRAPH = ROOT / "design" / "KG" / "SystemArchitecture.json"
 ROOT_CONTRACT = ROOT / "OVERALL_ARCHITECTURE.md"
 CONNECTOR_ACCEPTANCE_FILE = ROOT / "tests" / "test_architecture_connector_support.py"
 MIRROR_ACCEPTANCE_FILE = ROOT / "tests" / "mirror" / "test_neo4j_sync_integrity.py"
+MIRROR_BOOTSTRAP_ACCEPTANCE_FILE = ROOT / "tests" / "mirror" / "test_bootstrap_window_acceptance.py"
+MIRROR_LIVE_INCREMENTAL_ACCEPTANCE_FILE = ROOT / "tests" / "mirror" / "test_live_incremental_acceptance.py"
+MIRROR_PROJECTION_ACCEPTANCE_FILE = ROOT / "tests" / "mirror" / "test_projection_policy_acceptance.py"
+MIRROR_RECONCILE_ACCEPTANCE_FILE = ROOT / "tests" / "mirror" / "test_reconcile_acceptance.py"
 MIRROR_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures" / "manual_seed_steps.md"
 MIRROR_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "cypher_assertions.md"
+MIRROR_BOOTSTRAP_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures" / "bootstrap_window_probe.md"
+MIRROR_BOOTSTRAP_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "bootstrap_window_contract.md"
+MIRROR_LIVE_INCREMENTAL_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures" / "live_incremental_probe.md"
+MIRROR_LIVE_INCREMENTAL_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "live_incremental_contract.md"
+MIRROR_PROJECTION_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures" / "projection_policy_probe.md"
+MIRROR_PROJECTION_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "projection_policy_contract.md"
+MIRROR_RECONCILE_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures" / "reconcile_probe.md"
+MIRROR_RECONCILE_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "reconcile_contract.md"
 QUERY_BACKEND_ACCEPTANCE_FILE = ROOT / "tests" / "query_backend" / "test_query_backend_acceptance.py"
 QUERY_BACKEND_DOCKER_ACCEPTANCE_FILE = ROOT / "tests" / "query_backend" / "test_query_backend_docker_acceptance.py"
 QUERY_BACKEND_FIXTURE_FILE = ROOT / "tests" / "query_backend" / "protected_fixtures" / "rejected_cypher_and_degraded_probe.md"
@@ -76,9 +88,71 @@ def test_mirror_acceptance_entry_is_physicalized() -> None:
     assert "test_neo4j_sync_integrity" in _load_test_function_names(MIRROR_ACCEPTANCE_FILE)
 
 
+def test_new_mirror_acceptance_entries_are_physicalized() -> None:
+    cases = _collect_testcases()
+    bootstrap_case = cases["近一年窗口热子图初始化同步"]
+    two_hop_case = cases["二跳邻域补齐完整性"]
+    live_case = cases["Live Stream 增量实时同步"]
+    replay_case = cases["Watermark 恢复后幂等补偿"]
+    projection_case = cases["属性名称与默认基线投影一致性"]
+    reconcile_case = cases["删除与撤销状态对齐"]
+
+    assert bootstrap_case["acceptance"] == (
+        "tests/mirror/test_bootstrap_window_acceptance.py::"
+        "test_default_one_year_window_syncs_changed_hot_subgraph"
+    )
+    assert two_hop_case["acceptance"] == (
+        "tests/mirror/test_bootstrap_window_acceptance.py::"
+        "test_two_hop_neighborhood_completion_preserves_direction"
+    )
+    assert live_case["acceptance"] == (
+        "tests/mirror/test_live_incremental_acceptance.py::"
+        "test_live_stream_updates_reach_replica_and_refresh_freshness"
+    )
+    assert replay_case["acceptance"] == (
+        "tests/mirror/test_live_incremental_acceptance.py::"
+        "test_watermark_recovery_replays_idempotently"
+    )
+    assert projection_case["acceptance"] == (
+        "tests/mirror/test_projection_policy_acceptance.py::"
+        "test_property_names_and_default_baseline_are_preserved"
+    )
+    assert reconcile_case["acceptance"] == (
+        "tests/mirror/test_reconcile_acceptance.py::"
+        "test_delete_and_revoke_semantics_align_in_replica"
+    )
+
+    assert MIRROR_BOOTSTRAP_ACCEPTANCE_FILE.is_file(), "Mirror bootstrap acceptance entry file is missing"
+    assert MIRROR_LIVE_INCREMENTAL_ACCEPTANCE_FILE.is_file(), "Mirror live incremental acceptance entry file is missing"
+    assert MIRROR_PROJECTION_ACCEPTANCE_FILE.is_file(), "Mirror projection acceptance entry file is missing"
+    assert MIRROR_RECONCILE_ACCEPTANCE_FILE.is_file(), "Mirror reconcile acceptance entry file is missing"
+
+    bootstrap_names = _load_test_function_names(MIRROR_BOOTSTRAP_ACCEPTANCE_FILE)
+    assert "test_default_one_year_window_syncs_changed_hot_subgraph" in bootstrap_names
+    assert "test_two_hop_neighborhood_completion_preserves_direction" in bootstrap_names
+
+    incremental_names = _load_test_function_names(MIRROR_LIVE_INCREMENTAL_ACCEPTANCE_FILE)
+    assert "test_live_stream_updates_reach_replica_and_refresh_freshness" in incremental_names
+    assert "test_watermark_recovery_replays_idempotently" in incremental_names
+
+    projection_names = _load_test_function_names(MIRROR_PROJECTION_ACCEPTANCE_FILE)
+    assert "test_property_names_and_default_baseline_are_preserved" in projection_names
+
+    reconcile_names = _load_test_function_names(MIRROR_RECONCILE_ACCEPTANCE_FILE)
+    assert "test_delete_and_revoke_semantics_align_in_replica" in reconcile_names
+
+
 def test_mirror_protected_fixture_and_baseline_files_exist() -> None:
     assert MIRROR_FIXTURE_FILE.is_file(), "Mirror protected fixture file is missing"
     assert MIRROR_BASELINE_FILE.is_file(), "Mirror protected baseline file is missing"
+    assert MIRROR_BOOTSTRAP_FIXTURE_FILE.is_file(), "Mirror bootstrap protected fixture file is missing"
+    assert MIRROR_BOOTSTRAP_BASELINE_FILE.is_file(), "Mirror bootstrap protected baseline file is missing"
+    assert MIRROR_LIVE_INCREMENTAL_FIXTURE_FILE.is_file(), "Mirror live incremental protected fixture file is missing"
+    assert MIRROR_LIVE_INCREMENTAL_BASELINE_FILE.is_file(), "Mirror live incremental protected baseline file is missing"
+    assert MIRROR_PROJECTION_FIXTURE_FILE.is_file(), "Mirror projection protected fixture file is missing"
+    assert MIRROR_PROJECTION_BASELINE_FILE.is_file(), "Mirror projection protected baseline file is missing"
+    assert MIRROR_RECONCILE_FIXTURE_FILE.is_file(), "Mirror reconcile protected fixture file is missing"
+    assert MIRROR_RECONCILE_BASELINE_FILE.is_file(), "Mirror reconcile protected baseline file is missing"
 
 
 def test_query_backend_acceptance_entries_are_physicalized() -> None:

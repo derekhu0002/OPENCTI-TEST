@@ -12,12 +12,20 @@
 
 ## 3. 稳定元素
 
-- `mirror-sync/`：承载同步入口、watermark、新鲜度状态与删除对齐的稳定目录边界。
+- `mirror-sync/`：承载同步入口、watermark、新鲜度状态与删除对齐的稳定目录边界；即使运行时以 connector-like 容器服务部署，稳定实现归属仍留在本目录。
+- `Dockerfile`：mirror-sync 容器化交付边界。
+- `service.py`：mirror-sync 容器入口与运行时主循环边界。
 - `tests/`：后续编码阶段用于挂载同步支撑护栏的默认位置，不是显性 testcase 主入口。
 
 ## 4. 接口边界
 
 - 输入边界：OpenCTI live stream、增量拉取能力、主 compose 默认网络中的 `opencti`/`neo4j` 服务，以及 `.env` 中的 `MIRROR_*` 与 Neo4j 连接变量。
+- 容器运行时通过 `OPENCTI_URL`、`OPENCTI_TOKEN`、`STREAM_ID`、`BOOTSTRAP_START_AT`、`MIRROR_BOOTSTRAP_LOOKBACK_DAYS` 与 `MIRROR_POLL_INTERVAL_SECONDS` 收口流订阅、bootstrap 与轮询配置。
+- `.env` 中 `MIRROR_STREAM_ID` 负责为 `STREAM_ID` 提供上游 live stream 标识；占位值只用于配置物理化，不代表已完成真实运行时装配。
+- `.env` 中 `BOOTSTRAP_START_AT` 用于显式指定 bootstrap 起点；测试夹具可在共享环境中临时写入该锚点对应的时间语义，但不得借此改写产品默认近一年策略。
+- `.env` 中 `MIRROR_BOOTSTRAP_LOOKBACK_DAYS` 用于声明未显式给出启动锚点时的默认回看范围；当前默认值为 `365` 天。
+- `.env` 中 `MIRROR_POLL_INTERVAL_SECONDS` 用于声明 mirror-sync 容器主循环的轮询间隔；当前默认值为 `15` 秒。
+- 输入边界允许声明两类 bootstrap 配置：产品默认近一年窗口，以及用于真实环境验收降噪的显式 bootstrap 启动锚点；测试锚点只缩小初始扫描范围，不改写产品默认语义。
 - 输出边界：Neo4j 热子图、副本 freshness 状态、watermark、对账结果与删除或失效对齐状态。
 - 本目录不得向 `query-backend/` 暴露 Agent 查询接口；它只暴露副本读模型与 freshness 契约。
 
@@ -25,6 +33,7 @@
 
 - 允许依赖：OpenCTI、Neo4j、运行时平台契约、标准库与第三方库。
 - 禁止依赖：`tests/`、`scripts/`、`query-backend/` 的内部实现。
+- 测试目录不得反向以 import 方式调用本目录内部同步函数；真实环境验收只能通过 OpenCTI 侧刺激和副本侧只读观察来满足本边界。
 
 ## 6. implements 追溯
 
@@ -34,12 +43,13 @@
 
 ## 7. 显性 testcase 入口
 
-本目录无显性 testcase 主入口；与本目录相关的显性验收固定收口在 `../tests/mirror/test_neo4j_sync_integrity.py`。
+本目录无显性 testcase 主入口；与本目录相关的显性验收固定收口在 `../tests/mirror/test_neo4j_sync_integrity.py`、`../tests/mirror/test_bootstrap_window_acceptance.py`、`../tests/mirror/test_live_incremental_acceptance.py`、`../tests/mirror/test_projection_policy_acceptance.py` 与 `../tests/mirror/test_reconcile_acceptance.py`。
 
 ## 8. 关键非显性测试
 
 - `../tests/test_architecture_contracts.py` 冻结本目录必须存在局部契约并沿用共享骨架。
 - `../tests/test_dependency_boundaries.py` 冻结本目录只负责同步入口，不得向查询后端边界泄漏 Agent 查询职责。
+- `../tests/test_dependency_boundaries.py` 同时冻结 mirror 测试不得直接 import 本目录内部同步实现，以及真实环境验收允许 bootstrap 启动锚点而不改写默认近一年窗口。
 - `../tests/test_implementation_traceability.py` 冻结本目录与 `OpenCTIToNeo4jMirrorSync` 的直接实现关系。
 
 ## 9. 普通非显性测试
@@ -55,3 +65,4 @@
 
 - 不得把查询后端、脚本或测试内部实现塞进本目录，避免把同步边界退化成多职责浅层模块。
 - 若后续需要拆分子目录，只允许围绕同步职责分解，且不得改变显性 testcase 的挂载位置。
+- 若后续以 connector 风格服务落地 compose，允许新增 Dockerfile、入口脚本与运行时配置，但不得因此把本目录的稳定职责迁移到 `connectors/`。

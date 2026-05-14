@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="317.017" timestamp="2026-05-14T12:58:55.637250+08:00" hostname="DESKTOP-PI7E7MA"><testcase classname="tests.mirror.test_bootstrap_window_acceptance" name="test_default_one_year_window_syncs_changed_hot_subgraph" time="147.833"><failure message="AssertionError: Bootstrap sync must preserve updated_at for window-bound replica scope&#10;assert None">def test_default_one_year_window_syncs_changed_hot_subgraph() -&gt; None:
+        assert BOOTSTRAP_FIXTURE.is_file(), "Protected bootstrap fixture file is required"
+        assert BOOTSTRAP_BASELINE.is_file(), "Protected bootstrap baseline file is required"
+    
+        suffix = uuid4().hex[:8]
+        seed = ensure_mirror_seed_fixture(
+            ipv4_value=f"1.2.3.{int(suffix[:2], 16) % 200 + 20}",
+            malware_name=f"Replica-Bootstrap-{suffix}",
+        )
+    
+        freshness = load_freshness()
+        assert freshness["sync_status"] == "healthy"
+    
+        rows = run_cypher(
+            (
+                "MATCH (malware:malware {standard_id: $malware_standard_id}) "
+                "RETURN malware.standard_id AS standard_id, malware.updated_at AS updated_at"
+            ),
+            {"malware_standard_id": seed["malware_standard_id"]},
+        )
+        assert rows, "Bootstrap sync must materialize the in-scope malware node"
+&gt;       assert rows[0]["updated_at"], "Bootstrap sync must preserve updated_at for window-bound replica scope"
+E       AssertionError: Bootstrap sync must preserve updated_at for window-bound replica scope
+E       assert None
+
+tests\mirror\test_bootstrap_window_acceptance.py:35: AssertionError</failure></testcase><testcase classname="tests.mirror.test_bootstrap_window_acceptance" name="test_two_hop_neighborhood_completion_preserves_direction" time="169.070"><failure message="AssertionError: Two-hop neighborhood completion must retain the indicator-to-observable hop&#10;assert []">def test_two_hop_neighborhood_completion_preserves_direction() -&gt; None:
+        assert BOOTSTRAP_FIXTURE.is_file(), "Protected bootstrap fixture file is required"
+        assert BOOTSTRAP_BASELINE.is_file(), "Protected bootstrap baseline file is required"
+    
+        suffix = uuid4().hex[:8]
+        seed = ensure_mirror_seed_fixture(
+            ipv4_value=f"1.2.4.{int(suffix[:2], 16) % 200 + 20}",
+            malware_name=f"Replica-Neighborhood-{suffix}",
+        )
+    
+        based_on_rows = run_cypher(
+            (
+                "MATCH (indicator:indicator {standard_id: $indicator_standard_id})-[r]-&gt;(observable:`ipv4-addr` {standard_id: $observable_standard_id}) "
+                "RETURN type(r) AS relation_type LIMIT 1"
+            ),
+            {
+                "indicator_standard_id": seed["indicator_standard_id"],
+                "observable_standard_id": seed["ipv4_standard_id"],
+            },
+        )
+        indicates_rows = run_cypher(
+            (
+                "MATCH (indicator:indicator {standard_id: $indicator_standard_id})-[r]-&gt;(malware:malware {name: $malware_name}) "
+                "RETURN type(r) AS relation_type LIMIT 1"
+            ),
+            {
+                "indicator_standard_id": seed["indicator_standard_id"],
+                "malware_name": seed["malware_name"],
+            },
+        )
+    
+&gt;       assert based_on_rows, "Two-hop neighborhood completion must retain the indicator-to-observable hop"
+E       AssertionError: Two-hop neighborhood completion must retain the indicator-to-observable hop
+E       assert []
+
+tests\mirror\test_bootstrap_window_acceptance.py:69: AssertionError</failure></testcase></testsuite></testsuites>

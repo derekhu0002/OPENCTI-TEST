@@ -5,6 +5,7 @@
 {
 "id": "1207",
 "name": "StrategyLayerAndMotivationAspect"
+,"parent": "0"
 ,"type": "ArchiMate_Assessment"
 ,"subdiagram_views": [
 {
@@ -16,6 +17,7 @@
 {
 "id": "1208",
 "name": "BusinessLayer"
+,"parent": "0"
 ,"type": "ArchiMate_Assessment"
 ,"subdiagram_views": [
 {
@@ -27,6 +29,7 @@
 {
 "id": "1209",
 "name": "ApplicationLayer"
+,"parent": "0"
 ,"type": "ArchiMate_Assessment"
 ,"subdiagram_views": [
 {
@@ -38,6 +41,7 @@
 {
 "id": "1210",
 "name": "TechnologyLayer"
+,"parent": "0"
 ,"type": "ArchiMate_Assessment"
 ,"subdiagram_views": [
 {
@@ -49,13 +53,8 @@
 {
 "id": "1211",
 "name": "ProjectManagement"
+,"parent": "0"
 ,"type": "ArchiMate_Assessment"
-,"attributes": [
-{
-"name": "GRAPH_USAGE_GUIDE"
-,"description": "将本文件作为意图架构知识图谱与行动约束入口使用，而不是静态清单。阅读和行动时遵循以下规则：1. 优先把本图谱当作当前任务的第一事实来源，先通读相关元素、relationships、views、attributes、testcases，再决定是否继续读取代码、测试、脚本、文档或其它外部文件。2. 本图谱以Archimate建模语言为主，辅之其它建模语言（如UML等）；所有Archimate元素的语义都以Archimate标准定义为准，不得仅凭元素名称或自然语言习惯随意改写。3. 凡属性、description、browser_path、acceptanceCriteria或其它字段指向仓库路径、#file、#sym 或外部模型线索时，应将其视为需要按需追溯的证据入口；引用内容用于补充上下文，不得推翻图谱中已经明确写出的原则、约束、显性testcase与关系语义。4. 该图谱中若存在 `Archimate_principle`、`Archimate_constrain` 等元素，你必须优先识别并严格服从；它们是硬约束，用来限制你的推理、设计与行动边界，你不能超过这些约束。5. 遇到信息冲突时，按以下优先级处理：硬约束元素与原则 &gt; 显性testcase及意图架构显式语义 &gt; 元素、关系、视图、attributes中的明确描述 &gt; 被引用文件或符号 &gt; 当前代码现状；代码只是实现证据，不会自动覆盖意图。6. 显性testcase是意图架构验收基线。除非任务明确属于意图架构设计并要求更新基线，否则你不得擅自新增、删除、重建或改写显性testcase的目标、挂载对象、断言口径与范围；编码或修复阶段只能补齐其可执行入口、支撑性实现、支撑性测试与运行环境。7. 修改边界必须清晰：意图架构设计阶段负责更新意图元素、关系、视图与显性testcase；实现架构设计阶段负责维护实现架构；编码阶段默认修改代码、测试、脚本和文档，不得把实现偏差直接回写成意图漂移。8. 分析问题时必须沿追溯链理解上下文，不得只看单个元素名称或单段description；至少应综合相关元素、关系、视图、上下游依赖、引用文件与测试挂载点后再下结论。9. 当图谱信息不完整时，可以基于仓库证据做最小必要推断，但必须显式标记假设，且不得臆造不存在的外部接口、SLA、部署事实、组织流程或新的显性验收基线。10. 若需要新增支撑性测试、实现护栏或运行环境说明，应优先写入实现架构、代码、测试与对应文档的正确落点，而不是污染意图层。11. 最终输出必须能说明：你读取了哪些图谱证据，遵守了哪些原则或约束，哪些结论是仓库已证实事实，哪些内容只是带标记的最小假设。"
-}
-]
 ,"subdiagram_views": [
 {
 "view_id": "163",
@@ -66,6 +65,7 @@
 {
 "id": "1234",
 "name": "MITRE ATT&CK"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "MITRE ATT&amp;CK is a globally-accessible knowledge base of adversary tactics and techniques based on real-world observations. The ATT&amp;CK knowledge base is used as a foundation for the development of specific threat models and methodologies in the private sector, in government, and in the cybersecurity product and service community. The integration of MITRE ATT&amp;CK with OpenCTI allows for the ingestion of data from MITRE datasets, facilitating the pre-population of your OpenCTI instance. This includes importing information on tools, malware, campaigns, intrusion sets, attack patterns, courses of action, alongside MITRE-specific frameworks such as x-mitre-matrix, x-mitre-tactic, x-mitre-collection, x-mitre-data-source, and x-mitre-data-component. The connector supports the ingestion of data from MITRE Enterprise, MITRE Mobile, and MITRE ICS matrices."
 ,"attributes": [
@@ -88,6 +88,7 @@
 {
 "id": "1235",
 "name": "NIST NVD CVE"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "The NVD facilitates automated vulnerability management, security measurement, and compliance processes by providing comprehensive databases that include: • Vulnerability catalogs • Software vulnerability details • Product identifiers • Severity scoring metrics Common Vulnerabilities and Exposures (CVE) provides a standardized dictionary of publicly disclosed cybersecurity vulnerabilities and exposures, serving as a universal reference system for the security community. This connector seamlessly integrates with the NVD to retrieve CVE data, transform it into STIX2 format, and automatically import it into OpenCTI on a scheduled basis, ensuring your threat intelligence platform remains current with the latest vulnerability information.”"
 ,"attributes": [
@@ -110,6 +111,7 @@
 {
 "id": "1236",
 "name": "Google Threat Intelligence (GTI)"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "Google Threat Intelligence provides unparalleled visibility into threats, enabling the delivery of detailed and timely intelligence to security teams worldwide. By protecting billions of users, detecting millions of phishing attempts, and dedicating extensive resources to incident investigation, Google has a comprehensive view of the threat landscape, ensuring that critical organizations, including yours, remain secure.\r\n\r\nThe integration of Google Threat Intelligence with OpenCTI enables the ingestion of threat data from the Google Threat Intel API directly into the OpenCTI platform. The connector imports key data types such as reports, locations, sectors, malware, intrusion sets, attack patterns, vulnerabilities, and raw IOCs, providing structured intelligence in a comprehensible format within OpenCTI."
 ,"attributes": [
@@ -132,6 +134,7 @@
 {
 "id": "1237",
 "name": "CrowdStrike Falcon Intelligence"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "CrowdStrike Falcon Intelligence is an integral threat intelligence module within the Falcon platform, crafted to enhance the speed and effectiveness of threat detection, investigation, and response. It equips SOC teams to work more swiftly and intelligently, leveraging automation, enrichment, and high-fidelity data to optimize their cybersecurity operations.\r\n\r\nThe OpenCTI CrowdStrike connector facilitates the import of intelligence from the CrowdStrike Falcon platform. By utilizing the Intel APIs, this connector accesses CrowdStrike&#226;€™s comprehensive intelligence, including data on threat actors, indicators, reports, and YARA rules, thus enhancing the threat intelligence capabilities within OpenCTI."
 ,"attributes": [
@@ -154,6 +157,7 @@
 {
 "id": "1238",
 "name": "Ransomware.live"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "Ransomware.live is a specialized threat intelligence service focused on monitoring and reporting ransomware activities and incidents. By providing real-time data on ransomware campaigns, including attack vectors and ransom demands, RansomwareLive aids organizations in understanding and defending against this pervasive threat.\r\n\r\nIntegrating Ransomware.live with OpenCTI allows for the modeling of various attacks and ransomware group claims, as well as their victims, enabling tracking and alerts. This enhances the threat intelligence platform's capabilities with timely and detailed insights into the latest ransomware threats."
 ,"attributes": [
@@ -176,6 +180,7 @@
 {
 "id": "1239",
 "name": "CISA Known Exploited Vulnerabilities (KEV)"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "CISA KEV (Known Exploited Vulnerabilities) is a catalog maintained by the Cybersecurity and Infrastructure Security Agency that lists vulnerabilities actively exploited in the wild. It serves as an authoritative resource for organizations to prioritize vulnerability remediation and enhance their security resilience.\r\n\r\nThe integration of the CISA KEV source with OpenCTI enables the ingestion of vulnerabilities known to be actively exploited. This process involves parsing out Identity, Infrastructure, and Vulnerability STIX Objects, which are then imported into OpenCTI."
 ,"attributes": [
@@ -198,6 +203,7 @@
 {
 "id": "1240",
 "name": "Mandiant"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "The Mandiant connector imports comprehensive cyber threat intelligence from Mandiant (now part of Google Cloud) Advantage API V4 into OpenCTI. It provides access to Mandiant's threat actor profiles, malware families, campaigns, vulnerability reports, indicators of compromise (IOCs), and threat analysis reports. The connector supports incremental imports with configurable intervals for different entity types, custom TLP markings, and relationship inference for enhanced threat context."
 ,"attributes": [
@@ -220,6 +226,7 @@
 {
 "id": "1241",
 "name": "ThreatFox"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "ThreatFox is a platform from abuse.ch and Spamhaus dedicated to sharing indicators of compromise (IOCs) associated with malware, with the infosec community, AV vendors and cyber threat intelligence providers\r\n\r\nThe integration of ThreatFox with OpenCTI facilitates the automatic import of IOCs into the threat intelligence platform. This integration imports data for the following OpenCTI observables/indicators: file-md5, file-sha1, file-sha256, ipv4-addr, domain-name, and url. It also incorporates the Malware entity, enhancing the platform's capability to effectively manage and respond to threats."
 ,"attributes": [
@@ -242,6 +249,7 @@
 {
 "id": "1242",
 "name": "Kaspersky Enrichment"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "The OpenCTI Kaspersky enrichment connector allows you to enrich your observables with intelligence from the Kaspersky Threat Intelligence Portal. The connector queries the Kaspersky API to retrieve contextual information and threat data associated with your indicators/observables.\r\n\r\nAt this time, the connector supports file observables enrichment with Kaspersky's threat intelligence. Support for additional observable types (IP addresses, domains, and URLs) will be added in future releases."
 ,"attributes": [
@@ -254,6 +262,7 @@
 {
 "id": "1243",
 "name": "VirusTotal"
+,"parent": "1245"
 ,"type": "ArchiMate_ApplicationComponent,_CONNECTOR_"
 ,"description": "VirusTotal is a comprehensive service that aggregates data from numerous antivirus products and online scanners to analyze suspicious files and URLs for potential threats. By providing collective analysis results, VirusTotal helps security teams identify malicious content quickly and effectively, supporting more comprehensive cybersecurity efforts.\r\n\r\nIntegrating VirusTotal with OpenCTI enhances threat intelligence by providing access to the collective insights of numerous security vendors. This integration allows for the automatic import of analysis results for files and URLs, enriching the threat intelligence platform with detailed threat data. Security teams can leverage VirusTotal data to confirm, investigate, and respond to potential threats more efficiently, fortifying their overall security posture."
 ,"attributes": [
@@ -266,6 +275,7 @@
 {
 "id": "1245",
 "name": "CONNECTORS"
+,"parent": "1209"
 ,"type": "ArchiMate_ApplicationComponent"
 ,"subdiagram_views": [
 {
@@ -277,8 +287,9 @@
 {
 "id": "1246",
 "name": "OpenCTIToNeo4jMirrorSync"
+,"parent": "1209"
 ,"type": "ArchiMate_ApplicationComponent"
-,"description": "承接 OpenCTI 到 Neo4j 分析副本的同步意图；详细同步、热子图范围、新鲜度与删除对齐要求按落盘文件追溯。"
+,"description": "承接 OpenCTI 到 Neo4j 只读分析副本的同步总意图，统一约束初始化同步、实时增量同步、对账修复、删除对齐、属性投影和 freshness 契约。\r\n{\r\n\"name\": \"DefaultWindow\"\r\n,\"description\": \"P1Y\"\r\n},\r\n{\r\n\"name\": \"WindowConfigurable\"\r\n,\"description\": \"true\"\r\n},\r\n{\r\n\"name\": \"DefaultHopDepth\"\r\n,\"description\": \"2\"\r\n},\r\n{\r\n\"name\": \"HopDepthConfigurable\"\r\n,\"description\": \"true\"\r\n},\r\n{\r\n\"name\": \"SyncPriorityPath\"\r\n,\"description\": \"live-stream\"\r\n},\r\n{\r\n\"name\": \"FallbackPath\"\r\n,\"description\": \"incremental-pull\"\r\n},\r\n{\r\n\"name\": \"RepairPath\"\r\n,\"description\": \"reconcile\"\r\n}"
 ,"attributes": [
 {
 "name": "IntentDetail"
@@ -287,6 +298,10 @@
 {
 "name": "RequirementSource"
 ,"description": "opencti-neo4j-replica-requirements.md"
+},
+{
+"name": "ScopeDetail"
+,"description": "design\\KG\\opencti-neo4j-replica\\windowed-sync-and-projection-policy.md"
 }
 ]
 ,"subdiagram_views": [
@@ -309,6 +324,7 @@
 {
 "id": "1248",
 "name": "AIAgentGraphInvestigation"
+,"parent": "1207"
 ,"type": "ArchiMate_Goal"
 ,"description": "目标是支持远端 AI Agent 像分析师一样进行可探索、可审计、可回放的图调查，而不是仅支持固定模板查询。"
 ,"attributes": [
@@ -323,23 +339,9 @@
 ]
 },
 {
-"id": "1249",
-"name": "OpenCTINeo4jReplicaReadModel"
-,"type": "ArchiMate_ApplicationComponent"
-,"description": "OpenCTI 权威主源旁的只读 Neo4j 热子图副本，用于高级图查询、路径分析与调查式图探索。"
-,"attributes": [
-{
-"name": "IntentDetail"
-},
-{
-"name": "RequirementSource"
-,"description": "opencti-neo4j-replica-requirements.md"
-}
-]
-},
-{
 "id": "1250",
 "name": "ReplicaGraphQueryBackend"
+,"parent": "1246"
 ,"type": "ArchiMate_ApplicationService"
 ,"description": "独立后端查询服务面向远端 AI Agent 暴露图查询与受控 Cypher 执行入口，并在执行侧承担只读、预算、审计与结构化拒绝。"
 ,"attributes": [
@@ -376,20 +378,13 @@
 "Input": "",
 "acceptanceCriteria": "tests/query_backend/test_query_backend_acceptance.py::test_successful_query_returns_graph_payload_and_freshness_metadata",
 "TestResults": ""
-},
-{
-"name": "Docker统一代理查询入口可用性验证",
-"description": "*   **测试场景（GIVEN）：**\\r\\n    1.  查询后端以独立 Docker 容器方式运行。\\r\\n    2.  Caddy 作为统一 HTTPS 反向代理入口，把 `/graph/query` 转发到 `query-backend:8088`。\\r\\n    3.  调用方通过 `https://localhost/graph/query` 访问查询后端，而不是直连容器端口。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  调用方向统一代理入口提交一条包含写操作的 Cypher。\\r\\n    2.  请求经由 Caddy 转发到查询后端容器。\\r\\n*   **预期结果（THEN）：**\\r\\n    1.  统一代理入口可达且能够把请求转发到查询后端容器。\\r\\n    2.  查询后端仍返回结构化 `rejection_reason`、`budget_policy` 与 `investigation_id`。\\r\\n    3.  响应保持 `backend=neo4j-replica`，且不会因为统一代理入口而退化成 OpenCTI 或 GraphQL 路径。",
-"type": "Acceptance Test",
-"Input": "",
-"acceptanceCriteria": "tests/query_backend/test_query_backend_docker_acceptance.py::test_docker_proxy_entry_preserves_structured_rejection_contract",
-"TestResults": ""
 }
 ]
 },
 {
 "id": "1251",
 "name": "RemoteAIAgentGraphExplorer"
+,"parent": "1246"
 ,"type": "ArchiMate_ApplicationComponent"
 ,"description": "远端 AI Agent 基于后端裁剪后的 schema 视图与查询反馈进行探索式图分析，不直接持有 Neo4j 访问凭证。"
 ,"attributes": [
@@ -402,10 +397,220 @@
 ,"description": "opencti-neo4j-replica-requirements.md"
 }
 ]
+},
+{
+"id": "1252",
+"name": "WindowedBootstrapSync"
+,"parent": "1246"
+,"type": "ArchiMate_ApplicationFunction"
+,"description": "负责首次装载或指定时间点后的初始化同步，默认同步近 1 年内发生变动的实体与关系，并补齐这些变动对象 2 跳内关联实体与关系；时间窗和跳数均可配置。\r\n\"attributes\": [\r\n{\r\n\"name\": \"DefaultWindow\"\r\n,\"description\": \"P1Y\"\r\n},\r\n{\r\n\"name\": \"WindowConfigurable\"\r\n,\"description\": \"true\"\r\n},\r\n{\r\n\"name\": \"DefaultHopDepth\"\r\n,\"description\": \"2\"\r\n},\r\n{\r\n\"name\": \"HopDepthConfigurable\"\r\n,\"description\": \"true\"\r\n},\r\n{\r\n\"name\": \"KeyEntityTypes\"\r\n,\"description\": \"Threat-Actor, Malware, Indicator, Campaign, Report, Attack-Pattern, Vulnerability, Infrastructure, Intrusion-Set, Tool\"\r\n}\r\n]"
+,"attributes": [
+{
+"name": "IntentDetail"
+,"description": "design\\KG\\opencti-neo4j-replica\\windowed-sync-and-projection-policy.md"
+}
+]
+,"testcases": [
+{
+"name": "近一年窗口热子图初始化同步",
+"description": "*   **测试场景（GIVEN）：**\\r\\n    1.  OpenCTI 中存在近 1 年内发生变动的关键实体与关系。\\r\\n 2.  同步时间窗保持默认 `1` 年配置。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  执行初始化同步。\\r\\n    2.  在 Neo4j 副本中读取命中窗口的实体、关系及其同步状态。\\r\\n*   **预期结果（THEN）：**\\r\\n    1.  时间窗内变动的实体与关系必须进入副本。\\r\\n    2.  不命中时间窗的对象不应仅因全量回扫被无条件纳入。\\r\\n    3.  默认时间窗可被显式配置覆盖。",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/mirror/test_bootstrap_window_acceptance.py::test_default_one_year_window_syncs_changed_hot_subgraph",
+"TestResults": ""
+},
+{
+"name": "二跳邻域补齐完整性",
+"description": "*   **测试场景（GIVEN）：**\\r\\n    1.  某个命中同步时间窗的关键实体在 OpenCTI 中存在 2 跳内关联实体与关系。\\r\\n    2.  默认补齐深度为 `2` 跳。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  执行初始化同步。\\r\\n    2.  在副本中查询该实体的 1 跳和 2 跳邻域。\\r\\n*   **预期结果（THEN）：**\\r\\n    1.  副本必须补齐 2 跳内相关实体与关系。\\r\\n    2.  关系方向必须保持 `source_ref -&gt; target_ref` 语义。\\r\\n    3.  跳数配置变更后，补齐边界应相应收敛或扩展。",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/mirror/test_bootstrap_window_acceptance.py::test_two_hop_neighborhood_completion_preserves_direction",
+"TestResults": ""
+}
+]
+},
+{
+"id": "1253",
+"name": "LiveIncrementalMirrorSync"
+,"parent": "1246"
+,"type": "ArchiMate_ApplicationFunction"
+,"description": "负责基于 live stream 的实时增量同步、断点恢复和幂等写入；新增变动实时进入 Neo4j，恢复时允许重放，但结果幂等，不漏不重。\r\n\"attributes\": [\r\n{\r\n\"name\": \"SyncMode\"\r\n,\"description\": \"event-driven\"\r\n},\r\n{\r\n\"name\": \"WatermarkRequired\"\r\n,\"description\": \"true\"\r\n},\r\n{\r\n\"name\": \"ReplayGoal\"\r\n,\"description\": \"idempotent-end-state\"\r\n}\r\n]"
+,"attributes": [
+{
+"name": "IntentDetail"
+,"description": "design\\KG\\opencti-neo4j-replica\\replica-sync-and-freshness.md"
+}
+]
+,"testcases": [
+{
+"name": "Live Stream 增量实时同步",
+"description": "*   **测试场景（GIVEN）：**\\r\\n    1.  同步服务已建立 live stream 消费。\\r\\n    2.  OpenCTI 中新增或更新关键实体与关系。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  新增变动进入 live stream。\\r\\n    2.  同步服务消费事件并写入副本。\\r\\n*   **预期结果（THEN）：**\\r\\n    1.  新增变动必须在可接受时延内进入副本。\\r\\n    2.  freshness 状态必须相应刷新。\\r\\n    3.  副本不得依赖人工触发的单次投影来完成增量对齐。",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/mirror/test_live_incremental_acceptance.py::test_live_stream_updates_reach_replica_and_refresh_freshness",
+"TestResults": ""
+},
+{
+"name": "Watermark 恢复后幂等补偿",
+"description": "*   **测试场景（GIVEN）：**\\r\\n    1.  live stream 同步在处理中断后从 watermark 恢复。\\r\\n 2.  恢复过程中可能重放之前已处理的事件。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  同步服务从最近一次成功 watermark 重新启动。\\r\\n    2.  重放后的事件再次写入副本。\\r\\n*   **预期结果（THEN）：**\\r\\n    1.  副本最终状态必须与连续成功处理时一致。\\r\\n    2.  节点和关系不得因重放而保留重复终态。\\r\\n    3.  结果层面必须实现不漏不重。",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/mirror/test_live_incremental_acceptance.py::test_watermark_recovery_replays_idempotently",
+"TestResults": ""
+}
+]
+},
+{
+"id": "1254",
+"name": "ReplicaReconcileAndRepair"
+,"parent": "1246"
+,"type": "ArchiMate_ApplicationFunction"
+,"description": "负责周期性对账与修复，补齐增量遗漏、删除遗漏、脏边和状态漂移，不承担主增量接入职责。\r\n\"attributes\": [\r\n\"name\": \"TriggerMode\"\r\n,\"description\": \"periodic\"\r\n},\r\n{\r\n\"name\": \"RepairScope\"\r\n,\"description\": \"missed-updates-missed-deletes-drift\"\r\n}\r\n]"
+,"attributes": [
+{
+"name": "IntentDetail"
+,"description": "design\\KG\\opencti-neo4j-replica\\replica-sync-and-freshness.md"
+}
+]
+,"testcases": [
+{
+"name": "删除与撤销状态对齐",
+"description": "*   **测试场景（GIVEN）：**\\r\\n    1.  OpenCTI 中出现物理删除、逻辑删除、撤销或失效事件。\\r\\n 2.  副本中已经存在对应节点与关系。\\r\\n*   **操作步骤（WHEN）：**\\r\\n    1.  增量同步和对账修复运行。\\r\\n    2.  在副本中检查对应对象与边的存在性及状态字段。\\r\\n*   **预期结果（THEN）：**\\r\\n 1.  物理删除应删除对应节点及其关联边。\\r\\n    2.  逻辑删除、撤销或失效应保留对象并同步状态字段。\\r\\n    3.  reconcile 必须能够清理漏删与脏边。",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/mirror/test_reconcile_acceptance.py::test_delete_and_revoke_semantics_align_in_replica",
+"TestResults": ""
+}
+]
+},
+{
+"id": "1255",
+"name": "OpenCTINeo4jReplicaReadModel"
+,"parent": "1246"
+,"type": "ArchiMate_DataObject"
+,"description": "OpenCTI 权威主源旁的只读 Neo4j 热子图副本，用于高级图查询、路径分析与调查式图探索。\r\n{\r\n\"name\": \"IdentityKey\"\r\n,\"description\": \"standard_id\"\r\n},\r\n{\r\n\"name\": \"TrackingField\"\r\n,\"description\": \"opencti_id\"\r\n},\r\n{\r\n\"name\": \"RelationshipIdentityRule\"\r\n,\"description\": \"upstream-id-else-composite\"\r\n},\r\n{\r\n\"name\": \"DirectionRule\"\r\n,\"description\": \"preserve-source-to-target\"\r\n},\r\n{\r\n\"name\": \"ProjectionPolicy\"\r\n,\"description\": \"default-baseline-plus-configurable\"\r\n},\r\n{\r\n\"name\": \"PropertyNamePolicy\"\r\n,\"description\": \"preserve-opencti-field-names\"\r\n}\r\n"
+,"attributes": [
+{
+"name": "IntentDetail"
+,"description": "design\\\\KG\\\\opencti-neo4j-replica\\\\windowed-sync-and-projection-policy.md"
+},
+{
+"name": "RequirementSource"
+,"description": "opencti-neo4j-replica-requirements.md"
+}
+]
+,"testcases": [
+{
+"name": "属性名称与默认基线投影一致性",
+"description": "测试场景（GIVEN）：\r\n1.  OpenCTI 中存在命中默认同步范围的实体与关系。\\r\\n    \r\n2.  这些对象包含默认必保字段以及按类型扩展字段。\\r\\n*   \r\n操作步骤（WHEN）：**\\r\\n    \r\n1.  执行初始化同步或增量同步。\\r\\n    \r\n2.  在 Neo4j 副本中读取相应节点与关系的属性。\\r\\n*   **\r\n预期结果（THEN）：**\\r\\n    \r\n1.  副本属性名称必须与 OpenCTI 字段名保持一致。\\r\\n    \r\n2.  默认必保字段不得缺失。\\r\\n   \r\n3.  若上游存在 `name` 或 `description`，副本必须保留同名字段。\r\n",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/mirror/test_projection_policy_acceptance.py::test_property_names_and_default_baseline_are_preserved",
+"TestResults": ""
+}
+]
+},
+{
+"id": "1256",
+"name": "OPENCTI RUNTIME"
+,"parent": "1210"
+,"type": "ArchiMate_Node"
+,"attributes": [
+{
+"name": "docker-compose"
+,"description": "docker-compose.yml"
+}
+]
 }
 ],
 "relationships": [
-
+{
+"id":"1099"
+,"statement":"OpenCTIToNeo4jMirrorSync --(ArchiMate_Composition)--> ReplicaReconcileAndRepair"
+,"name":"ArchiMate_Composition"
+,"description": "同步总意图由对账修复子能力组成。"
+,"super_type": "ArchiMate_Composition"
+,"source_id":"1246"
+,"target_id":"1254"
+,"source_name":"OpenCTIToNeo4jMirrorSync"
+,"target_name":"ReplicaReconcileAndRepair"
+},
+{
+"id":"1100"
+,"statement":"OpenCTIToNeo4jMirrorSync --(ArchiMate_Composition)--> LiveIncrementalMirrorSync"
+,"name":"ArchiMate_Composition"
+,"description": "同步总意图由实时增量同步子能力组成。"
+,"super_type": "ArchiMate_Composition"
+,"source_id":"1246"
+,"target_id":"1253"
+,"source_name":"OpenCTIToNeo4jMirrorSync"
+,"target_name":"LiveIncrementalMirrorSync"
+},
+{
+"id":"1101"
+,"statement":"OpenCTIToNeo4jMirrorSync --(ArchiMate_Composition)--> WindowedBootstrapSync"
+,"name":"ArchiMate_Composition"
+,"description": "同步总意图由初始化同步子能力组成。"
+,"super_type": "ArchiMate_Composition"
+,"source_id":"1246"
+,"target_id":"1252"
+,"source_name":"OpenCTIToNeo4jMirrorSync"
+,"target_name":"WindowedBootstrapSync"
+},
+{
+"id":"1102"
+,"statement":"WindowedBootstrapSync --(ArchiMate_Access)--> OpenCTINeo4jReplicaReadModel"
+,"name":"ArchiMate_Access"
+,"description": "初始化同步形成并写入只读副本读模型。"
+,"super_type": "ArchiMate_Access"
+,"source_id":"1252"
+,"target_id":"1255"
+,"source_name":"WindowedBootstrapSync"
+,"target_name":"OpenCTINeo4jReplicaReadModel"
+},
+{
+"id":"1103"
+,"statement":"LiveIncrementalMirrorSync --(ArchiMate_Access)--> OpenCTINeo4jReplicaReadModel"
+,"name":"ArchiMate_Access"
+,"description": "实时增量同步更新只读副本读模型。"
+,"super_type": "ArchiMate_Access"
+,"source_id":"1253"
+,"target_id":"1255"
+,"source_name":"LiveIncrementalMirrorSync"
+,"target_name":"OpenCTINeo4jReplicaReadModel"
+},
+{
+"id":"1104"
+,"statement":"ReplicaReconcileAndRepair --(ArchiMate_Access)--> OpenCTINeo4jReplicaReadModel"
+,"name":"ArchiMate_Access"
+,"description": "对账修复过程修复只读副本读模型中的遗漏与漂移。"
+,"super_type": "ArchiMate_Access"
+,"source_id":"1254"
+,"target_id":"1255"
+,"source_name":"ReplicaReconcileAndRepair"
+,"target_name":"OpenCTINeo4jReplicaReadModel"
+},
+{
+"id":"1105"
+,"statement":"ReplicaGraphQueryBackend --(ArchiMate_Access)--> OpenCTINeo4jReplicaReadModel"
+,"name":"ArchiMate_Access"
+,"description": "查询后端只读访问副本读模型。"
+,"super_type": "ArchiMate_Access"
+,"source_id":"1250"
+,"target_id":"1255"
+,"source_name":"ReplicaGraphQueryBackend"
+,"target_name":"OpenCTINeo4jReplicaReadModel"
+},
+{
+"id":"1106"
+,"statement":"ReplicaGraphQueryBackend --(ArchiMate_Realization)--> AIAgentGraphInvestigation"
+,"name":"ArchiMate_Realization"
+,"super_type": "ArchiMate_Realization"
+,"source_id":"1250"
+,"target_id":"1248"
+,"source_name":"ReplicaGraphQueryBackend"
+,"target_name":"AIAgentGraphInvestigation"
+}
 ],
 "views": [
 {
@@ -414,10 +619,11 @@
 ,"parent_element_id": "1207"
 ,"parent_element_name": "StrategyLayerAndMotivationAspect"
 ,"included_elements": [
-"1248"
+"1248",
+"1250"
 ]
 ,"included_relationships": [
-
+"1106"
 ]
 },
 {
@@ -438,12 +644,22 @@
 ,"parent_element_id": "1246"
 ,"parent_element_name": "OpenCTIToNeo4jMirrorSync"
 ,"included_elements": [
-"1249",
 "1250",
-"1251"
+"1251",
+"1252",
+"1253",
+"1254",
+"1246",
+"1255"
 ]
 ,"included_relationships": [
-
+"1099",
+"1100",
+"1101",
+"1102",
+"1103",
+"1104",
+"1105"
 ]
 },
 {
@@ -472,6 +688,7 @@
 "view_name": "ApplicationLayer"
 ,"parent_element_id": "1209"
 ,"parent_element_name": "ApplicationLayer"
+,"description": "OpenCTI 主源旁的只读 Neo4j 分析副本，用于高级图查询、路径分析和调查式图探索；不是新的主数据源，不承担对象治理和主写入职责。"
 ,"included_elements": [
 "1246",
 "1245"
@@ -486,7 +703,7 @@
 ,"parent_element_id": "1210"
 ,"parent_element_name": "TechnologyLayer"
 ,"included_elements": [
-
+"1256"
 ]
 ,"included_relationships": [
 
