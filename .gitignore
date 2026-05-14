@@ -18,3 +18,4 @@ test_result.txt
 version.txt
 query-backend/runtime/audit.log
 mirror-sync/runtime/freshness.json
+.obsidian/
