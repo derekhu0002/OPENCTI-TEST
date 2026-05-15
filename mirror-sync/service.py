@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ENV_PATH = ROOT / ".env"
 RUNTIME_DIR = Path(__file__).resolve().parent / "runtime"
 SYNC_SCOPE_PATH = Path(__file__).resolve().parent / "sync_scope.json"
+FULL_SCOPE_CATALOG_PATH = Path(__file__).resolve().parent / "sync_scope.full.json"
 FRESHNESS_PATH = RUNTIME_DIR / "freshness.json"
 WATERMARK_PATH = RUNTIME_DIR / "stream.watermark.json"
 ANCHOR_PATH = RUNTIME_DIR / "test_bootstrap_anchor.json"
@@ -26,6 +27,50 @@ RECENT_LOOKBACK_MINUTES = 10
 IPV4_PATTERN_RE = re.compile(r"\[ipv4-addr:value = '([^']+)'\]")
 REQUIRED_NODE_SCOPE_NAMES = {"ipv4_observable", "indicator", "malware", "vulnerability"}
 REQUIRED_RELATIONSHIP_SCOPE_NAMES = {"indicator_ipv4_malware_neighborhood"}
+
+
+def _load_candidate_node_scope_catalog() -> list[dict[str, object]]:
+    if not FULL_SCOPE_CATALOG_PATH.is_file():
+        raise AssertionError(f"Missing mirror sync full-scope catalog: {FULL_SCOPE_CATALOG_PATH}")
+
+    payload = json.loads(FULL_SCOPE_CATALOG_PATH.read_text(encoding="utf-8"))
+    candidate_node_scopes = payload.get("candidate_node_scopes")
+    if not isinstance(candidate_node_scopes, list) or not candidate_node_scopes:
+        raise AssertionError("Mirror sync full-scope catalog must define a non-empty candidate_node_scopes list")
+
+    materialized_scopes: list[dict[str, object]] = []
+    for index, scope in enumerate(candidate_node_scopes):
+        if not isinstance(scope, dict):
+            raise AssertionError(f"Invalid candidate node scope at index {index}: expected object")
+        materialized_scope = dict(scope)
+        materialized_scope["enabled"] = True
+        materialized_scope.setdefault("required_for_baseline", False)
+        materialized_scopes.append(materialized_scope)
+    return materialized_scopes
+
+
+def _materialize_node_scopes(payload: dict[str, object]) -> list[dict[str, object]]:
+    enable_all_candidate_node_scopes = payload.get("enable_all_candidate_node_scopes", False)
+    if not isinstance(enable_all_candidate_node_scopes, bool):
+        raise AssertionError("Mirror sync scope config field 'enable_all_candidate_node_scopes' must be boolean")
+
+    node_scopes = payload.get("node_scopes")
+    if enable_all_candidate_node_scopes:
+        explicit_scopes = node_scopes if isinstance(node_scopes, list) else []
+        explicit_names = {
+            str(scope.get("name", "")).strip()
+            for scope in explicit_scopes
+            if isinstance(scope, dict)
+        }
+        merged_scopes = list(explicit_scopes)
+        for candidate_scope in _load_candidate_node_scope_catalog():
+            candidate_name = str(candidate_scope.get("name", "")).strip()
+            if candidate_name in explicit_names:
+                continue
+            merged_scopes.append(candidate_scope)
+        return merged_scopes
+
+    return node_scopes
 
 
 def _current_timestamp() -> str:
@@ -57,7 +102,7 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
     if version != 1:
         raise AssertionError(f"Unsupported mirror sync scope config version: {version}")
 
-    node_scopes = payload.get("node_scopes")
+    node_scopes = _materialize_node_scopes(payload)
     if not isinstance(node_scopes, list) or not node_scopes:
         raise AssertionError("Mirror sync scope config must define a non-empty node_scopes list")
 
@@ -150,6 +195,7 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
         if not isinstance(scope, dict):
             raise AssertionError(f"Invalid relationship scope at index {index}: expected object")
         name = str(scope.get("name", "")).strip()
+        bootstrap_mode = str(scope.get("bootstrap_mode", "")).strip()
         enabled = scope.get("enabled")
         required_for_baseline = scope.get("required_for_baseline")
         source_node_scope = str(scope.get("source_node_scope", "")).strip()
@@ -169,6 +215,10 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
         if not isinstance(required_for_baseline, bool):
             raise AssertionError(
                 f"Mirror sync relationship scope '{name}' must declare boolean required_for_baseline"
+            )
+        if bootstrap_mode not in {"incremental", "bootstrap_once"}:
+            raise AssertionError(
+                f"Mirror sync relationship scope '{name}' has unsupported bootstrap_mode '{bootstrap_mode}'"
             )
         if required_for_baseline and not enabled:
             raise AssertionError(

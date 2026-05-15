@@ -61,6 +61,7 @@ def _sample_relationship_scope() -> dict[str, object]:
         "name": "indicator_ipv4_malware_neighborhood",
         "enabled": True,
         "required_for_baseline": True,
+        "bootstrap_mode": "incremental",
         "source_node_scope": "indicator",
         "source_entity_type": "Indicator",
         "participants": {
@@ -327,6 +328,84 @@ def test_load_sync_scope_config_rejects_disabled_required_relationship_scope(mon
 
     with pytest.raises(AssertionError, match="relationship scope 'indicator_ipv4_malware_neighborhood' is required"):
         service._load_sync_scope_config()
+
+
+def test_load_sync_scope_config_can_enable_all_candidate_node_scopes(monkeypatch: pytest.MonkeyPatch) -> None:
+    payload = {
+        "version": 1,
+        "enable_all_candidate_node_scopes": True,
+        "node_scopes": [
+            _sample_node_scope(
+                "ipv4_observable",
+                graphql_field="stixCyberObservables",
+                label="ipv4-addr",
+                entity_type="IPv4-Addr",
+                extra_properties=[{"property": "value", "source_field": "value"}],
+                search={"mode": "search_connection", "search_field": "value"},
+            )
+        ],
+        "relationship_scopes": [_sample_relationship_scope()],
+    }
+    candidate_scopes = [
+        _sample_node_scope(
+            "indicator",
+            graphql_field="indicators",
+            label="indicator",
+            entity_type="Indicator",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        _sample_node_scope(
+            "malware",
+            graphql_field="malwares",
+            label="malware",
+            entity_type="Malware",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        _sample_node_scope(
+            "vulnerability",
+            required_for_baseline=False,
+            graphql_field="vulnerabilities",
+            bootstrap_mode="bootstrap_once",
+            label="vulnerability",
+            entity_type="Vulnerability",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        _sample_node_scope(
+            "report",
+            required_for_baseline=False,
+            graphql_field="reports",
+            bootstrap_mode="bootstrap_once",
+            label="report",
+            entity_type="Report",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+    ]
+
+    monkeypatch.setattr(service, "SYNC_SCOPE_PATH", Path("virtual/sync_scope.json"))
+    monkeypatch.setattr(service, "FULL_SCOPE_CATALOG_PATH", Path("virtual/sync_scope.full.json"))
+
+    def _fake_is_file(self: Path) -> bool:
+        return str(self) in {"virtual\\sync_scope.json", "virtual\\sync_scope.full.json"}
+
+    def _fake_read_text(self: Path, encoding: str = "utf-8") -> str:
+        if str(self) == "virtual\\sync_scope.json":
+            return service.json.dumps(payload)
+        if str(self) == "virtual\\sync_scope.full.json":
+            return service.json.dumps({"candidate_node_scopes": candidate_scopes})
+        raise AssertionError(f"Unexpected read_text path: {self}")
+
+    monkeypatch.setattr(service.Path, "is_file", _fake_is_file)
+    monkeypatch.setattr(service.Path, "read_text", _fake_read_text)
+
+    scopes = service._load_sync_scope_config()
+
+    assert {"ipv4_observable", "indicator", "malware", "vulnerability", "report"} <= set(scopes["node_scopes"])
+    assert scopes["node_scopes"]["report"]["enabled"] is True
+    assert set(scopes["relationship_scopes"]) == {"indicator_ipv4_malware_neighborhood"}
 
 
 def test_effective_since_rewinds_existing_watermark(monkeypatch: pytest.MonkeyPatch) -> None:

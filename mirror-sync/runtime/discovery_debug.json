@@ -1,10 +1,10 @@
 {
-  "since": "2026-05-15T08:57:51.459760Z",
-  "vulnerability_since": "2026-05-15T08:57:51.459760Z",
+  "since": "2026-05-15T10:16:09.899447Z",
+  "vulnerability_since": "2026-05-15T10:16:09.899447Z",
   "recent_indicator_names": [
-    "Replica-Projection-3e9a5273 indicator for 1.2.6.82",
-    "Replica-Reconcile-9e5730f3 indicator for 1.2.7.178",
-    "Replica-Incremental-58a39b2f indicator for 1.2.5.108"
+    "Replica-Projection-d5df3a45 indicator for 1.2.6.33",
+    "Replica-Reconcile-f39bc046 indicator for 1.2.7.63",
+    "Replica-Incremental-c01197ca indicator for 1.2.5.212"
   ],
   "recent_vulnerability_names": [],
   "recent_relationship_types": [
@@ -12,19 +12,21 @@
     "based-on",
     "indicates",
     "based-on",
+    "indicates",
+    "based-on",
     "indicates"
   ],
   "matched_indicator_names": [
+    "Replica-Projection-d5df3a45 indicator for 1.2.6.33",
+    "Replica-Reconcile-f39bc046 indicator for 1.2.7.63",
+    "Replica-Incremental-c01197ca indicator for 1.2.5.212",
+    "Replica-Neighborhood-94c04d55 indicator for 1.2.4.168",
+    "Replica-Bootstrap-f0537344 indicator for 1.2.3.60",
     "Replica-Projection-3e9a5273 indicator for 1.2.6.82",
     "Replica-Reconcile-9e5730f3 indicator for 1.2.7.178",
     "Replica-Incremental-58a39b2f indicator for 1.2.5.108",
     "Replica-Neighborhood-a6402a31 indicator for 1.2.4.186",
-    "Replica-Bootstrap-7dfa8a68 indicator for 1.2.3.145",
-    "Replica-Projection-4d545be6 indicator for 1.2.6.97",
-    "Replica-Projection-8838a044 indicator for 1.2.6.156",
-    "Replica-Projection-5cf92f3f indicator for 1.2.6.112",
-    "Replica-Projection-70aa7847 indicator for 1.2.6.132",
-    "Replica-Projection-0c884062 indicator for 1.2.6.32"
+    "Replica-Bootstrap-7dfa8a68 indicator for 1.2.3.145"
   ],
   "tracked_pair_keys": [
     "ipv4-addr--0198f97b-e65d-5025-87e5-58bc39d4bdb4|malware--35cb65c4-55db-5b52-ab23-35072bcdb5f3",
@@ -64,6 +66,7 @@
     "ipv4-addr--64ddedf1-7207-5abc-88b2-29715c54114b|malware--50161b36-930f-50b5-a0a9-4c23572b87af",
     "ipv4-addr--69fd2d5e-61a0-5ad1-884c-d02a01a5dd72|malware--a86cdda2-358f-54d6-85fa-5dc7c7a0d04c",
     "ipv4-addr--6b579218-2126-5ae6-a2ec-f23c44c4ebff|malware--9aa7e983-a8d1-58f0-9476-fa10187ad8fa",
+    "ipv4-addr--703b82f7-6f56-500e-9425-3bd5c087e471|malware--8d19cae1-5647-53be-a740-77cd8621d3be",
     "ipv4-addr--7093edcd-297a-5842-8abf-757b02ac4866|malware--d9c74899-aabc-5ad2-b483-b8e69f628f87",
     "ipv4-addr--7181263b-adeb-56c8-9aa3-f4a28594bb9d|malware--6763d026-1b2b-56e5-85d2-d405000e030f",
     "ipv4-addr--73e950b6-3f85-5a2e-b250-1c58dbbc8ef4|malware--687748b3-329f-5ace-adf7-51023dcde3f4",
@@ -72,7 +75,9 @@
     "ipv4-addr--79582b4c-ce37-5959-8d12-75ecb25602ce|malware--ed5a3e88-0e13-5abf-99db-b400528fcfba",
     "ipv4-addr--7c6939f9-d2af-5b1c-a3b4-2f456c82e4ed|malware--31436100-384b-55c9-9fa4-1a3c150c4f41",
     "ipv4-addr--7e41def3-60f6-5b47-b5eb-3b13fa368ae8|malware--3a174444-5269-5b2f-87bf-df1a07ac02b4",
+    "ipv4-addr--829b6814-9a3a-59ba-900a-a363528a19ff|malware--5d45580d-a6d0-585e-9562-a42ad64f6283",
     "ipv4-addr--840326d2-a619-522f-bca6-dbea137e0bc4|malware--dd54cf66-010f-53f5-802f-7e1d85cc898d",
+    "ipv4-addr--8b6f699d-3171-5371-a955-1672b8db1809|malware--0ba7b44f-22d2-5771-bc91-ca207eb649e1",
     "ipv4-addr--9a0f95ff-e6d2-51be-824a-0b85357d9495|malware--38a5a6fe-3b93-5a08-99c5-ae542cb0c807",
     "ipv4-addr--9ba793d6-61c5-5fc9-8b19-597eab86a30a|malware--9a03eaff-4697-54ed-9cde-6567db47d756",
     "ipv4-addr--9d04bc48-bba5-5bfc-8dec-c3bfdec323b2|malware--1a1cc293-8546-541e-878e-9de55872f43d",
@@ -87,6 +92,7 @@
     "ipv4-addr--b0570748-d17a-5b36-b4ea-e4ad6f71b303|malware--45634e90-9c1f-5894-8f2e-4df6c9505143",
     "ipv4-addr--b2fe9a8f-83c7-5116-8892-c3a74ff1b477|malware--eb5a386e-d5ba-5535-b7f6-46fbf07d3d8a",
     "ipv4-addr--b5b27b6a-a0bd-5750-afe0-fda1afb5f1b7|malware--66343bd3-ae7b-59e8-b87d-a5b2176da23f",
+    "ipv4-addr--bc642840-75a1-51b1-ba15-54d26d88cad2|malware--046900be-d53a-5c84-b729-c93bef497b6e",
     "ipv4-addr--bcf1ca97-b78d-5766-93bd-0381f01384d4|malware--8406fe44-d196-5a72-bf07-690167c8fc5d",
     "ipv4-addr--c2376cc4-4b3e-5c2f-b630-9410c3af30a5|malware--57274e52-6d89-52a9-947e-528d92b398a6",
     "ipv4-addr--c268557f-205c-5000-9f70-1a375e46b4ed|malware--2081765f-af2a-5468-9bf7-460b95f9e5b9",
@@ -105,6 +111,7 @@
     "ipv4-addr--e8b4aefb-125d-5ecb-8959-3123757c7055|malware--40529356-ba0d-523e-a5c2-7341e62923a6",
     "ipv4-addr--eb70b41e-128f-53d1-b291-522c47b5d8f4|malware--f66ab1f1-d244-5e61-8af2-8ebdc3293adb",
     "ipv4-addr--ec82f0c7-986a-55f0-9957-26674eef006a|malware--d23bc16b-e870-51bc-aec6-ced61d6f9279",
+    "ipv4-addr--ed822904-e0e2-5089-aae3-7c6413361b21|malware--1e56d971-480d-59f3-b85a-2cb0aded80bb",
     "ipv4-addr--f08fa873-1fc6-5f5e-aa6e-b78e70e2f25a|malware--7a6a75fd-af96-5b8a-8c7f-0b7822095b84",
     "ipv4-addr--fb71a533-d518-551e-aea7-84d268eb85b5|malware--100b73af-958d-5767-b217-eb266f3b8b95",
     "ipv4-addr--fccbcae9-e89c-52bd-adfa-fad5f1ac12a3|malware--6a9ac44f-9b15-5586-a520-da597f514aab",

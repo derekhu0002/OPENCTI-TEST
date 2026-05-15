@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "enable_all_candidate_node_scopes": true,
   "node_scopes": [
     {
       "name": "ipv4_observable",
@@ -124,6 +125,7 @@
       "name": "indicator_ipv4_malware_neighborhood",
       "enabled": true,
       "required_for_baseline": true,
+      "bootstrap_mode": "incremental",
       "source_node_scope": "indicator",
       "source_entity_type": "Indicator",
       "participants": {
