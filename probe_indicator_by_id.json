@@ -1,0 +1,45 @@
+{
+  "search_indicators_by_id": {
+    "data": {
+      "indicators": {
+        "edges": [
+          {
+            "node": {
+              "id": "2242e064-e597-4de5-ac4f-cadf032467c9",
+              "standard_id": "indicator--e52a4b2e-59bd-5887-90d4-26d702076971",
+              "name": "Replica-Projection-0e6752f4 indicator for 1.2.6.34",
+              "pattern": "[ipv4-addr:value = '1.2.6.34']",
+              "updated_at": "2026-05-14T16:18:52.893Z",
+              "created_at": "2026-05-14T16:18:52.893Z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "indicator_by_id": {
+    "data": {
+      "indicator": {
+        "id": "2242e064-e597-4de5-ac4f-cadf032467c9",
+        "standard_id": "indicator--e52a4b2e-59bd-5887-90d4-26d702076971",
+        "name": "Replica-Projection-0e6752f4 indicator for 1.2.6.34",
+        "pattern": "[ipv4-addr:value = '1.2.6.34']",
+        "updated_at": "2026-05-14T16:18:52.893Z",
+        "created_at": "2026-05-14T16:18:52.893Z"
+      }
+    }
+  },
+  "stix_domain_object_by_id": {
+    "data": {
+      "stixDomainObject": {
+        "id": "2242e064-e597-4de5-ac4f-cadf032467c9",
+        "entity_type": "Indicator",
+        "standard_id": "indicator--e52a4b2e-59bd-5887-90d4-26d702076971",
+        "name": "Replica-Projection-0e6752f4 indicator for 1.2.6.34",
+        "pattern": "[ipv4-addr:value = '1.2.6.34']",
+        "updated_at": "2026-05-14T16:18:52.893Z",
+        "created_at": "2026-05-14T16:18:52.893Z"
+      }
+    }
+  }
+}

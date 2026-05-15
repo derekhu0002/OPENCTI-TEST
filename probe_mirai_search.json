@@ -1,0 +1,283 @@
+{
+  "indicator_search_exact_name": {
+    "data": {
+      "indicators": {
+        "edges": [
+          {
+            "node": {
+              "id": "12cec6e5-f121-4625-86d5-75d6745ac8af",
+              "standard_id": "indicator--4cdfe342-d659-57c3-88c1-1cc69d418191",
+              "name": "Replica-Projection-dff84743 indicator for 1.2.6.43",
+              "pattern": "[ipv4-addr:value = '1.2.6.43']",
+              "updated_at": "2026-05-15T01:31:57.933Z",
+              "created_at": "2026-05-15T01:31:57.933Z"
+            }
+          },
+          {
+            "node": {
+              "id": "cf95c684-fbc6-4cd6-ab6b-e1ace4ad810d",
+              "standard_id": "indicator--be1d5b41-4acc-56c2-92aa-796d44329fd3",
+              "name": "Replica-Reconcile-7e77199a indicator for 1.2.7.146",
+              "pattern": "[ipv4-addr:value = '1.2.7.146']",
+              "updated_at": "2026-05-15T01:29:00.691Z",
+              "created_at": "2026-05-15T01:29:00.691Z"
+            }
+          },
+          {
+            "node": {
+              "id": "434a3dcd-7c45-4f9a-bd5f-9c12484570f2",
+              "standard_id": "indicator--e3281062-9d7c-5773-98cc-86d9d3984545",
+              "name": "Replica-Incremental-ece7a428 indicator for 1.2.5.56",
+              "pattern": "[ipv4-addr:value = '1.2.5.56']",
+              "updated_at": "2026-05-15T01:26:43.108Z",
+              "created_at": "2026-05-15T01:26:43.108Z"
+            }
+          },
+          {
+            "node": {
+              "id": "5bf52ed9-9518-4145-abf8-a41ada5b08d7",
+              "standard_id": "indicator--b37b91bd-ced6-5677-b7d4-3b0a955fcb74",
+              "name": "Replica-Neighborhood-fe6285c2 indicator for 1.2.4.74",
+              "pattern": "[ipv4-addr:value = '1.2.4.74']",
+              "updated_at": "2026-05-15T01:23:51.324Z",
+              "created_at": "2026-05-15T01:23:51.324Z"
+            }
+          },
+          {
+            "node": {
+              "id": "75ecba5f-1b21-459b-911f-d86aef13037c",
+              "standard_id": "indicator--822d300d-cc0c-59ba-b28a-621efd6da0fd",
+              "name": "Replica-Bootstrap-661ae65b indicator for 1.2.3.122",
+              "pattern": "[ipv4-addr:value = '1.2.3.122']",
+              "updated_at": "2026-05-15T01:21:19.817Z",
+              "created_at": "2026-05-15T01:21:19.817Z"
+            }
+          },
+          {
+            "node": {
+              "id": "ee3fdc30-770a-4926-8db5-bf965318bd46",
+              "standard_id": "indicator--2ced1d22-4d45-546d-a998-f4498ca90700",
+              "name": "Replica-Reconcile-ef121865 indicator for 1.2.7.59",
+              "pattern": "[ipv4-addr:value = '1.2.7.59']",
+              "updated_at": "2026-05-15T01:02:42.136Z",
+              "created_at": "2026-05-15T01:02:42.136Z"
+            }
+          },
+          {
+            "node": {
+              "id": "419c6116-e347-4aa9-a121-66c210b061b8",
+              "standard_id": "indicator--3df1ebf7-1d3b-5c8f-8d38-53386bbf8105",
+              "name": "Replica-Bootstrap-bfb1bb61 indicator for 1.2.3.211",
+              "pattern": "[ipv4-addr:value = '1.2.3.211']",
+              "updated_at": "2026-05-14T19:15:04.022Z",
+              "created_at": "2026-05-14T19:15:04.022Z"
+            }
+          },
+          {
+            "node": {
+              "id": "bfa575ec-6d84-4753-8c25-8c2e6012e44d",
+              "standard_id": "indicator--544808d5-1416-58fa-bcaf-476f4c170a48",
+              "name": "Replica-Bootstrap-d1c1bcf4 indicator for 1.2.3.29",
+              "pattern": "[ipv4-addr:value = '1.2.3.29']",
+              "updated_at": "2026-05-14T19:12:35.744Z",
+              "created_at": "2026-05-14T14:54:54.001Z"
+            }
+          },
+          {
+            "node": {
+              "id": "bb94e303-b38c-48f0-8bd4-d8057c8be4c0",
+              "standard_id": "indicator--003f6c33-486e-5c8d-b9a5-b27efd542d75",
+              "name": "Replica-Bootstrap-bcecfcc6 indicator for 1.2.3.208",
+              "pattern": "[ipv4-addr:value = '1.2.3.208']",
+              "updated_at": "2026-05-14T19:10:07.322Z",
+              "created_at": "2026-05-14T19:10:07.322Z"
+            }
+          },
+          {
+            "node": {
+              "id": "a71018ff-6344-48f8-a8db-0d9f1cb0e902",
+              "standard_id": "indicator--536041f1-78d5-5a89-9d20-29e0aa027b9c",
+              "name": "Replica-Bootstrap-cb8d6218 indicator for 1.2.3.23",
+              "pattern": "[ipv4-addr:value = '1.2.3.23']",
+              "updated_at": "2026-05-14T19:07:38.888Z",
+              "created_at": "2026-05-14T19:07:38.888Z"
+            }
+          },
+          {
+            "node": {
+              "id": "d72fd4b2-7ebb-45f9-b42b-71ba6d9b4c1b",
+              "standard_id": "indicator--8f282e9b-d5e4-5743-9367-546d99d326c0",
+              "name": "Replica-Bootstrap-21620797 indicator for 1.2.3.53",
+              "pattern": "[ipv4-addr:value = '1.2.3.53']",
+              "updated_at": "2026-05-14T19:05:08.857Z",
+              "created_at": "2026-05-14T04:49:22.770Z"
+            }
+          },
+          {
+            "node": {
+              "id": "8146efb5-97b8-4c9d-bc65-4f75a10fa376",
+              "standard_id": "indicator--b822ae48-50b4-5e4e-b3da-792dcbdd692b",
+              "name": "Replica-Bootstrap-968ddda6 indicator for 1.2.3.170",
+              "pattern": "[ipv4-addr:value = '1.2.3.170']",
+              "updated_at": "2026-05-14T19:02:39.688Z",
+              "created_at": "2026-05-14T19:02:39.688Z"
+            }
+          },
+          {
+            "node": {
+              "id": "214df76d-588f-40d1-8e2e-0955770325a8",
+              "standard_id": "indicator--c7bab3c8-0969-5152-be6e-01cb965f05ef",
+              "name": "Replica-Bootstrap-ea84c215 indicator for 1.2.3.54",
+              "pattern": "[ipv4-addr:value = '1.2.3.54']",
+              "updated_at": "2026-05-14T19:00:10.869Z",
+              "created_at": "2026-05-14T19:00:10.869Z"
+            }
+          },
+          {
+            "node": {
+              "id": "bdd56c34-1979-4025-8878-aafd3a80ea5a",
+              "standard_id": "indicator--cc089709-384a-53b6-9f27-c78dcbeb4e86",
+              "name": "Replica-Reconcile-e442903c indicator for 1.2.7.48",
+              "pattern": "[ipv4-addr:value = '1.2.7.48']",
+              "updated_at": "2026-05-14T18:57:15.769Z",
+              "created_at": "2026-05-14T18:57:15.769Z"
+            }
+          },
+          {
+            "node": {
+              "id": "fb4a3fb3-2b72-4964-be1b-d36be7224499",
+              "standard_id": "indicator--a232cfa7-c259-590f-bc56-0b4e5867e6ae",
+              "name": "Replica-Reconcile-34bea12f indicator for 1.2.7.72",
+              "pattern": "[ipv4-addr:value = '1.2.7.72']",
+              "updated_at": "2026-05-14T18:54:20.477Z",
+              "created_at": "2026-05-14T18:54:20.477Z"
+            }
+          },
+          {
+            "node": {
+              "id": "a94da160-9e83-4ee6-b6cb-a520c31b681e",
+              "standard_id": "indicator--9bb2d2c5-d0a9-54cd-b82c-8f6c11567e8f",
+              "name": "Replica-Reconcile-c2f8d988 indicator for 1.2.7.214",
+              "pattern": "[ipv4-addr:value = '1.2.7.214']",
+              "updated_at": "2026-05-14T18:51:25.455Z",
+              "created_at": "2026-05-14T18:51:25.455Z"
+            }
+          },
+          {
+            "node": {
+              "id": "41217c92-aee5-46cc-8b8c-55fd9baa788b",
+              "standard_id": "indicator--5bcd96ff-3948-5dca-973e-54aade9eedcd",
+              "name": "Replica-Reconcile-4b40c847 indicator for 1.2.7.95",
+              "pattern": "[ipv4-addr:value = '1.2.7.95']",
+              "updated_at": "2026-05-14T18:48:28.074Z",
+              "created_at": "2026-05-14T18:48:28.074Z"
+            }
+          },
+          {
+            "node": {
+              "id": "f40ed199-560f-46a6-ba34-ff8a8fe491f4",
+              "standard_id": "indicator--4b180fca-8748-5f16-a610-668aef858553",
+              "name": "Replica-Reconcile-5ef0f17b indicator for 1.2.7.114",
+              "pattern": "[ipv4-addr:value = '1.2.7.114']",
+              "updated_at": "2026-05-14T18:45:31.550Z",
+              "created_at": "2026-05-14T18:45:31.550Z"
+            }
+          },
+          {
+            "node": {
+              "id": "e2583d77-40e1-4c03-8585-7775f920ceb7",
+              "standard_id": "indicator--4de46a57-d964-54b1-b494-cc047db1fe64",
+              "name": "Replica-Reconcile-cb93365c indicator for 1.2.7.23",
+              "pattern": "[ipv4-addr:value = '1.2.7.23']",
+              "updated_at": "2026-05-14T18:42:36.590Z",
+              "created_at": "2026-05-14T18:42:36.590Z"
+            }
+          },
+          {
+            "node": {
+              "id": "4ad2aa02-8643-44cf-bec3-c6dcbcdbf03a",
+              "standard_id": "indicator--57e338d7-3ac7-5cf0-8ce3-21bbbd8456d9",
+              "name": "Replica-Reconcile-abd0cdc1 indicator for 1.2.7.191",
+              "pattern": "[ipv4-addr:value = '1.2.7.191']",
+              "updated_at": "2026-05-14T18:39:41.608Z",
+              "created_at": "2026-05-14T04:04:36.909Z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "indicator_search_ipv4": {
+    "data": {
+      "indicators": {
+        "edges": [
+          {
+            "node": {
+              "id": "83c190cd-4d89-46cc-95e8-42d13a944bfc",
+              "standard_id": "indicator--50d9ef55-b67e-5983-84d1-27d79d7425dd",
+              "name": "Replica-Bootstrap-18cd039a indicator for 1.2.3.44",
+              "pattern": "[ipv4-addr:value = '1.2.3.44']",
+              "updated_at": "2026-05-14T04:41:36.642Z",
+              "created_at": "2026-05-14T03:36:03.944Z"
+            }
+          },
+          {
+            "node": {
+              "id": "bf7b235e-0849-4d79-8b2a-a348b57a0b1d",
+              "standard_id": "indicator--274128a4-2ad4-50b5-ae7b-b0dea1fa9861",
+              "name": "Mirai-Botnet indicator for 1.2.3.4",
+              "pattern": "[ipv4-addr:value = '1.2.3.4']",
+              "updated_at": "2026-05-13T07:28:48.334Z",
+              "created_at": "2026-05-13T07:28:48.334Z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "malware_search_exact_name": {
+    "data": {
+      "malwares": {
+        "edges": [
+          {
+            "node": {
+              "id": "e53f5a72-d90c-41e7-a533-aa07a21af5eb",
+              "standard_id": "malware--35cb65c4-55db-5b52-ab23-35072bcdb5f3",
+              "name": "Mirai-Botnet",
+              "updated_at": "2026-05-14T03:32:32.877Z",
+              "created_at": "2026-05-13T07:17:44.327Z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "observable_search_ipv4": {
+    "data": {
+      "stixCyberObservables": {
+        "edges": [
+          {
+            "node": {
+              "id": "a6a2a68b-c573-434c-9b0d-5ecca3a5c036",
+              "standard_id": "ipv4-addr--310801c4-0877-5d7f-889c-e2692d5a6b1a",
+              "entity_type": "IPv4-Addr",
+              "value": "1.2.3.44",
+              "updated_at": "2026-05-14T03:35:22.857Z",
+              "created_at": "2026-05-14T03:35:22.857Z"
+            }
+          },
+          {
+            "node": {
+              "id": "dc679dd0-f58c-4ed7-a0ef-1f35bba8ae35",
+              "standard_id": "ipv4-addr--0198f97b-e65d-5025-87e5-58bc39d4bdb4",
+              "entity_type": "IPv4-Addr",
+              "value": "1.2.3.4",
+              "updated_at": "2026-05-13T07:11:34.424Z",
+              "created_at": "2026-05-13T07:11:34.424Z"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

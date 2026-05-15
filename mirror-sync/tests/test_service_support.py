@@ -14,12 +14,12 @@ service = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(service)
 
 
-def test_effective_since_rewinds_existing_watermark() -> None:
+def test_effective_since_rewinds_existing_watermark(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(service, "_read_anchor_timestamp", lambda: "")
+
     since = service._effective_since({"last_synced_at": "2026-05-14T12:00:05Z"})
 
-    expected_recent_floor = datetime.now(UTC) - service.timedelta(minutes=service.RECENT_LOOKBACK_MINUTES)
-    assert since <= expected_recent_floor
-    assert since >= expected_recent_floor - service.timedelta(seconds=2)
+    assert since == datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
 
 
 def test_effective_since_resets_to_new_anchor(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -115,4 +115,122 @@ def test_collect_candidate_pairs_tracks_ipv4_indicator_malware_chain() -> None:
     assert pair["indicator_standard_id"] == "indicator--1"
     assert pair["malware_name"] == "Mirai-Botnet"
     assert pair["based_on_relationship_id"] == "rel-based-on"
+    assert pair["indicates_relationship_id"] == "rel-indicates"
+
+
+def test_collect_candidate_pairs_falls_back_to_relationship_targets_for_non_recent_seed() -> None:
+    since = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
+    indicators = [
+        {
+            "id": "indicator-1",
+            "standard_id": "indicator--1",
+            "name": "Mirai-Botnet indicator for 1.2.3.4",
+            "pattern": "[ipv4-addr:value = '1.2.3.4']",
+            "x_opencti_main_observable_type": "IPv4-Addr",
+            "created_at": "2026-05-14T12:00:02Z",
+            "updated_at": "2026-05-14T12:00:02Z",
+        }
+    ]
+    relationships = [
+        {
+            "id": "rel-based-on",
+            "standard_id": "relationship--based-on",
+            "relationship_type": "based-on",
+            "created_at": "2026-05-14T12:00:04Z",
+            "updated_at": "2026-05-14T12:00:04Z",
+            "from": {"id": "indicator-1", "entity_type": "Indicator"},
+            "to": {
+                "id": "observable-1",
+                "standard_id": "ipv4-addr--fixed",
+                "entity_type": "IPv4-Addr",
+            },
+        },
+        {
+            "id": "rel-indicates",
+            "standard_id": "relationship--indicates",
+            "relationship_type": "indicates",
+            "created_at": "2026-05-14T12:00:05Z",
+            "updated_at": "2026-05-14T12:00:05Z",
+            "from": {"id": "indicator-1", "entity_type": "Indicator"},
+            "to": {
+                "id": "malware-1",
+                "standard_id": "malware--fixed",
+                "entity_type": "Malware",
+            },
+        },
+    ]
+
+    tracked_pairs = service._collect_candidate_pairs(
+        observables=[],
+        indicators=indicators,
+        malwares=[],
+        relationships=relationships,
+        since=since,
+        existing_pairs={},
+    )
+
+    assert list(tracked_pairs) == ["ipv4-addr--fixed|malware--fixed"]
+    pair = tracked_pairs["ipv4-addr--fixed|malware--fixed"]
+    assert pair["observable_value"] == "1.2.3.4"
+    assert pair["observable_standard_id"] == "ipv4-addr--fixed"
+    assert pair["malware_name"] == "Mirai-Botnet"
+    assert pair["malware_standard_id"] == "malware--fixed"
+
+
+def test_collect_candidate_pairs_fetches_non_recent_indicator_for_recent_indicates(monkeypatch: pytest.MonkeyPatch) -> None:
+    since = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
+    monkeypatch.setattr(
+        service,
+        "_fetch_indicator_by_id",
+        lambda indicator_id: {
+            "id": indicator_id,
+            "standard_id": "indicator--1",
+            "name": "Mirai-Botnet indicator for 1.2.3.4",
+            "pattern": "[ipv4-addr:value = '1.2.3.4']",
+            "x_opencti_main_observable_type": "IPv4-Addr",
+            "created_at": "2026-05-14T12:00:02Z",
+            "updated_at": "2026-05-14T12:00:02Z",
+        },
+    )
+    monkeypatch.setattr(
+        service,
+        "_fetch_observable_by_value",
+        lambda value: {
+            "id": "observable-1",
+            "standard_id": "ipv4-addr--fixed",
+            "entity_type": "IPv4-Addr",
+            "value": value,
+            "created_at": "2026-05-14T12:00:01Z",
+            "updated_at": "2026-05-14T12:00:01Z",
+        },
+    )
+    relationships = [
+        {
+            "id": "rel-indicates",
+            "standard_id": "relationship--indicates",
+            "relationship_type": "indicates",
+            "created_at": "2026-05-14T12:00:05Z",
+            "updated_at": "2026-05-14T12:00:05Z",
+            "from": {"id": "indicator-1", "entity_type": "Indicator"},
+            "to": {
+                "id": "malware-1",
+                "standard_id": "malware--fixed",
+                "entity_type": "Malware",
+            },
+        },
+    ]
+
+    tracked_pairs = service._collect_candidate_pairs(
+        observables=[],
+        indicators=[],
+        malwares=[],
+        relationships=relationships,
+        since=since,
+        existing_pairs={},
+    )
+
+    assert list(tracked_pairs) == ["ipv4-addr--fixed|malware--fixed"]
+    pair = tracked_pairs["ipv4-addr--fixed|malware--fixed"]
+    assert pair["indicator_name"] == "Mirai-Botnet indicator for 1.2.3.4"
+    assert pair["based_on_relationship_id"] == "search-based-on::indicator-1::observable-1"
     assert pair["indicates_relationship_id"] == "rel-indicates"

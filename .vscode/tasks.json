@@ -171,6 +171,348 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-rerun",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-final",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "sync-integrity-rerun",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "restart-mirror-sync",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--force-recreate",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "sync-integrity-after-restart",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-after-named-fallback",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "restart-mirror-sync-after-fallback",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--force-recreate",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "sync-integrity-final-rerun",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-indicator-fetch",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "restart-mirror-sync-after-indicator-fetch",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--force-recreate",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "sync-integrity-after-indicator-fetch",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-indicator-by-id",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_probe_indicator_by_id.py"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "recent-query-sync-integrity-probe",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_query_recent.py",
+				"2026-05-15T01:58:00Z",
+				"recent_sync_integrity_probe.json"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "recent-opencti-probe-run",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_recent_opencti_probe.py",
+				"2026-05-15T01:58:00Z",
+				"recent_sync_probe.json"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-exact-name",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "restart-mirror-sync-exact-name",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--force-recreate",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "sync-integrity-exact-name-final",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-mirai-search",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_probe_mirai_search.py"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-ipv4-search",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "restart-mirror-sync-ipv4-search",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--force-recreate",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "sync-integrity-pass-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-service-support-no-test-logic",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\tests\\test_service_support.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "restart-mirror-sync-generic",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"up",
+				"-d",
+				"--force-recreate",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "sync-integrity-generic-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
 		}
 	]
 }

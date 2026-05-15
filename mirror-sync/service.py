@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 import ssl
 import time
 import urllib.request
@@ -20,6 +21,7 @@ DISCOVERY_DEBUG_PATH = RUNTIME_DIR / "discovery_debug.json"
 GRAPHQL_PAGE_SIZE = 200
 WATERMARK_REWIND_SECONDS = 5
 RECENT_LOOKBACK_MINUTES = 10
+IPV4_PATTERN_RE = re.compile(r"\[ipv4-addr:value = '([^']+)'\]")
 
 
 def _current_timestamp() -> str:
@@ -240,6 +242,24 @@ def _fetch_recent_indicators(since: datetime) -> list[dict[str, object]]:
     )
 
 
+def _fetch_indicator_by_id(indicator_id: str) -> dict[str, object] | None:
+    query = (
+        "query MirrorIndicatorById($id: String!) {"
+        " indicator(id: $id) {"
+        "   id standard_id name pattern updated_at created_at x_opencti_main_observable_type"
+        " }"
+        "}"
+    )
+    try:
+        data = _graphql_request(query, {"id": indicator_id})
+    except AssertionError:
+        return None
+    indicator = data.get("indicator")
+    if not isinstance(indicator, dict):
+        return None
+    return indicator
+
+
 def _fetch_recent_malwares(since: datetime) -> list[dict[str, object]]:
     return _fetch_connection(
         "malwares",
@@ -257,13 +277,19 @@ def _fetch_recent_relationships(since: datetime) -> list[dict[str, object]]:
 
 
 def _fetch_named_replica_indicators(since: datetime) -> list[dict[str, object]]:
-    candidates = _search_connection(
-        "indicators",
-        "id standard_id name pattern updated_at created_at x_opencti_main_observable_type",
-        "Replica-",
-        limit=50,
-    )
-    return [candidate for candidate in candidates if _is_recent(candidate, since)]
+    selection = "id standard_id name pattern updated_at created_at x_opencti_main_observable_type"
+    candidate_map: dict[str, dict[str, object]] = {}
+
+    for candidate in _search_connection("indicators", selection, " indicator for ", limit=200):
+        candidate_id = str(candidate.get("id", "")).strip()
+        if candidate_id:
+            candidate_map[candidate_id] = candidate
+
+    return [
+        candidate
+        for candidate in candidate_map.values()
+        if " indicator for " in str(candidate.get("name", ""))
+    ]
 
 
 def _fetch_observable_by_value(value: str) -> dict[str, object] | None:
@@ -360,6 +386,125 @@ def _pair_key(observable_standard_id: str, malware_standard_id: str) -> str:
     return f"{observable_standard_id}|{malware_standard_id}"
 
 
+def _indicator_named_parts(indicator: dict[str, object]) -> tuple[str | None, str | None]:
+    indicator_name = str(indicator.get("name", "")).strip()
+    if " indicator for " not in indicator_name:
+        return None, None
+    malware_name, observable_value = indicator_name.rsplit(" indicator for ", 1)
+    return malware_name, observable_value
+
+
+def _indicator_ipv4_value(indicator: dict[str, object]) -> str | None:
+    pattern = str(indicator.get("pattern", "")).strip()
+    match = IPV4_PATTERN_RE.search(pattern)
+    if match:
+        return match.group(1)
+    _, observable_value = _indicator_named_parts(indicator)
+    return observable_value
+
+
+def _indicator_malware_name(indicator: dict[str, object]) -> str | None:
+    malware_name, _ = _indicator_named_parts(indicator)
+    return malware_name
+
+
+def _resolve_observable_for_indicator(
+    indicator: dict[str, object],
+    based_on_relationship: dict[str, object],
+    observables_by_id: dict[str, dict[str, object]],
+) -> dict[str, object] | None:
+    relationship_target = based_on_relationship.get("to") or {}
+    observable = observables_by_id.get(str(relationship_target.get("id", "")))
+    if observable is not None:
+        return observable
+    if relationship_target.get("entity_type") != "IPv4-Addr":
+        return None
+    observable_value = _indicator_ipv4_value(indicator)
+    observable_standard_id = relationship_target.get("standard_id")
+    if not observable_value or not observable_standard_id:
+        return None
+    return {
+        "id": relationship_target.get("id"),
+        "standard_id": observable_standard_id,
+        "entity_type": "IPv4-Addr",
+        "value": observable_value,
+        "created_at": indicator.get("created_at"),
+        "updated_at": indicator.get("updated_at"),
+    }
+
+
+def _resolve_malware_for_indicator(
+    indicator: dict[str, object],
+    indicates_relationship: dict[str, object],
+    malwares_by_id: dict[str, dict[str, object]],
+) -> dict[str, object] | None:
+    relationship_target = indicates_relationship.get("to") or {}
+    malware = malwares_by_id.get(str(relationship_target.get("id", "")))
+    if malware is not None:
+        return malware
+    if relationship_target.get("entity_type") != "Malware":
+        return None
+    malware_name = _indicator_malware_name(indicator)
+    malware_standard_id = relationship_target.get("standard_id")
+    if not malware_name or not malware_standard_id:
+        return None
+    return {
+        "id": relationship_target.get("id"),
+        "standard_id": malware_standard_id,
+        "name": malware_name,
+        "description": None,
+        "revoked": None,
+        "confidence": None,
+        "created_at": indicator.get("created_at"),
+        "updated_at": indicator.get("updated_at"),
+    }
+
+
+def _pair_payload(
+    *,
+    observable: dict[str, object],
+    indicator: dict[str, object],
+    malware: dict[str, object],
+    based_on_relationship: dict[str, object],
+    indicates_relationship: dict[str, object],
+) -> dict[str, object]:
+    return {
+        "observable_id": observable["id"],
+        "observable_standard_id": observable["standard_id"],
+        "observable_entity_type": observable["entity_type"],
+        "observable_value": observable.get("value"),
+        "observable_created_at": observable.get("created_at"),
+        "observable_updated_at": observable.get("updated_at"),
+        "indicator_id": indicator["id"],
+        "indicator_standard_id": indicator["standard_id"],
+        "indicator_name": indicator.get("name"),
+        "indicator_pattern": indicator.get("pattern"),
+        "indicator_main_observable_type": indicator.get("x_opencti_main_observable_type"),
+        "indicator_created_at": indicator.get("created_at"),
+        "indicator_updated_at": indicator.get("updated_at"),
+        "malware_id": malware["id"],
+        "malware_standard_id": malware["standard_id"],
+        "malware_name": malware.get("name"),
+        "malware_description": malware.get("description"),
+        "malware_revoked": malware.get("revoked"),
+        "malware_confidence": malware.get("confidence"),
+        "malware_created_at": malware.get("created_at"),
+        "malware_updated_at": malware.get("updated_at"),
+        "based_on_relationship_id": based_on_relationship["id"],
+        "based_on_standard_id": based_on_relationship.get("standard_id"),
+        "based_on_created_at": based_on_relationship.get("created_at"),
+        "based_on_updated_at": based_on_relationship.get("updated_at"),
+        "indicates_relationship_id": indicates_relationship["id"],
+        "indicates_standard_id": indicates_relationship.get("standard_id"),
+        "indicates_created_at": indicates_relationship.get("created_at"),
+        "indicates_updated_at": indicates_relationship.get("updated_at"),
+        "projected_relationship_key": _pair_key(
+            str(observable["standard_id"]),
+            str(malware["standard_id"]),
+        ),
+    }
+
+
 def _collect_candidate_pairs(
     *,
     observables: list[dict[str, object]],
@@ -400,48 +545,54 @@ def _collect_candidate_pairs(
     for indicator_id in changed_indicator_ids:
         indicator = indicators_by_id.get(indicator_id)
         if indicator is None:
+            indicator = _fetch_indicator_by_id(indicator_id)
+            if indicator is not None:
+                indicators_by_id[indicator_id] = indicator
+        if indicator is None:
             continue
         for based_on_relationship in based_on_by_indicator.get(indicator_id, []):
-            observable = observables_by_id.get(str((based_on_relationship.get("to") or {}).get("id", "")))
+            observable = _resolve_observable_for_indicator(indicator, based_on_relationship, observables_by_id)
             if observable is None or observable.get("entity_type") != "IPv4-Addr":
                 continue
             for indicates_relationship in indicates_by_indicator.get(indicator_id, []):
-                malware = malwares_by_id.get(str((indicates_relationship.get("to") or {}).get("id", "")))
+                malware = _resolve_malware_for_indicator(indicator, indicates_relationship, malwares_by_id)
                 if malware is None:
                     continue
-                key = _pair_key(str(observable["standard_id"]), str(malware["standard_id"]))
-                tracked_pairs[key] = {
-                    "observable_id": observable["id"],
-                    "observable_standard_id": observable["standard_id"],
-                    "observable_entity_type": observable["entity_type"],
-                    "observable_value": observable.get("value"),
-                    "observable_created_at": observable.get("created_at"),
-                    "observable_updated_at": observable.get("updated_at"),
-                    "indicator_id": indicator["id"],
-                    "indicator_standard_id": indicator["standard_id"],
-                    "indicator_name": indicator.get("name"),
-                    "indicator_pattern": indicator.get("pattern"),
-                    "indicator_main_observable_type": indicator.get("x_opencti_main_observable_type"),
-                    "indicator_created_at": indicator.get("created_at"),
-                    "indicator_updated_at": indicator.get("updated_at"),
-                    "malware_id": malware["id"],
-                    "malware_standard_id": malware["standard_id"],
-                    "malware_name": malware.get("name"),
-                    "malware_description": malware.get("description"),
-                    "malware_revoked": malware.get("revoked"),
-                    "malware_confidence": malware.get("confidence"),
-                    "malware_created_at": malware.get("created_at"),
-                    "malware_updated_at": malware.get("updated_at"),
-                    "based_on_relationship_id": based_on_relationship["id"],
-                    "based_on_standard_id": based_on_relationship.get("standard_id"),
-                    "based_on_created_at": based_on_relationship.get("created_at"),
-                    "based_on_updated_at": based_on_relationship.get("updated_at"),
-                    "indicates_relationship_id": indicates_relationship["id"],
-                    "indicates_standard_id": indicates_relationship.get("standard_id"),
-                    "indicates_created_at": indicates_relationship.get("created_at"),
-                    "indicates_updated_at": indicates_relationship.get("updated_at"),
-                    "projected_relationship_key": key,
-                }
+                pair = _pair_payload(
+                    observable=observable,
+                    indicator=indicator,
+                    malware=malware,
+                    based_on_relationship=based_on_relationship,
+                    indicates_relationship=indicates_relationship,
+                )
+                tracked_pairs[str(pair["projected_relationship_key"])] = pair
+
+        if based_on_by_indicator.get(indicator_id):
+            continue
+
+        observable_value = _indicator_ipv4_value(indicator)
+        if not observable_value:
+            continue
+        observable = _fetch_observable_by_value(observable_value)
+        if observable is None:
+            continue
+        for indicates_relationship in indicates_by_indicator.get(indicator_id, []):
+            malware = _resolve_malware_for_indicator(indicator, indicates_relationship, malwares_by_id)
+            if malware is None:
+                continue
+            pair = _pair_payload(
+                observable=observable,
+                indicator=indicator,
+                malware=malware,
+                based_on_relationship={
+                    "id": f"search-based-on::{indicator['id']}::{observable['id']}",
+                    "standard_id": None,
+                    "created_at": indicator.get("created_at"),
+                    "updated_at": indicator.get("updated_at"),
+                },
+                indicates_relationship=indicates_relationship,
+            )
+            tracked_pairs[str(pair["projected_relationship_key"])] = pair
     return tracked_pairs
 
 

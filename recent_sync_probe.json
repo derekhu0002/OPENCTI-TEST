@@ -1,0 +1,16 @@
+{
+  "indicators": {
+    "data": {
+      "indicators": {
+        "edges": []
+      }
+    }
+  },
+  "relationships": {
+    "data": {
+      "stixCoreRelationships": {
+        "edges": []
+      }
+    }
+  }
+}
