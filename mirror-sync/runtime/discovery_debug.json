@@ -1,17 +1,8 @@
 {
-  "since": "2026-05-15T03:05:51.532165Z",
-  "recent_indicator_names": [
-    "Replica-Projection-b98ab085 indicator for 1.2.6.205",
-    "Replica-Reconcile-da7b0a84 indicator for 1.2.7.38",
-    "Replica-Incremental-9d7386c4 indicator for 1.2.5.177"
-  ],
+  "since": "2026-05-15T03:12:51.839000Z",
+  "recent_indicator_names": [],
   "recent_relationship_types": [
-    "indicates",
-    "based-on",
-    "indicates",
-    "based-on",
-    "indicates",
-    "based-on"
+    "indicates"
   ],
   "matched_indicator_names": [
     "Replica-Projection-b98ab085 indicator for 1.2.6.205",
