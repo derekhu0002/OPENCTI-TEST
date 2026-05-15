@@ -29,6 +29,18 @@
 - 输出边界：Neo4j 热子图、副本 freshness 状态、watermark、对账结果与删除或失效对齐状态。
 - 本目录不得向 `query-backend/` 暴露 Agent 查询接口；它只暴露副本读模型与 freshness 契约。
 
+### 4.1 正式生产启动清单
+
+- 启动前必须确认 `docker-compose.yml` 中的 `mirror-sync` 服务与 `opencti`、`neo4j` 同属主 compose 默认网络，并继续通过该服务名部署，不单独发明旁路启动入口。
+- 启动前必须确认 `.env` 中 `MIRROR_STREAM_ID` 已替换为真实可用的 OpenCTI live stream id；占位值或失效 stream id 不构成正式装配完成。
+- 若要按产品默认近一年窗口执行首次 bootstrap，必须保证 `.env` 中 `BOOTSTRAP_START_AT` 为空，且 `mirror-sync/runtime/test_bootstrap_anchor.json` 不存在；否则运行时会把该测试锚点视为有效 bootstrap 起点。
+- 若要在生产变更窗口中人为收窄首次 bootstrap 范围，必须显式填写 `.env` 中 `BOOTSTRAP_START_AT`，并把该时间点当作受控运维决策，而不是测试遗留副作用。
+- `MIRROR_BOOTSTRAP_LOOKBACK_DAYS` 在未显式设置 `BOOTSTRAP_START_AT` 时保持默认 `365`；正式部署不得通过修改测试夹具文件来替代该配置边界。
+- 启动命令固定为 `docker compose up -d mirror-sync`，或者在冷启动场景使用 `docker compose up -d opencti neo4j mirror-sync`；正式运行后由 compose 的 `restart: always` 负责常驻拉起。
+- 启动后必须观察 `mirror-sync/runtime/freshness.json` 与 `mirror-sync/runtime/stream.watermark.json` 是否持续刷新；最小健康判据为 `sync_status` 为 `healthy`、`staleness_seconds` 为 `0` 或可接受小值、`last_poll_at` 持续推进。
+- 启动后应以 `tests/mirror/test_neo4j_sync_integrity.py` 作为最小链路验收入口，验证 OpenCTI 写入后的代表性对象能在 Neo4j 副本中被只读查询到。
+- 若生产环境曾执行过 mirror 验收测试，正式切换前必须审计并清理 `mirror-sync/runtime/` 下的测试锚点与仅测试期有意义的运行时残留，避免把共享环境的测试时间窗带入长期运行。
+
 ## 5. 依赖方向
 
 - 允许依赖：OpenCTI、Neo4j、运行时平台契约、标准库与第三方库。
