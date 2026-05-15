@@ -1,6 +1,0 @@
-﻿
-Source                                                          Name           
-------                                                          ----           
-C:\Program Files\Docker\Docker\resources\bin\docker-compose.exe docker-compo...
-
-

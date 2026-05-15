@@ -157,6 +157,20 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "test"
+		},
+		{
+			"label": "failure-record-sync-integrity",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
 		}
 	]
 }
