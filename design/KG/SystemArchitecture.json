@@ -326,6 +326,14 @@
 "Input": "",
 "acceptanceCriteria": "tests/mirror/test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
 "TestResults": ""
+},
+{
+"name": "OpenCTI 平台全量元素关系属性覆盖盘点",
+"description": "*   **测试场景（GIVEN）：**\r\n    1.  OpenCTI 平台可通过 GraphQL introspection 暴露当前 live schema。\r\n    2.  `mirror-sync/runtime/full_scope_introspection.json` 作为 mirror-sync 的全量 schema 盘点快照存在于仓库中。\r\n*   **操作步骤（WHEN）：**\r\n    1.  测试从当前 OpenCTI live GraphQL 端点重新获取全量 introspection。\r\n    2.  测试把 live schema 与 `mirror-sync/runtime/full_scope_introspection.json` 中记录的 schema 元素、关系和属性集合进行覆盖比对。\r\n*   **预期结果（THEN）：**\r\n    1.  live schema 中的所有命名元素必须都能在 `full_scope_introspection.json` 中找到。\r\n    2.  live schema 中的对象关系、接口实现关系和联合类型可能目标必须都能在该快照中找到。\r\n    3.  live schema 中的字段、输入字段、枚举值、参数和 directive 参数必须都能在该快照中找到。\r\n*   **验收标准文件：** `OPENCTI-TEST/tests/test_full_scope_introspection_acceptance.py`",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/test_full_scope_introspection_acceptance.py::test_full_scope_introspection_covers_live_opencti_schema",
+"TestResults": ""
 }
 ]
 },

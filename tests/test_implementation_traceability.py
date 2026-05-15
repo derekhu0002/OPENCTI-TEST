@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_CONTRACT = ROOT / "OVERALL_ARCHITECTURE.md"
 MIRROR_SYNC_CONTRACT = ROOT / "mirror-sync" / "ARCHITECTURE.md"
+TESTS_CONTRACT = ROOT / "tests" / "ARCHITECTURE.md"
 MIRROR_TEST_CONTRACT = ROOT / "tests" / "mirror" / "ARCHITECTURE.md"
 QUERY_BACKEND_CONTRACT = ROOT / "query-backend" / "ARCHITECTURE.md"
 QUERY_BACKEND_TEST_CONTRACT = ROOT / "tests" / "query_backend" / "ARCHITECTURE.md"
@@ -15,6 +16,8 @@ def test_root_contract_declares_replica_traceability_chain() -> None:
     text = ROOT_CONTRACT.read_text(encoding="utf-8")
     assert "OpenCTIToNeo4jMirrorSync" in text
     assert "mirror-sync/" in text
+    assert "test_full_scope_introspection_acceptance.py" in text
+    assert "OpenCTI 平台全量元素关系属性覆盖盘点" in text
     assert "test_bootstrap_window_acceptance.py" in text
     assert "test_live_incremental_acceptance.py" in text
     assert "test_projection_policy_acceptance.py" in text
@@ -38,14 +41,18 @@ def test_root_contract_declares_query_backend_acceptance_entries() -> None:
 
 def test_local_contracts_keep_direct_implements_relationships() -> None:
     mirror_text = MIRROR_SYNC_CONTRACT.read_text(encoding="utf-8")
+    tests_text = TESTS_CONTRACT.read_text(encoding="utf-8")
     mirror_test_text = MIRROR_TEST_CONTRACT.read_text(encoding="utf-8")
     backend_text = QUERY_BACKEND_CONTRACT.read_text(encoding="utf-8")
     test_text = QUERY_BACKEND_TEST_CONTRACT.read_text(encoding="utf-8")
 
     assert "直接 implements `OpenCTIToNeo4jMirrorSync`" in mirror_text
+    assert "OpenCTI 平台全量元素关系属性覆盖盘点" in mirror_text
     assert "直接 implements `ReplicaGraphQueryBackend`" in backend_text
     assert "直接 implements `AIAgentGraphInvestigation`" in backend_text
     assert "Dockerfile" in backend_text
+    assert "test_full_scope_introspection_acceptance.py" in tests_text
+    assert "直接 implements `OpenCTI 平台全量元素关系属性覆盖盘点`" in tests_text
     assert "近一年窗口热子图初始化同步" in mirror_test_text
     assert "二跳邻域补齐完整性" in mirror_test_text
     assert "Live Stream 增量实时同步" in mirror_test_text

@@ -27,6 +27,7 @@ MIRROR_RECONCILE_FIXTURE_FILE = ROOT / "tests" / "mirror" / "protected_fixtures"
 MIRROR_RECONCILE_BASELINE_FILE = ROOT / "tests" / "mirror" / "protected_baselines" / "reconcile_contract.md"
 QUERY_BACKEND_ACCEPTANCE_FILE = ROOT / "tests" / "query_backend" / "test_query_backend_acceptance.py"
 QUERY_BACKEND_DOCKER_ACCEPTANCE_FILE = ROOT / "tests" / "query_backend" / "test_query_backend_docker_acceptance.py"
+FULL_SCOPE_INTROSPECTION_ACCEPTANCE_FILE = ROOT / "tests" / "test_full_scope_introspection_acceptance.py"
 QUERY_BACKEND_FIXTURE_FILE = ROOT / "tests" / "query_backend" / "protected_fixtures" / "rejected_cypher_and_degraded_probe.md"
 QUERY_BACKEND_DOCKER_FIXTURE_FILE = ROOT / "tests" / "query_backend" / "protected_fixtures" / "docker_proxy_probe.md"
 QUERY_BACKEND_BASELINE_FILE = ROOT / "tests" / "query_backend" / "protected_baselines" / "response_contract.md"
@@ -140,6 +141,21 @@ def test_new_mirror_acceptance_entries_are_physicalized() -> None:
 
     reconcile_names = _load_test_function_names(MIRROR_RECONCILE_ACCEPTANCE_FILE)
     assert "test_delete_and_revoke_semantics_align_in_replica" in reconcile_names
+
+
+def test_full_scope_introspection_acceptance_entry_is_physicalized() -> None:
+    cases = _collect_testcases()
+    scope_case = cases["OpenCTI 平台全量元素关系属性覆盖盘点"]
+
+    assert scope_case["description"], "Full scope introspection testcase must remain declared in the architecture graph"
+    assert scope_case["acceptance"] == (
+        "tests/test_full_scope_introspection_acceptance.py::"
+        "test_full_scope_introspection_covers_live_opencti_schema"
+    )
+    assert FULL_SCOPE_INTROSPECTION_ACCEPTANCE_FILE.is_file(), "Full scope introspection acceptance entry file is missing"
+
+    function_names = _load_test_function_names(FULL_SCOPE_INTROSPECTION_ACCEPTANCE_FILE)
+    assert "test_full_scope_introspection_covers_live_opencti_schema" in function_names
 
 
 def test_mirror_protected_fixture_and_baseline_files_exist() -> None:

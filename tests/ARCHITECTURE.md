@@ -22,6 +22,7 @@
 ## 3. 稳定元素
 
 - `test_architecture_connector_support.py`：当前 connector 类显性 testcase 唯一主入口。
+- `test_full_scope_introspection_acceptance.py`：mirror-sync 全量 schema introspection 覆盖显性 testcase 主入口。
 - `mirror/test_neo4j_sync_integrity.py`：Neo4j mirror 最小链路显性 testcase 主入口。
 - `mirror/test_bootstrap_window_acceptance.py`：Neo4j mirror 时间窗与邻域显性 testcase 主入口。
 - `mirror/test_live_incremental_acceptance.py`：Neo4j mirror 增量与恢复显性 testcase 主入口。
@@ -49,6 +50,7 @@
 ## 6. implements 追溯
 
 - `test_architecture_connector_support.py` 直接 implements 当前图谱中的 connector 显性 testcase。
+- `test_full_scope_introspection_acceptance.py` 直接 implements `OpenCTI 平台全量元素关系属性覆盖盘点`。
 - `mirror/test_neo4j_sync_integrity.py` 直接 implements `OpenCTI 情报数据镜像至 Neo4j 完整性验证`。
 - `mirror/test_bootstrap_window_acceptance.py` 直接 implements `近一年窗口热子图初始化同步` 与 `二跳邻域补齐完整性`。
 - `mirror/test_live_incremental_acceptance.py` 直接 implements `Live Stream 增量实时同步` 与 `Watermark 恢复后幂等补偿`。
@@ -61,6 +63,7 @@
 ## 7. 显性 testcase 入口
 
 - connector 类显性 testcase 固定在 `test_architecture_connector_support.py`。
+- mirror-sync 全量 schema introspection 显性 testcase 固定在 `test_full_scope_introspection_acceptance.py`。
 - mirror 最小链路显性 testcase 固定在 `mirror/test_neo4j_sync_integrity.py`。
 - mirror 时间窗与邻域显性 testcase 固定在 `mirror/test_bootstrap_window_acceptance.py`。
 - mirror 增量与恢复显性 testcase 固定在 `mirror/test_live_incremental_acceptance.py`。
@@ -87,6 +90,7 @@
 ## 10. 保护对象
 
 - 根级显性入口文件名与路径。
+- `test_full_scope_introspection_acceptance.py`
 - `mirror/protected_fixtures/` 与 `mirror/protected_baselines/`。
 - `query_backend/protected_fixtures/` 与 `query_backend/protected_baselines/`。
 - `query_backend/test_query_backend_docker_acceptance.py` 与其 Docker 代理保护文件。

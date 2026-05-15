@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "node_scopes": [
+    {
+      "name": "ipv4_observable",
+      "enabled": true,
+      "required_for_baseline": true,
+      "graphql_field": "stixCyberObservables",
+      "selection": "id standard_id entity_type updated_at created_at ... on IPv4Addr { value }",
+      "bootstrap_mode": "incremental",
+      "projection": {
+        "label": "ipv4-addr",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "value", "source_field": "value" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "value",
+        "match_fields": [
+          { "record_field": "entity_type", "equals": "IPv4-Addr" },
+          { "record_field": "value", "equals_search": true }
+        ]
+      }
+    },
+    {
+      "name": "indicator",
+      "enabled": true,
+      "required_for_baseline": true,
+      "graphql_field": "indicators",
+      "selection": "id standard_id name pattern updated_at created_at x_opencti_main_observable_type",
+      "bootstrap_mode": "incremental",
+      "projection": {
+        "label": "indicator",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "static_value": "Indicator" },
+          { "property": "name", "source_field": "name" },
+          { "property": "pattern", "source_field": "pattern" },
+          { "property": "x_opencti_main_observable_type", "source_field": "x_opencti_main_observable_type" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "malware",
+      "enabled": true,
+      "required_for_baseline": true,
+      "graphql_field": "malwares",
+      "selection": "id standard_id name description updated_at created_at revoked confidence",
+      "bootstrap_mode": "incremental",
+      "projection": {
+        "label": "malware",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "static_value": "Malware" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "revoked", "source_field": "revoked" },
+          { "property": "confidence", "source_field": "confidence" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name",
+        "match_fields": [
+          { "record_field": "name", "equals_search": true }
+        ]
+      }
+    },
+    {
+      "name": "vulnerability",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "vulnerabilities",
+      "selection": "id standard_id name description updated_at created_at",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "vulnerability",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "static_value": "Vulnerability" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    }
+  ],
+  "relationship_scopes": [
+    {
+      "name": "indicator_ipv4_malware_neighborhood",
+      "enabled": true,
+      "required_for_baseline": true,
+      "source_node_scope": "indicator",
+      "source_entity_type": "Indicator",
+      "participants": {
+        "observable": {
+          "node_scope": "ipv4_observable",
+          "payload_prefix": "observable"
+        },
+        "indicator": {
+          "node_scope": "indicator",
+          "payload_prefix": "indicator"
+        },
+        "malware": {
+          "node_scope": "malware",
+          "payload_prefix": "malware"
+        }
+      },
+      "via_relationships": [
+        {
+          "name": "based_on",
+          "relationship_type": "based-on",
+          "from_participant": "indicator",
+          "to_participant": "observable",
+          "target_node_scope": "ipv4_observable",
+          "target_entity_type": "IPv4-Addr",
+          "fallback_search": {
+            "search_field": "observable_value",
+            "resolver": "observable_by_value"
+          }
+        },
+        {
+          "name": "indicates",
+          "relationship_type": "indicates",
+          "from_participant": "indicator",
+          "to_participant": "malware",
+          "target_node_scope": "malware",
+          "target_entity_type": "Malware",
+          "fallback_search": {
+            "search_field": "malware_name",
+            "resolver": "malware_by_name"
+          }
+        }
+      ],
+      "projection_relationships": [
+        {
+          "name": "based_on",
+          "kind": "upstream",
+          "from_participant": "indicator",
+          "to_participant": "observable",
+          "type": "based-on",
+          "merge_key": {
+            "property": "opencti_id",
+            "source_field": "based_on_relationship_id"
+          },
+          "properties": [
+            { "property": "standard_id", "source_field": "based_on_standard_id" },
+            { "property": "relationship_type", "static_value": "based-on" },
+            { "property": "created_at", "source_field": "based_on_created_at" },
+            { "property": "updated_at", "source_field": "based_on_updated_at" }
+          ]
+        },
+        {
+          "name": "indicates",
+          "kind": "upstream",
+          "from_participant": "indicator",
+          "to_participant": "malware",
+          "type": "indicates",
+          "merge_key": {
+            "property": "opencti_id",
+            "source_field": "indicates_relationship_id"
+          },
+          "properties": [
+            { "property": "standard_id", "source_field": "indicates_standard_id" },
+            { "property": "relationship_type", "static_value": "indicates" },
+            { "property": "created_at", "source_field": "indicates_created_at" },
+            { "property": "updated_at", "source_field": "indicates_updated_at" }
+          ]
+        },
+        {
+          "name": "projected_indicates",
+          "kind": "derived",
+          "from_participant": "observable",
+          "to_participant": "malware",
+          "type": "indicates",
+          "merge_key": {
+            "property": "relationship_key",
+            "key_format": "{observable_standard_id}|{malware_standard_id}"
+          },
+          "properties": [
+            { "property": "relationship_type", "static_value": "indicates" }
+          ]
+        }
+      ],
+      "named_fallback": {
+        "enabled": true,
+        "indicator_search_term": " indicator for ",
+        "indicator_name_delimiter": " indicator for ",
+        "synthetic_relationship_ids": {
+          "based_on": "search-based-on::{indicator_id}::{observable_id}",
+          "indicates": "search-indicates::{indicator_id}::{malware_id}"
+        }
+      }
+    }
+  ]
+}

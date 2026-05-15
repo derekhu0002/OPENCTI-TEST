@@ -44,13 +44,13 @@
 - Compose 服务名、profile、环境变量边界。
 - OpenCTI HTTPS 入口与管理员 token 配置边界。
 - `docker-compose.yml` 中 `opencti` 与 `neo4j` 同属默认 compose 内部网络，副本同步与后续查询实现必须优先复用该容器内连通性，而不是把 Neo4j 视为独立外置前提。
-- `docker-compose.yml` 中 `mirror-sync` 作为独立容器服务运行，使用 `mirror-sync/Dockerfile` 交付并通过 `OPENCTI_URL`、`OPENCTI_TOKEN`、`STREAM_ID`、`BOOTSTRAP_START_AT`、`MIRROR_BOOTSTRAP_LOOKBACK_DAYS`、`MIRROR_POLL_INTERVAL_SECONDS` 与 Neo4j 连接变量收口运行时配置边界。
+- `docker-compose.yml` 中 `mirror-sync` 作为独立容器服务运行，使用 `mirror-sync/Dockerfile` 交付并通过 `OPENCTI_URL`、`OPENCTI_TOKEN`、`STREAM_ID`、`BOOTSTRAP_START_AT`、`MIRROR_BOOTSTRAP_LOOKBACK_DAYS`、`MIRROR_POLL_INTERVAL_SECONDS` 与 Neo4j 连接变量，以及 `mirror-sync/sync_scope.json` 的只读节点/关系 scope 契约，收口运行时配置边界；该契约内容变化在容器重启后会触发启用 scope 的受控 bootstrap 回放，用于补齐新增元素或新增属性。
 - `docker-compose.yml` 中 `query-backend` 作为独立容器服务运行；统一外部入口由 `Caddyfile` 在 `https://localhost/graph/query` 反向代理到 `query-backend:8088`，内部仍通过 compose 网络访问 `neo4j` 与 `mirror-sync/runtime/freshness.json` 绑定目录。
 - MISP 测试专用 compose 变体入口。
 - Neo4j 容器与 mirror 环境变量边界：服务名 `neo4j`、`NEO4J_ADVERTISED_HOST`、`NEO4J_HTTP_PORT`、`NEO4J_BOLT_PORT`、`NEO4J_PASSWORD`、`MIRROR_*`。
 - query-backend 容器与运行时装配边界：`QUERY_BACKEND_PORT`、`QUERY_BACKEND_HOST`、`QUERY_BACKEND_AUDIT_LOG`、`NEO4J_MIRROR_HTTP_HOST`、`NEO4J_MIRROR_HTTP_PORT`、`NEO4J_MIRROR_USERNAME`、`NEO4J_MIRROR_PASSWORD`，以及 `Caddyfile` 中 `https://localhost/graph/query` 到 `query-backend:8088` 的统一反向代理规则。
 - `QUERY_BACKEND_PORT`：主机侧暴露 query-backend 容器的端口；当前默认值为 `8088`，用于 compose 端口映射与统一 HTTPS 代理下游目标。
-- mirror-sync 容器与运行时装配边界：`OPENCTI_URL`、`OPENCTI_TOKEN`、`STREAM_ID`、`BOOTSTRAP_START_AT`、`MIRROR_BOOTSTRAP_LOOKBACK_DAYS`、`MIRROR_POLL_INTERVAL_SECONDS`、`NEO4J_MIRROR_HTTP_HOST`、`NEO4J_MIRROR_HTTP_PORT`、`NEO4J_MIRROR_USERNAME`、`NEO4J_MIRROR_PASSWORD`，以及 `mirror-sync/runtime` 的持久化运行时目录。
+- mirror-sync 容器与运行时装配边界：`OPENCTI_URL`、`OPENCTI_TOKEN`、`STREAM_ID`、`BOOTSTRAP_START_AT`、`MIRROR_BOOTSTRAP_LOOKBACK_DAYS`、`MIRROR_POLL_INTERVAL_SECONDS`、`NEO4J_MIRROR_HTTP_HOST`、`NEO4J_MIRROR_HTTP_PORT`、`NEO4J_MIRROR_USERNAME`、`NEO4J_MIRROR_PASSWORD`、`mirror-sync/sync_scope.json`、`mirror-sync/sync_scope.full.json`，以及 `mirror-sync/runtime` 的持久化运行时目录；其中 `sync_scope.json` 是运行时契约，`sync_scope.full.json` 是 live schema 候选目录。
 - `MIRROR_STREAM_ID`：由 `.env` 提供给 `STREAM_ID` 的上游 live stream 标识；在真实运行时必须替换占位值，在测试设计阶段只用于固定配置边界。
 - `BOOTSTRAP_START_AT`：显式 bootstrap 启动锚点；为空时 mirror-sync 使用产品默认近一年窗口，非空时允许共享环境测试把初始扫描收窄到指定起点之后。
 - `MIRROR_BOOTSTRAP_LOOKBACK_DAYS`：未指定 `BOOTSTRAP_START_AT` 时的默认 bootstrap 回看窗口天数；当前契约默认值为 `365`，代表产品默认近一年范围。
@@ -84,6 +84,7 @@
 ### 4.6 验证护栏暴露的稳定接口
 
 - 当前 connector 显性 testcase 的唯一主入口：`tests/test_architecture_connector_support.py`。
+- mirror-sync 全量 schema introspection 显性 testcase 的唯一主入口：`tests/test_full_scope_introspection_acceptance.py`。
 - Neo4j mirror 最小链路显性 testcase 的唯一主入口：`tests/mirror/test_neo4j_sync_integrity.py`。
 - Neo4j mirror 时间窗与邻域显性 testcase 的固定主入口：`tests/mirror/test_bootstrap_window_acceptance.py`。
 - Neo4j mirror 增量与恢复显性 testcase 的固定主入口：`tests/mirror/test_live_incremental_acceptance.py`。
@@ -112,6 +113,7 @@
 | 意图元素 / testcase | 直接实现元素 | 说明 |
 | --- | --- | --- |
 | `MITRE ATT&CK数据接入` 至 `MISP Intel接入` 这些 connector 显性 testcase | 运行时平台 + `tests/test_architecture_connector_support.py` | 仓库中的直接承载是 compose 服务定义、`.env` 配置入口与现有显性 pytest 主入口 |
+| `OpenCTI 平台全量元素关系属性覆盖盘点` | `tests/test_full_scope_introspection_acceptance.py` | 通过 live OpenCTI GraphQL introspection 校验 `mirror-sync/runtime/full_scope_introspection.json` 覆盖当前平台的 schema 元素、关系与属性 |
 | `OpenCTIToNeo4jMirrorSync` | `mirror-sync/` | 本阶段为同步职责建立独立稳定边界，后续编码阶段在该边界内补齐 live stream、增量拉取、对账与删除对齐实现 |
 | `ReplicaGraphQueryBackend` | `query-backend/` | 本阶段为后端查询与受控执行建立独立稳定边界，后续编码阶段在该边界内补齐查询 API、schema 视图、预算与审计实现 |
 | `AIAgentGraphInvestigation` | `query-backend/` | 调查会话、结构化反馈和人机共审输出边界由查询后端直接承载 |
@@ -138,6 +140,7 @@
 当前显性 testcase 物理入口固定如下：
 
 - connector 类显性 testcase 继续只读收口在 `tests/test_architecture_connector_support.py`，后续编码阶段只能补齐运行时与实现，不得拆分、迁移或重命名该入口。
+- mirror-sync 全量 schema introspection 显性 testcase 固定落在 `tests/test_full_scope_introspection_acceptance.py`，后续编码阶段必须直接维护该入口对 live OpenCTI schema 与 `mirror-sync/runtime/full_scope_introspection.json` 的覆盖校验。
 - Neo4j mirror 最小链路显性 testcase 固定落在 `tests/mirror/test_neo4j_sync_integrity.py`，后续编码阶段必须直接调用该文件，不得重定向到其他入口。
 - Neo4j mirror 时间窗与邻域显性 testcase 固定落在 `tests/mirror/test_bootstrap_window_acceptance.py`，其中“近一年窗口热子图初始化同步”与“二跳邻域补齐完整性”分别对应单一测试函数入口。
 - Neo4j mirror 增量与恢复显性 testcase 固定落在 `tests/mirror/test_live_incremental_acceptance.py`，其中“Live Stream 增量实时同步”与“Watermark 恢复后幂等补偿”分别对应单一测试函数入口。
@@ -182,6 +185,7 @@
 下列对象在当前阶段冻结为只读架构基线：
 
 - `tests/test_architecture_connector_support.py`
+- `tests/test_full_scope_introspection_acceptance.py`
 - `tests/mirror/test_neo4j_sync_integrity.py`
 - `tests/mirror/protected_fixtures/manual_seed_steps.md`
 - `tests/mirror/protected_baselines/cypher_assertions.md`
