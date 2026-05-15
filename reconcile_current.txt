@@ -1,0 +1,86 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________ test_delete_and_revoke_semantics_align_in_replica ______________
+
+    def test_delete_and_revoke_semantics_align_in_replica() -> None:
+        assert RECONCILE_FIXTURE.is_file(), "Protected reconcile fixture file is required"
+        assert RECONCILE_BASELINE.is_file(), "Protected reconcile baseline file is required"
+    
+        suffix = uuid4().hex[:8]
+>       seed = ensure_mirror_seed_fixture(
+            ipv4_value=f"1.2.7.{int(suffix[:2], 16) % 200 + 20}",
+            malware_name=f"Replica-Reconcile-{suffix}",
+        )
+
+tests\mirror\test_reconcile_acceptance.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\mirror\_fixture_support.py:365: in ensure_mirror_seed_fixture
+    _wait_for_replica_projection(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def _wait_for_replica_projection(
+        *,
+        observable_standard_id: str,
+        malware_standard_id: str,
+    ) -> None:
+        timeout_seconds = int(os.getenv("MIRROR_ASSERT_TIMEOUT_SECONDS", "90"))
+        deadline = time.time() + timeout_seconds
+        last_rows: list[dict[str, object]] = []
+        last_freshness: dict[str, object] | None = None
+        last_watermarks: list[str] = []
+        last_error: AssertionError | urllib.error.URLError | None = None
+    
+        while time.time() < deadline:
+            try:
+                last_rows = run_cypher(
+                    (
+                        "MATCH (observable:`ipv4-addr` {standard_id: $observable_standard_id}) "
+                        "OPTIONAL MATCH (observable)-[r]->(malware:malware {standard_id: $malware_standard_id}) "
+                        "RETURN observable.standard_id AS observable_standard_id, "
+                        "       malware.standard_id AS malware_standard_id, "
+                        "       type(r) AS relation_type "
+                        "LIMIT 1"
+                    ),
+                    {
+                        "observable_standard_id": observable_standard_id,
+                        "malware_standard_id": malware_standard_id,
+                    },
+                )
+                last_freshness = load_freshness()
+                last_watermarks = [str(path) for path in load_watermark_artifacts()]
+                if (
+                    last_rows
+                    and last_rows[0]["observable_standard_id"] == observable_standard_id
+                    and last_rows[0]["malware_standard_id"] == malware_standard_id
+                    and last_rows[0]["relation_type"] == "indicates"
+                    and last_freshness.get("sync_status") == "healthy"
+                    and last_watermarks
+                ):
+                    return
+                last_error = None
+            except (AssertionError, urllib.error.URLError) as exc:
+                last_error = exc
+    
+            time.sleep(3)
+    
+        details = {
+            "last_rows": last_rows,
+            "last_freshness": last_freshness,
+            "last_watermarks": last_watermarks,
+            "anchor_path": str(TEST_BOOTSTRAP_ANCHOR_PATH),
+        }
+        if last_error is not None:
+            raise AssertionError(
+                "Timed out waiting for real mirror replica projection after GraphQL seeding: "
+                f"{last_error}; context={details}"
+            ) from last_error
+>       raise AssertionError(
+            "Timed out waiting for real mirror replica projection after GraphQL seeding; "
+            f"context={details}"
+        )
+E       AssertionError: Timed out waiting for real mirror replica projection after GraphQL seeding; context={'last_rows': [], 'last_freshness': {'backend': 'neo4j-replica', 'freshness_ts': '2026-05-14T14:28:22.619920Z', 'staleness_seconds': 0, 'sync_status': 'healthy', 'opencti_url': 'http://opencti:8080', 'stream_id': 'fff9e807-179b-4f8b-bef0-ddd3d2d66846', 'bootstrap_start_at': '2026-05-14T14:25:04.002646Z', 'bootstrap_lookback_days': '365', 'last_synced_at': '2026-05-14T14:26:48.645000Z', 'tracked_pair_count': 2}, 'last_watermarks': ['D:\\Projects\\OPENCTI-TEST\\mirror-sync\\runtime\\stream.watermark.json'], 'anchor_path': 'D:\\Projects\\OPENCTI-TEST\\mirror-sync\\runtime\\test_bootstrap_anchor.json'}
+
+tests\mirror\_fixture_support.py:197: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/mirror/test_reconcile_acceptance.py::test_delete_and_revoke_semantics_align_in_replica
+1 failed in 202.20s (0:03:22)

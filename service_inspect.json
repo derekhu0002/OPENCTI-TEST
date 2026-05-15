@@ -1,0 +1,48 @@
+{
+  "since": "2026-05-14T14:39:04.397500Z",
+  "state_bootstrap_start_at": "2026-05-14T14:46:42.232515Z",
+  "state_last_synced_at": "2026-05-14T14:48:27.145000Z",
+  "recent_indicator_names": [
+    "Replica-Neighborhood-e61a1c93 indicator for 1.2.4.50",
+    "Replica-Bootstrap-a05d295e indicator for 1.2.3.180",
+    "Replica-Incremental-1b161882 indicator for 1.2.5.47",
+    "Replica-Bootstrap-30c02ffe indicator for 1.2.3.68",
+    "Replica-Neighborhood-b59a0cd3 indicator for 1.2.4.201"
+  ],
+  "recent_relationship_types": [
+    "indicates",
+    "indicates",
+    "based-on",
+    "indicates",
+    "based-on",
+    "indicates",
+    "based-on",
+    "indicates"
+  ],
+  "named_indicator_names": [
+    "Replica-Neighborhood-e61a1c93 indicator for 1.2.4.50",
+    "Replica-Bootstrap-a05d295e indicator for 1.2.3.180",
+    "Replica-Incremental-1b161882 indicator for 1.2.5.47",
+    "Replica-Bootstrap-30c02ffe indicator for 1.2.3.68",
+    "Replica-Neighborhood-b59a0cd3 indicator for 1.2.4.201"
+  ],
+  "first_named_indicator": "Replica-Neighborhood-e61a1c93 indicator for 1.2.4.50",
+  "observable_lookup": {
+    "id": "896f976e-780a-48b1-a4f3-94379eacaec6",
+    "standard_id": "ipv4-addr--3bb833c1-a899-51c5-980c-4571909e9272",
+    "entity_type": "IPv4-Addr",
+    "updated_at": "2026-05-14T08:33:51.469Z",
+    "created_at": "2026-05-14T08:33:51.469Z",
+    "value": "1.2.4.50"
+  },
+  "malware_lookup": {
+    "id": "fb1998e7-5f1f-4759-9d09-f1d52d8b3299",
+    "standard_id": "malware--d2566550-351b-5d6e-960e-43c424d981e5",
+    "name": "Replica-Neighborhood-e61a1c93",
+    "description": "Replica-Neighborhood-e61a1c93 description for replica projection checks",
+    "updated_at": "2026-05-14T14:47:22.841Z",
+    "created_at": "2026-05-14T14:47:22.841Z",
+    "revoked": false,
+    "confidence": 100
+  }
+}

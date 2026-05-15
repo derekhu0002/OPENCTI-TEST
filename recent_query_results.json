@@ -1,0 +1,538 @@
+{
+  "filtered_indicators": {
+    "data": {
+      "indicators": {
+        "edges": [
+          {
+            "node": {
+              "id": "328f2d62-e754-4526-82aa-32d060999ad7",
+              "standard_id": "indicator--a08f0445-65fa-5fd4-b71d-e0d588d73a96",
+              "name": "Replica-Incremental-c3322c46 indicator for 1.2.5.215",
+              "updated_at": "2026-05-14T14:30:55.144Z",
+              "created_at": "2026-05-14T14:30:55.144Z"
+            }
+          },
+          {
+            "node": {
+              "id": "01c18358-feb8-4775-a81d-f9595551c0a2",
+              "standard_id": "indicator--ba0ef9b3-a32b-5a28-a341-e4cce17d7a84",
+              "name": "Replica-Reconcile-d65ec9e6 indicator for 1.2.7.34",
+              "updated_at": "2026-05-14T14:26:07.360Z",
+              "created_at": "2026-05-14T14:26:07.360Z"
+            }
+          },
+          {
+            "node": {
+              "id": "655ae8a5-2345-452e-8345-85b47112da33",
+              "standard_id": "indicator--51ab4ac1-7737-5812-bdbc-7d696a3f985a",
+              "name": "Replica-Projection-e2d5a825 indicator for 1.2.6.46",
+              "updated_at": "2026-05-14T14:22:43.412Z",
+              "created_at": "2026-05-14T14:22:43.412Z"
+            }
+          },
+          {
+            "node": {
+              "id": "05f1e790-6b3d-4c3f-847b-979669916333",
+              "standard_id": "indicator--e446ee3b-8c2b-5cb9-a17c-d44d643be4fd",
+              "name": "Replica-Incremental-87b5fa73 indicator for 1.2.5.155",
+              "updated_at": "2026-05-14T14:20:30.632Z",
+              "created_at": "2026-05-14T14:20:30.632Z"
+            }
+          },
+          {
+            "node": {
+              "id": "71356f46-f3e7-42d6-8d9f-9957d975a09f",
+              "standard_id": "indicator--d9474e29-8b76-595c-b453-dc4214d2cd8a",
+              "name": "Replica-Neighborhood-bd2ee516 indicator for 1.2.4.209",
+              "updated_at": "2026-05-14T14:17:06.700Z",
+              "created_at": "2026-05-14T14:17:06.700Z"
+            }
+          },
+          {
+            "node": {
+              "id": "3c733e46-b71c-4a04-81b9-d2572ae3591a",
+              "standard_id": "indicator--0f3912de-b593-5b3a-8740-82b2a3dbf283",
+              "name": "Replica-Bootstrap-48a29fc0 indicator for 1.2.3.92",
+              "updated_at": "2026-05-14T14:13:45.225Z",
+              "created_at": "2026-05-14T14:13:45.225Z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "unfiltered_indicators": {
+    "data": {
+      "indicators": {
+        "edges": [
+          {
+            "node": {
+              "id": "328f2d62-e754-4526-82aa-32d060999ad7",
+              "standard_id": "indicator--a08f0445-65fa-5fd4-b71d-e0d588d73a96",
+              "name": "Replica-Incremental-c3322c46 indicator for 1.2.5.215",
+              "updated_at": "2026-05-14T14:30:55.144Z",
+              "created_at": "2026-05-14T14:30:55.144Z"
+            }
+          },
+          {
+            "node": {
+              "id": "01c18358-feb8-4775-a81d-f9595551c0a2",
+              "standard_id": "indicator--ba0ef9b3-a32b-5a28-a341-e4cce17d7a84",
+              "name": "Replica-Reconcile-d65ec9e6 indicator for 1.2.7.34",
+              "updated_at": "2026-05-14T14:26:07.360Z",
+              "created_at": "2026-05-14T14:26:07.360Z"
+            }
+          },
+          {
+            "node": {
+              "id": "655ae8a5-2345-452e-8345-85b47112da33",
+              "standard_id": "indicator--51ab4ac1-7737-5812-bdbc-7d696a3f985a",
+              "name": "Replica-Projection-e2d5a825 indicator for 1.2.6.46",
+              "updated_at": "2026-05-14T14:22:43.412Z",
+              "created_at": "2026-05-14T14:22:43.412Z"
+            }
+          },
+          {
+            "node": {
+              "id": "05f1e790-6b3d-4c3f-847b-979669916333",
+              "standard_id": "indicator--e446ee3b-8c2b-5cb9-a17c-d44d643be4fd",
+              "name": "Replica-Incremental-87b5fa73 indicator for 1.2.5.155",
+              "updated_at": "2026-05-14T14:20:30.632Z",
+              "created_at": "2026-05-14T14:20:30.632Z"
+            }
+          },
+          {
+            "node": {
+              "id": "71356f46-f3e7-42d6-8d9f-9957d975a09f",
+              "standard_id": "indicator--d9474e29-8b76-595c-b453-dc4214d2cd8a",
+              "name": "Replica-Neighborhood-bd2ee516 indicator for 1.2.4.209",
+              "updated_at": "2026-05-14T14:17:06.700Z",
+              "created_at": "2026-05-14T14:17:06.700Z"
+            }
+          },
+          {
+            "node": {
+              "id": "3c733e46-b71c-4a04-81b9-d2572ae3591a",
+              "standard_id": "indicator--0f3912de-b593-5b3a-8740-82b2a3dbf283",
+              "name": "Replica-Bootstrap-48a29fc0 indicator for 1.2.3.92",
+              "updated_at": "2026-05-14T14:13:45.225Z",
+              "created_at": "2026-05-14T14:13:45.225Z"
+            }
+          },
+          {
+            "node": {
+              "id": "ff3c65ff-9c03-4118-9457-8febc0419a6f",
+              "standard_id": "indicator--b71174e3-55ae-5e87-8aec-3855543d040c",
+              "name": "Replica-Incremental-43cfc623 indicator for 1.2.5.87",
+              "updated_at": "2026-05-14T14:07:40.183Z",
+              "created_at": "2026-05-14T14:07:40.183Z"
+            }
+          },
+          {
+            "node": {
+              "id": "fdc2156b-ec96-4a40-9736-210ec28cc050",
+              "standard_id": "indicator--cad4cae0-499e-54cb-a47e-032b76b2922c",
+              "name": "Replica-Bootstrap-37c6b457 indicator for 1.2.3.75",
+              "updated_at": "2026-05-14T14:04:26.454Z",
+              "created_at": "2026-05-14T06:54:05.102Z"
+            }
+          },
+          {
+            "node": {
+              "id": "ee9866a0-6138-4389-a782-27599a64188a",
+              "standard_id": "indicator--d6dd7fb4-28ce-55fd-af0c-3b1eade46313",
+              "name": "Replica-Incremental-d8c20116 indicator for 1.2.5.36",
+              "updated_at": "2026-05-14T13:54:13.700Z",
+              "created_at": "2026-05-14T13:54:13.700Z"
+            }
+          },
+          {
+            "node": {
+              "id": "8ed8d3ca-f974-4bb2-8cd8-c5fdedc05a09",
+              "standard_id": "indicator--1a47c15c-8298-58d5-aae7-b16fac92ad74",
+              "name": "Replica-Incremental-68850ba0 indicator for 1.2.5.124",
+              "updated_at": "2026-05-14T12:36:52.033Z",
+              "created_at": "2026-05-14T12:36:52.033Z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "filtered_relationships": {
+    "data": {
+      "stixCoreRelationships": {
+        "edges": [
+          {
+            "node": {
+              "id": "ef3c58ac-dbc4-47a0-8ddf-27d677ad7cd4",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:31:37.533Z",
+              "created_at": "2026-05-14T14:31:37.533Z",
+              "from": {
+                "id": "328f2d62-e754-4526-82aa-32d060999ad7",
+                "standard_id": "indicator--a08f0445-65fa-5fd4-b71d-e0d588d73a96",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "29606400-f069-41b0-a403-283f7ef051c0",
+                "standard_id": "malware--2d56a23e-07ae-5da0-9ad8-45e8c7549fae",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "0b4c4197-4695-4d20-82a6-b0c430208a59",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:31:17.951Z",
+              "created_at": "2026-05-14T14:31:17.951Z",
+              "from": {
+                "id": "328f2d62-e754-4526-82aa-32d060999ad7",
+                "standard_id": "indicator--a08f0445-65fa-5fd4-b71d-e0d588d73a96",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "2256b48b-1471-4192-9f8a-9df519301f02",
+                "standard_id": "ipv4-addr--54726267-3dd1-5bd8-924d-93321bd6997a",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "fb49c38d-565e-4c23-a625-a747fbff2114",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:26:48.645Z",
+              "created_at": "2026-05-14T14:26:48.645Z",
+              "from": {
+                "id": "01c18358-feb8-4775-a81d-f9595551c0a2",
+                "standard_id": "indicator--ba0ef9b3-a32b-5a28-a341-e4cce17d7a84",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "2ad2dd58-81da-4c85-b528-e40c8de59cc7",
+                "standard_id": "malware--3e004da0-f884-5909-88e6-4a2a4fe8180d",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "b90a0928-3704-4993-9873-f341ff704c79",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:26:29.407Z",
+              "created_at": "2026-05-14T14:26:29.407Z",
+              "from": {
+                "id": "01c18358-feb8-4775-a81d-f9595551c0a2",
+                "standard_id": "indicator--ba0ef9b3-a32b-5a28-a341-e4cce17d7a84",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "eb57411a-e855-401d-82d7-1b3ea6d95d86",
+                "standard_id": "ipv4-addr--2058841b-df5c-5d9a-b894-625a21d3cf00",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "a9f605d2-a995-4706-8ca8-ef6d954ac5d5",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:23:27.105Z",
+              "created_at": "2026-05-14T14:23:27.105Z",
+              "from": {
+                "id": "655ae8a5-2345-452e-8345-85b47112da33",
+                "standard_id": "indicator--51ab4ac1-7737-5812-bdbc-7d696a3f985a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "e615b23e-dcd0-4b7b-b1af-2c93d30add68",
+                "standard_id": "malware--8276d813-f893-544a-bb81-6308a1adeb08",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "4366ae5e-e2be-4e9a-8e59-ed69229e6912",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:23:04.082Z",
+              "created_at": "2026-05-14T14:23:04.082Z",
+              "from": {
+                "id": "655ae8a5-2345-452e-8345-85b47112da33",
+                "standard_id": "indicator--51ab4ac1-7737-5812-bdbc-7d696a3f985a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "43c6e4ae-5541-4e99-99a3-b2786e8b4133",
+                "standard_id": "ipv4-addr--81d2605f-1d7f-52a2-bcf7-809d25995d3b",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "5c2b9129-6739-4b6b-bf44-352dc660be0e",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:21:11.877Z",
+              "created_at": "2026-05-14T14:21:11.877Z",
+              "from": {
+                "id": "05f1e790-6b3d-4c3f-847b-979669916333",
+                "standard_id": "indicator--e446ee3b-8c2b-5cb9-a17c-d44d643be4fd",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "ccbaea6c-80bd-40fc-bead-6697018c8988",
+                "standard_id": "malware--a92cea38-7be8-5852-a73c-f30217528e1c",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "4716dda8-27db-443e-b1c9-1feb5fc737bc",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:20:52.808Z",
+              "created_at": "2026-05-14T14:20:52.808Z",
+              "from": {
+                "id": "05f1e790-6b3d-4c3f-847b-979669916333",
+                "standard_id": "indicator--e446ee3b-8c2b-5cb9-a17c-d44d643be4fd",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "3ae60577-64d2-4321-98aa-845d8ac595a8",
+                "standard_id": "ipv4-addr--c9b0c2e4-9f73-582b-9224-6580a14177ad",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "030961e7-7824-4ba5-848b-a3eb60a23166",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:17:50.261Z",
+              "created_at": "2026-05-14T14:17:50.261Z",
+              "from": {
+                "id": "71356f46-f3e7-42d6-8d9f-9957d975a09f",
+                "standard_id": "indicator--d9474e29-8b76-595c-b453-dc4214d2cd8a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "1b84aefb-95a8-4538-bfd5-b87ba8b7cfd1",
+                "standard_id": "malware--59537e9f-e552-5b05-ad6e-bf4ee127986f",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "450624d5-f8e7-4276-8d20-2c822e945de6",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:17:27.231Z",
+              "created_at": "2026-05-14T14:17:27.231Z",
+              "from": {
+                "id": "71356f46-f3e7-42d6-8d9f-9957d975a09f",
+                "standard_id": "indicator--d9474e29-8b76-595c-b453-dc4214d2cd8a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "3243cac9-ffa4-4914-80da-2b89d975424b",
+                "standard_id": "ipv4-addr--9d8edbb0-8333-5155-b863-d0f8e8652499",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "unfiltered_relationships": {
+    "data": {
+      "stixCoreRelationships": {
+        "edges": [
+          {
+            "node": {
+              "id": "ef3c58ac-dbc4-47a0-8ddf-27d677ad7cd4",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:31:37.533Z",
+              "created_at": "2026-05-14T14:31:37.533Z",
+              "from": {
+                "id": "328f2d62-e754-4526-82aa-32d060999ad7",
+                "standard_id": "indicator--a08f0445-65fa-5fd4-b71d-e0d588d73a96",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "29606400-f069-41b0-a403-283f7ef051c0",
+                "standard_id": "malware--2d56a23e-07ae-5da0-9ad8-45e8c7549fae",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "0b4c4197-4695-4d20-82a6-b0c430208a59",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:31:17.951Z",
+              "created_at": "2026-05-14T14:31:17.951Z",
+              "from": {
+                "id": "328f2d62-e754-4526-82aa-32d060999ad7",
+                "standard_id": "indicator--a08f0445-65fa-5fd4-b71d-e0d588d73a96",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "2256b48b-1471-4192-9f8a-9df519301f02",
+                "standard_id": "ipv4-addr--54726267-3dd1-5bd8-924d-93321bd6997a",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "fb49c38d-565e-4c23-a625-a747fbff2114",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:26:48.645Z",
+              "created_at": "2026-05-14T14:26:48.645Z",
+              "from": {
+                "id": "01c18358-feb8-4775-a81d-f9595551c0a2",
+                "standard_id": "indicator--ba0ef9b3-a32b-5a28-a341-e4cce17d7a84",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "2ad2dd58-81da-4c85-b528-e40c8de59cc7",
+                "standard_id": "malware--3e004da0-f884-5909-88e6-4a2a4fe8180d",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "b90a0928-3704-4993-9873-f341ff704c79",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:26:29.407Z",
+              "created_at": "2026-05-14T14:26:29.407Z",
+              "from": {
+                "id": "01c18358-feb8-4775-a81d-f9595551c0a2",
+                "standard_id": "indicator--ba0ef9b3-a32b-5a28-a341-e4cce17d7a84",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "eb57411a-e855-401d-82d7-1b3ea6d95d86",
+                "standard_id": "ipv4-addr--2058841b-df5c-5d9a-b894-625a21d3cf00",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "a9f605d2-a995-4706-8ca8-ef6d954ac5d5",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:23:27.105Z",
+              "created_at": "2026-05-14T14:23:27.105Z",
+              "from": {
+                "id": "655ae8a5-2345-452e-8345-85b47112da33",
+                "standard_id": "indicator--51ab4ac1-7737-5812-bdbc-7d696a3f985a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "e615b23e-dcd0-4b7b-b1af-2c93d30add68",
+                "standard_id": "malware--8276d813-f893-544a-bb81-6308a1adeb08",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "4366ae5e-e2be-4e9a-8e59-ed69229e6912",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:23:04.082Z",
+              "created_at": "2026-05-14T14:23:04.082Z",
+              "from": {
+                "id": "655ae8a5-2345-452e-8345-85b47112da33",
+                "standard_id": "indicator--51ab4ac1-7737-5812-bdbc-7d696a3f985a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "43c6e4ae-5541-4e99-99a3-b2786e8b4133",
+                "standard_id": "ipv4-addr--81d2605f-1d7f-52a2-bcf7-809d25995d3b",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "5c2b9129-6739-4b6b-bf44-352dc660be0e",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:21:11.877Z",
+              "created_at": "2026-05-14T14:21:11.877Z",
+              "from": {
+                "id": "05f1e790-6b3d-4c3f-847b-979669916333",
+                "standard_id": "indicator--e446ee3b-8c2b-5cb9-a17c-d44d643be4fd",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "ccbaea6c-80bd-40fc-bead-6697018c8988",
+                "standard_id": "malware--a92cea38-7be8-5852-a73c-f30217528e1c",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "4716dda8-27db-443e-b1c9-1feb5fc737bc",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:20:52.808Z",
+              "created_at": "2026-05-14T14:20:52.808Z",
+              "from": {
+                "id": "05f1e790-6b3d-4c3f-847b-979669916333",
+                "standard_id": "indicator--e446ee3b-8c2b-5cb9-a17c-d44d643be4fd",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "3ae60577-64d2-4321-98aa-845d8ac595a8",
+                "standard_id": "ipv4-addr--c9b0c2e4-9f73-582b-9224-6580a14177ad",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "030961e7-7824-4ba5-848b-a3eb60a23166",
+              "relationship_type": "indicates",
+              "updated_at": "2026-05-14T14:17:50.261Z",
+              "created_at": "2026-05-14T14:17:50.261Z",
+              "from": {
+                "id": "71356f46-f3e7-42d6-8d9f-9957d975a09f",
+                "standard_id": "indicator--d9474e29-8b76-595c-b453-dc4214d2cd8a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "1b84aefb-95a8-4538-bfd5-b87ba8b7cfd1",
+                "standard_id": "malware--59537e9f-e552-5b05-ad6e-bf4ee127986f",
+                "entity_type": "Malware"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "450624d5-f8e7-4276-8d20-2c822e945de6",
+              "relationship_type": "based-on",
+              "updated_at": "2026-05-14T14:17:27.231Z",
+              "created_at": "2026-05-14T14:17:27.231Z",
+              "from": {
+                "id": "71356f46-f3e7-42d6-8d9f-9957d975a09f",
+                "standard_id": "indicator--d9474e29-8b76-595c-b453-dc4214d2cd8a",
+                "entity_type": "Indicator"
+              },
+              "to": {
+                "id": "3243cac9-ffa4-4914-80da-2b89d975424b",
+                "standard_id": "ipv4-addr--9d8edbb0-8333-5155-b863-d0f8e8652499",
+                "entity_type": "IPv4-Addr"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

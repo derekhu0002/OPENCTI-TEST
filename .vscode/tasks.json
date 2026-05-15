@@ -1,0 +1,162 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "bootstrap-default-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_bootstrap_window_acceptance.py::test_default_one_year_window_syncs_changed_hot_subgraph",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "bootstrap-hops-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_bootstrap_window_acceptance.py::test_two_hop_neighborhood_completion_preserves_direction",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "sync-integrity-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_neo4j_sync_integrity.py::test_neo4j_sync_integrity",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "watermark-recovery-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_live_incremental_acceptance.py::test_watermark_recovery_replays_idempotently",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "reconcile-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\mirror\\test_reconcile_acceptance.py::test_delete_and_revoke_semantics_align_in_replica",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "architecture-contracts-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_architecture_contracts.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "dependency-boundaries-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_dependency_boundaries.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "implementation-traceability-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_implementation_traceability.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "acceptance-baselines-check",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_acceptance_baselines.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "acceptance-baselines-rerun",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_acceptance_baselines.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "critical-guardrails-batch",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"pytest",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_architecture_contracts.py",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_dependency_boundaries.py",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_implementation_traceability.py",
+				"d:\\Projects\\OPENCTI-TEST\\tests\\test_acceptance_baselines.py",
+				"-q"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}

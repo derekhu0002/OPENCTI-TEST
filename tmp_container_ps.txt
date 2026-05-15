@@ -1,0 +1,3 @@
+﻿NAME                IMAGE             COMMAND                   SERVICE       CREATED         STATUS                  PORTS
+xtm-mirror-sync-1   xtm-mirror-sync   "python /app/mirror-鈥?   mirror-sync   4 seconds ago   Up Less than a second   
+

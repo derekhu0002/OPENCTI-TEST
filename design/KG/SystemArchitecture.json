@@ -174,6 +174,14 @@
 "Input": "",
 "acceptanceCriteria": "tests/test_architecture_connector_support.py::test_ransomwarelive_connector_definition",
 "TestResults": ""
+},
+{
+"name": "Docker统一代理查询入口可用性验证",
+"description": "*   **测试场景（GIVEN）：**\\\\r\\\\n    \r\n1. Query Backend 通过统一 HTTPS 反向代理入口对外暴露。\\\\r\\\\n    \r\n2. Docker 化访问路径需要保持与直接后端调用一致的结构化拒绝契约。\\\\r\\\\n\r\n*   **操作步骤（WHEN）：**\\\\r\\\\n    \r\n1. 通过容器化代理入口提交应被拒绝的 Cypher 查询。\\\\r\\\\n    \r\n2. 后端执行层在代理链路下完成策略校验并返回结果。\\\\r\\\\n\r\n*   **预期结果（THEN）：**\\\\r\\\\n    \r\n1. 响应保持结构化拒绝语义，不丢失 rejection_reason 等关键字段。\\\\r\\\\n    \r\n2. 代理入口不会把受控拒绝误包装成网络错误或非结构化失败。\\\\r\\\\n    3. 该显性入口继续固定映射到 Docker 代理 acceptance 入口。",
+"type": "Acceptance Test",
+"Input": "",
+"acceptanceCriteria": "tests/query_backend/test_query_backend_docker_acceptance.py::test_docker_proxy_entry_preserves_structured_rejection_contract",
+"TestResults": ""
 }
 ]
 },

@@ -154,6 +154,10 @@ services:
         target: /app/.env
         read_only: true
       - type: bind
+        source: ./mirror-sync/service.py
+        target: /app/mirror-sync/service.py
+        read_only: true
+      - type: bind
         source: ./mirror-sync/runtime
         target: /app/mirror-sync/runtime
     depends_on:

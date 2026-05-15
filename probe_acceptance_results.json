@@ -1,0 +1,84 @@
+{
+  "bootstrap": {
+    "ok": true,
+    "seed": {
+      "bootstrap_start_at": "2026-05-14T15:01:18.536377Z",
+      "ipv4_value": "1.2.3.27",
+      "ipv4_standard_id": "ipv4-addr--ffe59824-db20-5c6f-a55d-ffdb1c04412d",
+      "malware_name": "Replica-Bootstrap-07ce343b",
+      "malware_description": "Replica-Bootstrap-07ce343b description for replica projection checks",
+      "malware_standard_id": "malware--b31daa9b-ac15-5e3e-9163-eb5ee15e1dff",
+      "observable_id": "047ff198-afdb-43b5-849c-93e52ca035c8",
+      "indicator_id": "f890e9f8-39d3-43a9-bb86-76e9e8e0a083",
+      "indicator_standard_id": "indicator--5972bf8a-fe96-5f9f-94f6-c729102d411a",
+      "malware_id": "65b71d79-7b5f-4242-9b8c-db991ccd610e",
+      "relationship_id": "d53011bc-6669-4cb6-b039-e9fa1980fc29",
+      "relationship_type": "indicates"
+    },
+    "freshness": {
+      "backend": "neo4j-replica",
+      "freshness_ts": "2026-05-14T15:03:24.877373Z",
+      "staleness_seconds": 0,
+      "sync_status": "healthy",
+      "opencti_url": "http://opencti:8080",
+      "stream_id": "fff9e807-179b-4f8b-bef0-ddd3d2d66846",
+      "bootstrap_start_at": "2026-05-14T15:01:18.536377Z",
+      "bootstrap_lookback_days": "365",
+      "last_synced_at": "2026-05-14T15:03:04.548000Z",
+      "tracked_pair_count": 17
+    },
+    "watermark_artifacts": [
+      "D:\\Projects\\OPENCTI-TEST\\mirror-sync\\runtime\\stream.watermark.json"
+    ],
+    "malware_rows": [
+      {
+        "standard_id": "malware--b31daa9b-ac15-5e3e-9163-eb5ee15e1dff",
+        "updated_at": "2026-05-14T15:02:00.570Z"
+      }
+    ],
+    "based_on_rows": [
+      {
+        "relation_type": "based-on"
+      }
+    ],
+    "indicates_rows": [
+      {
+        "relation_type": "indicates"
+      }
+    ]
+  },
+  "incremental": {
+    "ok": true,
+    "change": {
+      "ipv4_value": "1.2.5.155",
+      "ipv4_standard_id": "ipv4-addr--c9b0c2e4-9f73-582b-9224-6580a14177ad",
+      "malware_name": "Replica-Incremental-87675a38",
+      "malware_description": "Incremental change 87675a38 expected to arrive through live stream",
+      "malware_standard_id": "malware--834d5307-5727-566c-b228-41b852d982ec",
+      "indicator_standard_id": "indicator--e446ee3b-8c2b-5cb9-a17c-d44d643be4fd",
+      "relationship_id": "0f727f38-2f5b-4fb1-8124-d306e7f97315"
+    },
+    "rows": [
+      {
+        "standard_id": "ipv4-addr--c9b0c2e4-9f73-582b-9224-6580a14177ad",
+        "relationship_type": "indicates",
+        "malware_standard_id": "malware--834d5307-5727-566c-b228-41b852d982ec"
+      }
+    ],
+    "freshness": {
+      "backend": "neo4j-replica",
+      "freshness_ts": "2026-05-14T15:06:33.975570Z",
+      "staleness_seconds": 0,
+      "sync_status": "healthy",
+      "opencti_url": "http://opencti:8080",
+      "stream_id": "fff9e807-179b-4f8b-bef0-ddd3d2d66846",
+      "bootstrap_start_at": "2026-05-14T15:01:18.536377Z",
+      "bootstrap_lookback_days": "365",
+      "last_synced_at": "2026-05-14T15:06:14.133000Z",
+      "tracked_pair_count": 18
+    },
+    "watermark_artifacts": [
+      "D:\\Projects\\OPENCTI-TEST\\mirror-sync\\runtime\\stream.watermark.json"
+    ]
+  }
+}
