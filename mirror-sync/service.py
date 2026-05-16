@@ -256,6 +256,53 @@ def _sync_scope_hash() -> str:
     return hashlib.sha256(SYNC_SCOPE_PATH.read_bytes()).hexdigest()
 
 
+def _validated_connection_arguments(scope_name: str, connection_arguments: object) -> dict[str, object]:
+    if connection_arguments is None:
+        return {}
+    if not isinstance(connection_arguments, dict):
+        raise AssertionError(f"Mirror sync node scope '{scope_name}' connection_arguments must be an object")
+
+    unsupported_keys = sorted(set(connection_arguments) - {"types"})
+    if unsupported_keys:
+        unsupported = ", ".join(unsupported_keys)
+        raise AssertionError(
+            f"Mirror sync node scope '{scope_name}' has unsupported connection_arguments keys: {unsupported}"
+        )
+
+    validated: dict[str, object] = {}
+    if "types" in connection_arguments:
+        types = connection_arguments.get("types")
+        if not isinstance(types, list) or not types:
+            raise AssertionError(f"Mirror sync node scope '{scope_name}' connection_arguments.types must be a non-empty list")
+        normalized_types = [str(item).strip() for item in types if str(item).strip()]
+        if len(normalized_types) != len(types):
+            raise AssertionError(
+                f"Mirror sync node scope '{scope_name}' connection_arguments.types must only contain non-empty strings"
+            )
+        validated["types"] = normalized_types
+    return validated
+
+
+def _connection_query_parts(connection_arguments: object) -> tuple[str, str, dict[str, object]]:
+    arguments = _validated_connection_arguments("<query>", connection_arguments)
+    variable_definitions: list[str] = []
+    field_arguments: list[str] = []
+    variables: dict[str, object] = {}
+
+    types = arguments.get("types")
+    if types:
+        variable_definitions.append("$types: [String]")
+        field_arguments.append("types: $types")
+        variables["types"] = types
+
+    return ", ".join(variable_definitions), ", ".join(field_arguments), variables
+
+
+def _relationship_scope_mode(scope: dict[str, object]) -> str:
+    mode = str(scope.get("relationship_mode", "neighborhood")).strip()
+    return mode or "neighborhood"
+
+
 def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
     if not SYNC_SCOPE_PATH.is_file():
         raise AssertionError(f"Missing mirror sync scope config: {SYNC_SCOPE_PATH}")
@@ -295,6 +342,7 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
             )
         projection = scope.get("projection")
         search = scope.get("search")
+        connection_arguments = _validated_connection_arguments(name, scope.get("connection_arguments"))
         if not isinstance(enabled, bool):
             raise AssertionError(f"Mirror sync node scope '{name}' must declare boolean enabled")
         if not isinstance(required_for_baseline, bool):
@@ -343,7 +391,10 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
                 raise AssertionError(f"Mirror sync node scope '{name}' has unsupported search mode '{mode}'")
             if not search_field:
                 raise AssertionError(f"Mirror sync node scope '{name}' search is missing search_field")
-        scopes_by_name[name] = dict(scope)
+        scope_payload = dict(scope)
+        if connection_arguments:
+            scope_payload["connection_arguments"] = connection_arguments
+        scopes_by_name[name] = scope_payload
 
     missing_required_scopes = REQUIRED_NODE_SCOPE_NAMES - set(scopes_by_name)
     if missing_required_scopes:
@@ -369,6 +420,7 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
         projection_relationships = scope.get("projection_relationships")
         named_fallback = scope.get("named_fallback")
         participants = scope.get("participants")
+        relationship_mode = _relationship_scope_mode(scope)
 
         if not name:
             raise AssertionError(f"Invalid relationship scope at index {index}: missing name")
@@ -380,14 +432,71 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
             raise AssertionError(
                 f"Mirror sync relationship scope '{name}' must declare boolean required_for_baseline"
             )
+        if required_for_baseline and not enabled:
+            raise AssertionError(f"Mirror sync relationship scope '{name}' is required and cannot be disabled")
+        if relationship_mode not in {"neighborhood", "direct"}:
+            raise AssertionError(
+                f"Mirror sync relationship scope '{name}' has unsupported relationship_mode '{relationship_mode}'"
+            )
         if bootstrap_mode not in {"incremental", "bootstrap_once"}:
             raise AssertionError(
                 f"Mirror sync relationship scope '{name}' has unsupported bootstrap_mode '{bootstrap_mode}'"
             )
-        if required_for_baseline and not enabled:
-            raise AssertionError(
-                f"Mirror sync relationship scope '{name}' is required for the acceptance baseline and cannot be disabled"
-            )
+        if relationship_mode == "direct":
+            allowed_relationship_types = scope.get("allowed_relationship_types")
+            entity_type_node_scopes = scope.get("entity_type_node_scopes")
+            relationship_projection = scope.get("relationship_projection")
+            if source_node_scope or source_entity_type or via_relationships is not None or named_fallback is not None:
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' must not declare neighborhood-only fields"
+                )
+            if not isinstance(allowed_relationship_types, list) or not allowed_relationship_types:
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' must define allowed_relationship_types"
+                )
+            if not all(isinstance(item, str) and item.strip() for item in allowed_relationship_types):
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' allowed_relationship_types must only contain non-empty strings"
+                )
+            if not isinstance(entity_type_node_scopes, dict) or not entity_type_node_scopes:
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' must define entity_type_node_scopes"
+                )
+            for entity_type, node_scope_name in entity_type_node_scopes.items():
+                if not isinstance(entity_type, str) or not entity_type.strip():
+                    raise AssertionError(
+                        f"Mirror sync direct relationship scope '{name}' has invalid entity_type_node_scopes key"
+                    )
+                normalized_node_scope_name = str(node_scope_name).strip()
+                if normalized_node_scope_name not in scopes_by_name:
+                    raise AssertionError(
+                        f"Mirror sync direct relationship scope '{name}' references unknown node scope '{normalized_node_scope_name}'"
+                    )
+            if projection is not None or projection_relationships is not None:
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' must use relationship_projection instead of projection_relationships"
+                )
+            if not isinstance(relationship_projection, dict):
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' must define relationship_projection"
+                )
+            merge_key = relationship_projection.get("merge_key")
+            properties = relationship_projection.get("properties")
+            if not isinstance(merge_key, dict):
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' relationship_projection is missing merge_key"
+                )
+            if not str(merge_key.get("property", "")).strip() or not str(merge_key.get("source_field", "")).strip():
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' relationship_projection has incomplete merge_key"
+                )
+            if not isinstance(properties, list) or not properties:
+                raise AssertionError(
+                    f"Mirror sync direct relationship scope '{name}' relationship_projection must define properties"
+                )
+            relationship_scopes_by_name[name] = dict(scope)
+            continue
+
         if source_node_scope not in scopes_by_name:
             raise AssertionError(
                 f"Mirror sync relationship scope '{name}' references unknown source_node_scope '{source_node_scope}'"
@@ -492,14 +601,13 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
                 raise AssertionError(
                     f"Mirror sync relationship scope '{name}' projection relationship is missing merge_key"
                 )
-            merge_property = str(merge_key.get("property", "")).strip()
-            merge_source_field = str(merge_key.get("source_field", "")).strip()
-            merge_key_format = str(merge_key.get("key_format", "")).strip()
-            if not merge_property or (not merge_source_field and not merge_key_format):
+            if not str(merge_key.get("property", "")).strip() or not (
+                str(merge_key.get("source_field", "")).strip() or str(merge_key.get("key_format", "")).strip()
+            ):
                 raise AssertionError(
                     f"Mirror sync relationship scope '{name}' projection relationship has incomplete merge_key"
                 )
-            if not isinstance(properties, list):
+            if not isinstance(properties, list) or not properties:
                 raise AssertionError(
                     f"Mirror sync relationship scope '{name}' projection relationship must define properties"
                 )
@@ -808,11 +916,25 @@ def _fetch_connection_page(
     return records[:limit] if limit is not None else records
 
 
-def _fetch_connection(field: str, selection: str, since: datetime) -> list[dict[str, object]]:
+def _fetch_connection(
+    field: str,
+    selection: str,
+    since: datetime,
+    connection_arguments: dict[str, object] | None = None,
+) -> list[dict[str, object]]:
     page_size = _configured_graphql_page_size()
+    extra_variable_definitions, extra_field_arguments, extra_variables = _connection_query_parts(connection_arguments)
+    filtered_variable_definitions = "$first: Int!, $after: ID, $filters: FilterGroup"
+    fallback_variable_definitions = "$first: Int!, $after: ID"
+    search_field_arguments = "first: $first, after: $after"
+    if extra_variable_definitions:
+        filtered_variable_definitions += ", " + extra_variable_definitions
+        fallback_variable_definitions += ", " + extra_variable_definitions
+    if extra_field_arguments:
+        search_field_arguments += ", " + extra_field_arguments
     filtered_query = (
-        f"query MirrorRecent($first: Int!, $after: ID, $filters: FilterGroup) {{"
-        f" {field}(first: $first, after: $after, filters: $filters, orderBy: updated_at, orderMode: desc) {{"
+        f"query MirrorRecent({filtered_variable_definitions}) {{"
+        f" {field}({search_field_arguments}, filters: $filters, orderBy: updated_at, orderMode: desc) {{"
         "   edges {"
         f"     node {{ {selection} }}"
         "   }"
@@ -825,13 +947,13 @@ def _fetch_connection(field: str, selection: str, since: datetime) -> list[dict[
             filtered_query,
             field,
             page_size=page_size,
-            base_variables={"filters": _updated_since_filters(since)},
+            base_variables={**extra_variables, "filters": _updated_since_filters(since)},
         )
     except AssertionError:
         try:
             fallback_query = (
-                f"query MirrorRecent($first: Int!, $after: ID) {{"
-                f" {field}(first: $first, after: $after, orderBy: updated_at, orderMode: desc) {{"
+                f"query MirrorRecent({fallback_variable_definitions}) {{"
+                f" {field}({search_field_arguments}, orderBy: updated_at, orderMode: desc) {{"
                 "   edges {"
                 f"     node {{ {selection} }}"
                 "   }"
@@ -843,11 +965,12 @@ def _fetch_connection(field: str, selection: str, since: datetime) -> list[dict[
                 fallback_query,
                 field,
                 page_size=page_size,
+                base_variables=extra_variables,
             )
         except AssertionError:
             first_only_query = (
-                f"query MirrorRecent($first: Int!, $after: ID) {{"
-                f" {field}(first: $first, after: $after) {{"
+                f"query MirrorRecent({fallback_variable_definitions}) {{"
+                f" {field}({search_field_arguments}) {{"
                 "   edges {"
                 f"     node {{ {selection} }}"
                 "   }"
@@ -859,6 +982,7 @@ def _fetch_connection(field: str, selection: str, since: datetime) -> list[dict[
                 first_only_query,
                 field,
                 page_size=page_size,
+                base_variables=extra_variables,
             )
 
 
@@ -867,14 +991,28 @@ def _fetch_recent_scope(scope: dict[str, object], since: datetime) -> list[dict[
         str(scope["graphql_field"]),
         str(scope["selection"]),
         since,
+        dict(scope.get("connection_arguments") or {}),
     )
 
 
-def _search_connection(field: str, selection: str, search: str, limit: int | None = 10) -> list[dict[str, object]]:
+def _search_connection(
+    field: str,
+    selection: str,
+    search: str,
+    limit: int | None = 10,
+    connection_arguments: dict[str, object] | None = None,
+) -> list[dict[str, object]]:
     page_size = _configured_graphql_page_size()
+    extra_variable_definitions, extra_field_arguments, extra_variables = _connection_query_parts(connection_arguments)
+    variable_definitions = "$first: Int!, $after: ID, $search: String"
+    field_arguments = "first: $first, after: $after"
+    if extra_variable_definitions:
+        variable_definitions += ", " + extra_variable_definitions
+    if extra_field_arguments:
+        field_arguments += ", " + extra_field_arguments
     query = (
-        f"query MirrorSearch($first: Int!, $after: ID, $search: String) {{"
-        f" {field}(first: $first, after: $after, search: $search, orderBy: updated_at, orderMode: desc) {{"
+        f"query MirrorSearch({variable_definitions}) {{"
+        f" {field}({field_arguments}, search: $search, orderBy: updated_at, orderMode: desc) {{"
         "   edges {"
         f"     node {{ {selection} }}"
         "   }"
@@ -887,7 +1025,7 @@ def _search_connection(field: str, selection: str, search: str, limit: int | Non
             query,
             field,
             page_size=page_size,
-            base_variables={"search": search},
+            base_variables={**extra_variables, "search": search},
             limit=limit,
         )
     except AssertionError:
@@ -965,6 +1103,7 @@ def _search_node_scope(scope_name: str, search_value: str, *, limit: int = 10) -
         str(scope["selection"]),
         search_value,
         limit=limit,
+        connection_arguments=dict(scope.get("connection_arguments") or {}),
     )
     match_fields = search.get("match_fields") or []
     for match in matches:
@@ -1051,6 +1190,47 @@ def _project_relationship_payload(
     payload: dict[str, object],
     node_scopes: dict[str, dict[str, object]],
 ) -> None:
+    if _relationship_scope_mode(relationship_scope) == "direct":
+        relationship_projection = dict(relationship_scope["relationship_projection"])
+        source_scope = node_scopes[str(payload["source_node_scope"])]
+        target_scope = node_scopes[str(payload["target_node_scope"])]
+        source_projection = dict(source_scope["projection"])
+        target_projection = dict(target_scope["projection"])
+        source_merge_key = dict(source_projection["merge_key"])
+        target_merge_key = dict(target_projection["merge_key"])
+        source_key_value = payload.get(f"source_{source_merge_key['source_field']}")
+        target_key_value = payload.get(f"target_{target_merge_key['source_field']}")
+        if source_key_value in (None, "") or target_key_value in (None, ""):
+            return
+        merge_key = dict(relationship_projection["merge_key"])
+        merge_value = payload.get(str(merge_key["source_field"]))
+        if merge_value in (None, ""):
+            return
+        parameters: dict[str, object] = {
+            "from_key_value": source_key_value,
+            "to_key_value": target_key_value,
+            "relationship_merge_value": merge_value,
+        }
+        assignments: list[str] = []
+        for property_mapping in relationship_projection.get("properties", []):
+            property_name = str(property_mapping["property"])
+            parameters[property_name] = (
+                property_mapping.get("static_value")
+                if "static_value" in property_mapping
+                else payload.get(str(property_mapping["source_field"]))
+            )
+            assignments.append(f"relationship.{property_name} = ${property_name}")
+        relationship_type = str(payload["relationship_type"])
+        statement = (
+            f"MERGE (source:`{source_projection['label']}` {{{source_merge_key['property']}: $from_key_value}}) "
+            f"MERGE (target:`{target_projection['label']}` {{{target_merge_key['property']}: $to_key_value}}) "
+            f"MERGE (source)-[relationship:`{relationship_type}` {{{merge_key['property']}: $relationship_merge_value}}]->(target)"
+        )
+        if assignments:
+            statement += " SET " + ", ".join(assignments)
+        _run_cypher(statement, parameters)
+        return
+
     participants = dict(relationship_scope["participants"])
     for participant in participants.values():
         node_scope = node_scopes[str(participant["node_scope"])]
@@ -1531,6 +1711,61 @@ def _collect_named_pairs(
     return tracked_pairs, matched_indicator_names
 
 
+def _collect_direct_relationship_payloads(
+    *,
+    relationship_scope: dict[str, object],
+    relationships: list[dict[str, object]],
+    since: datetime,
+) -> list[dict[str, object]]:
+    allowed_relationship_types = {
+        str(item)
+        for item in relationship_scope.get("allowed_relationship_types", [])
+        if isinstance(item, str) and item.strip()
+    }
+    entity_type_node_scopes = {
+        str(entity_type): str(node_scope)
+        for entity_type, node_scope in dict(relationship_scope.get("entity_type_node_scopes") or {}).items()
+    }
+    payloads: list[dict[str, object]] = []
+    for relationship in relationships:
+        if not _is_recent(relationship, since):
+            continue
+        relationship_type = str(relationship.get("relationship_type", "")).strip()
+        if relationship_type not in allowed_relationship_types:
+            continue
+        source = relationship.get("from") or {}
+        target = relationship.get("to") or {}
+        source_entity_type = str(source.get("entity_type", "")).strip()
+        target_entity_type = str(target.get("entity_type", "")).strip()
+        source_node_scope = entity_type_node_scopes.get(source_entity_type)
+        target_node_scope = entity_type_node_scopes.get(target_entity_type)
+        source_standard_id = str(source.get("standard_id", "")).strip()
+        target_standard_id = str(target.get("standard_id", "")).strip()
+        if not source_node_scope or not target_node_scope:
+            continue
+        if not source_standard_id or not target_standard_id:
+            continue
+        payloads.append(
+            {
+                "relationship_scope_name": relationship_scope["name"],
+                "source_node_scope": source_node_scope,
+                "target_node_scope": target_node_scope,
+                "source_id": source.get("id"),
+                "source_standard_id": source_standard_id,
+                "source_entity_type": source_entity_type,
+                "target_id": target.get("id"),
+                "target_standard_id": target_standard_id,
+                "target_entity_type": target_entity_type,
+                "relationship_id": relationship.get("id"),
+                "relationship_standard_id": relationship.get("standard_id"),
+                "relationship_type": relationship_type,
+                "relationship_created_at": relationship.get("created_at"),
+                "relationship_updated_at": relationship.get("updated_at"),
+            }
+        )
+    return payloads
+
+
 def _project_pair(pair: dict[str, object]) -> None:
     scopes = _load_sync_scope_config()
     _project_relationship_payload(
@@ -1608,47 +1843,71 @@ def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
         _persist_progress_watermark()
 
     relationship_scope_since = since
-    relationship_scope = relationship_scopes["indicator_ipv4_malware_neighborhood"]
-    if relationship_scope["enabled"]:
-        relationship_scope_since = _scope_since(
+    relationship_scope_since_by_name: dict[str, str] = {}
+    enabled_relationship_scopes = [
+        scope for scope in relationship_scopes.values() if scope.get("enabled")
+    ]
+    earliest_relationship_scope_since: datetime | None = None
+    for relationship_scope in enabled_relationship_scopes:
+        scope_name = str(relationship_scope["name"])
+        scope_since = _scope_since(
             state=state,
-            scope_name=str(relationship_scope["name"]),
+            scope_name=scope_name,
             bootstrapped_key="bootstrapped_relationship_scopes",
             incremental_since=since,
             bootstrap_mode=str(relationship_scope["bootstrap_mode"]),
             config_changed=config_changed,
         )
+        relationship_scope_since_by_name[scope_name] = scope_since.astimezone(UTC).isoformat().replace("+00:00", "Z")
+        if earliest_relationship_scope_since is None or scope_since < earliest_relationship_scope_since:
+            earliest_relationship_scope_since = scope_since
+
+    if earliest_relationship_scope_since is not None:
+        relationship_scope_since = earliest_relationship_scope_since
         relationships = _fetch_recent_relationships(relationship_scope_since)
-        completed_relationship_scopes.append(str(relationship_scope["name"]))
         _persist_progress_watermark()
 
+    matched_indicator_names: list[str] = []
     existing_pairs = {} if config_changed else {
         str(pair["projected_relationship_key"]): pair
         for pair in state.get("tracked_pairs", [])
         if isinstance(pair, dict) and pair.get("projected_relationship_key")
     }
-    tracked_pairs = (
-        _collect_candidate_pairs(
+    tracked_pairs = existing_pairs
+    for relationship_scope in enabled_relationship_scopes:
+        scope_name = str(relationship_scope["name"])
+        scope_since = _parse_timestamp(relationship_scope_since_by_name[scope_name]) or relationship_scope_since
+        if _relationship_scope_mode(relationship_scope) == "direct":
+            for payload in _collect_direct_relationship_payloads(
+                relationship_scope=relationship_scope,
+                relationships=relationships,
+                since=scope_since,
+            ):
+                _project_relationship_payload(relationship_scope, payload, node_scopes)
+            completed_relationship_scopes.append(scope_name)
+            _persist_progress_watermark()
+            continue
+
+        tracked_pairs = _collect_candidate_pairs(
             relationship_scope=relationship_scope,
             observables=records_by_scope.get("ipv4_observable", []),
             indicators=records_by_scope.get("indicator", []),
             malwares=records_by_scope.get("malware", []),
             relationships=relationships,
-            since=relationship_scope_since,
-            existing_pairs=existing_pairs,
+            since=scope_since,
+            existing_pairs=tracked_pairs,
         )
-        if relationship_scope["enabled"]
-        else existing_pairs
-    )
-    tracked_pairs, matched_indicator_names = _collect_named_pairs(
-        relationship_scope,
-        relationship_scope_since,
-        tracked_pairs,
-    )
-    for pair in tracked_pairs.values():
-        _project_relationship_payload(relationship_scope, pair, node_scopes)
-    checkpoint_tracked_pairs = list(tracked_pairs.values())
-    _persist_progress_watermark()
+        tracked_pairs, current_matched_indicator_names = _collect_named_pairs(
+            relationship_scope,
+            scope_since,
+            tracked_pairs,
+        )
+        matched_indicator_names.extend(current_matched_indicator_names)
+        for pair in tracked_pairs.values():
+            _project_relationship_payload(relationship_scope, pair, node_scopes)
+        checkpoint_tracked_pairs = list(tracked_pairs.values())
+        completed_relationship_scopes.append(scope_name)
+        _persist_progress_watermark()
 
     _write_discovery_debug(
         {
@@ -1656,6 +1915,7 @@ def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
             "config_changed": config_changed,
             "sync_scope_hash": sync_scope_hash,
             "scope_since_by_name": scope_since_by_name,
+            "relationship_scope_since_by_name": relationship_scope_since_by_name,
             "relationship_scope_since": relationship_scope_since.astimezone(UTC).isoformat().replace("+00:00", "Z"),
             "enabled_node_scopes": enabled_node_scope_names,
             "enabled_relationship_scopes": enabled_relationship_scope_names,

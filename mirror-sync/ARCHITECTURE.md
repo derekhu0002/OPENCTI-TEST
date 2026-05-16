@@ -16,7 +16,7 @@
 - `Dockerfile`：mirror-sync 容器化交付边界。
 - `service.py`：mirror-sync 容器入口与运行时主循环边界。
 - `runtime/full_scope_introspection.json`：当前 OpenCTI 平台 live GraphQL schema 的全量 introspection 快照，用于盘点 mirror-sync 可扩展的元素、关系与属性覆盖面。
-- `sync_scope.json`：mirror-sync 节点与关系 scope 的只读实现契约，声明节点/关系 scope 的启用状态、GraphQL 字段、字段选择、节点与关系投影、搜索补全与 bootstrap 策略；运行时按该文件内容计算配置摘要，若容器重启时摘要变化，则对当前启用 scope 重新执行 bootstrap 窗口回放以补齐新增元素或属性。当前契约同时允许用显式布尔开关一次性启用 `sync_scope.full.json` 中的全部 candidate node scopes。
+- `sync_scope.json`：mirror-sync 节点与关系 scope 的只读实现契约，声明节点/关系 scope 的启用状态、GraphQL 字段、字段选择、节点与关系投影、搜索补全、受控 GraphQL 连接参数与 bootstrap 策略；运行时按该文件内容计算配置摘要，若容器重启时摘要变化，则对当前启用 scope 重新执行 bootstrap 窗口回放以补齐新增元素或属性。当前检入版本采用面向 HIVS AGENT 消费面的显式节点 scope 清单，并以显式 `relationship_mode: direct` 关系 scope 补齐新增 observable 与威胁情报对象之间经审查的关系覆盖，同时保持全量 candidate node scope 开关关闭。
 - `sync_scope.full.json`：基于 live OpenCTI GraphQL introspection 生成的备用候选目录，用于枚举当前 OpenCTI 可进一步纳入的 query field / node scope 模板；默认仍是扩容盘点资料，不单独替代 `sync_scope.json` 的运行时契约地位；只有 `sync_scope.json` 显式启用全量 candidate node scope 开关时，运行时才会受控吸收其中的 node scope 模板。candidate relationship scope templates 目前仍是审查清单，运行时不得自动吸收。
 - `tests/`：后续编码阶段用于挂载同步支撑护栏的默认位置，不是显性 testcase 主入口。
 
@@ -24,7 +24,7 @@
 
 - 输入边界：OpenCTI live stream、增量拉取能力、主 compose 默认网络中的 `opencti`/`neo4j` 服务，以及 `.env` 中的 `MIRROR_*` 与 Neo4j 连接变量。
 - 容器运行时通过 `OPENCTI_URL`、`OPENCTI_TOKEN`、`STREAM_ID`、`BOOTSTRAP_START_AT`、`MIRROR_BOOTSTRAP_LOOKBACK_DAYS` 与 `MIRROR_POLL_INTERVAL_SECONDS` 收口流订阅、bootstrap 与轮询配置。
-- 节点与关系同步范围通过 `sync_scope.json` 只读收口；当前版本允许声明节点 scope 的 `enabled`、`graphql_field`、`selection`、`projection`、`search` 与 `bootstrap_mode`，以及关系 scope 的 `bootstrap_mode`、source、participants、via relationship、投影关系、两跳 neighborhood 补全与命名回退规则。若 `sync_scope.json` 显式开启全量 candidate node scope 开关，则运行时在保留本地显式 scope 优先级的前提下，把 `sync_scope.full.json` 中的 candidate node scopes 追加为启用状态。关系 scope 仍然只能来自 `sync_scope.json` 中经过审查的显式声明，不能自动全开 `sync_scope.full.json` 的 candidate relationship scope templates。
+- 节点与关系同步范围通过 `sync_scope.json` 只读收口；当前版本允许声明节点 scope 的 `enabled`、`graphql_field`、`connection_arguments`、`selection`、`projection`、`search` 与 `bootstrap_mode`，以及两类关系 scope：`relationship_mode: neighborhood` 的 source、participants、via relationship、投影关系、两跳 neighborhood 补全与命名回退规则；`relationship_mode: direct` 的 `allowed_relationship_types`、`entity_type_node_scopes` 与 `relationship_projection`。若 `sync_scope.json` 显式开启全量 candidate node scope 开关，则运行时在保留本地显式 scope 优先级的前提下，把 `sync_scope.full.json` 中的 candidate node scopes 追加为启用状态。当前检入契约改为显式列出 HIVS AGENT 已确认依赖的 `indicator`、`malware`、`vulnerability`、`attackPatterns`、`campaigns`、`infrastructures`、`intrusionSets`、`reports`、`groupings`、`identities`、`sectors`、`coursesOfAction`、`observedData`、`tools` 与 IOC observable 子类型 scope，并以 `indicator_extended_observable_based_on_direct_relationships` 与 `threat_intel_context_direct_relationships` 两个 reviewed direct relationship scopes 显式补齐新增类型之间的关系；关系 scope 仍然只能来自 `sync_scope.json` 中经过审查的显式声明，不能自动全开 `sync_scope.full.json` 的 candidate relationship scope templates。
 - `.env` 中 `MIRROR_STREAM_ID` 负责为 `STREAM_ID` 提供上游 live stream 标识；占位值只用于配置物理化，不代表已完成真实运行时装配。
 - `.env` 中 `BOOTSTRAP_START_AT` 用于显式指定 bootstrap 起点；测试夹具可在共享环境中临时写入该锚点对应的时间语义，但不得借此改写产品默认近一年策略。
 - `.env` 中 `MIRROR_BOOTSTRAP_LOOKBACK_DAYS` 用于声明未显式给出启动锚点时的默认回看范围；当前默认值为 `365` 天。

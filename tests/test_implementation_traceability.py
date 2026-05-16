@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 
@@ -63,3 +64,106 @@ def test_local_contracts_keep_direct_implements_relationships() -> None:
     assert "直接 implements `受控 Cypher 拒绝与结构化反馈`" in test_text
     assert "直接 implements `副本降级不静默回退`" in test_text
     assert "直接 implements `Docker统一代理查询入口可用性验证`" in test_text
+
+
+def test_sync_scope_declares_explicit_agent_driven_node_scope_union() -> None:
+    payload = json.loads((ROOT / "mirror-sync" / "sync_scope.json").read_text(encoding="utf-8"))
+
+    assert payload["enable_all_candidate_node_scopes"] is False
+
+    enabled_node_scopes = {
+        str(scope["name"])
+        for scope in payload["node_scopes"]
+        if isinstance(scope, dict) and scope.get("enabled") is True
+    }
+
+    assert {
+        "ipv4_observable",
+        "domain_name_observable",
+        "url_observable",
+        "file_observable",
+        "indicator",
+        "malware",
+        "vulnerability",
+        "attackPatterns",
+        "campaigns",
+        "infrastructures",
+        "intrusionSets",
+        "reports",
+        "groupings",
+        "identities",
+        "sectors",
+        "coursesOfAction",
+        "observedData",
+        "tools",
+    } <= enabled_node_scopes
+
+
+def test_sync_scope_declares_reviewed_direct_relationship_scopes() -> None:
+    payload = json.loads((ROOT / "mirror-sync" / "sync_scope.json").read_text(encoding="utf-8"))
+
+    relationship_scopes = {
+        str(scope["name"]): scope
+        for scope in payload["relationship_scopes"]
+        if isinstance(scope, dict)
+    }
+
+    observable_scope = relationship_scopes["indicator_extended_observable_based_on_direct_relationships"]
+    threat_intel_scope = relationship_scopes["threat_intel_context_direct_relationships"]
+
+    assert observable_scope["relationship_mode"] == "direct"
+    assert observable_scope["enabled"] is True
+    assert set(observable_scope["allowed_relationship_types"]) == {"based-on"}
+    assert observable_scope["entity_type_node_scopes"] == {
+        "Indicator": "indicator",
+        "Domain-Name": "domain_name_observable",
+        "Url": "url_observable",
+        "File": "file_observable",
+    }
+
+    assert threat_intel_scope["relationship_mode"] == "direct"
+    assert threat_intel_scope["enabled"] is True
+    assert set(threat_intel_scope["allowed_relationship_types"]) == {
+        "indicates",
+        "uses",
+        "targets",
+        "related-to",
+        "mitigates",
+    }
+    assert {
+        "Indicator": "indicator",
+        "Malware": "malware",
+        "Vulnerability": "vulnerability",
+        "Attack-Pattern": "attackPatterns",
+        "Campaign": "campaigns",
+        "Infrastructure": "infrastructures",
+        "Intrusion-Set": "intrusionSets",
+        "Report": "reports",
+        "Grouping": "groupings",
+        "Identity": "identities",
+        "Sector": "sectors",
+        "Course-Of-Action": "coursesOfAction",
+        "Observed-Data": "observedData",
+        "Tool": "tools",
+    }.items() <= threat_intel_scope["entity_type_node_scopes"].items()
+
+
+def test_indicator_scope_avoids_invalid_observable_value_field() -> None:
+    payload = json.loads((ROOT / "mirror-sync" / "sync_scope.json").read_text(encoding="utf-8"))
+
+    indicator_scope = next(
+        scope
+        for scope in payload["node_scopes"]
+        if isinstance(scope, dict) and scope.get("name") == "indicator"
+    )
+    selection = str(indicator_scope["selection"])
+    projection_properties = {
+        str(property_mapping["property"])
+        for property_mapping in indicator_scope["projection"]["properties"]
+        if isinstance(property_mapping, dict) and property_mapping.get("property")
+    }
+
+    assert "observable_value" not in selection
+    assert "observable_value" not in projection_properties
+    assert "x_opencti_main_observable_type" in selection
+    assert "pattern" in selection

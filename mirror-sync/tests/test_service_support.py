@@ -26,6 +26,7 @@ def _sample_node_scope(
     entity_type: str,
     extra_properties: list[dict[str, object]] | None = None,
     search: dict[str, object] | None = None,
+    connection_arguments: dict[str, object] | None = None,
 ) -> dict[str, object]:
     properties: list[dict[str, object]] = [
         {"property": "opencti_id", "source_field": "id"},
@@ -53,6 +54,8 @@ def _sample_node_scope(
     }
     if search is not None:
         payload["search"] = search
+    if connection_arguments is not None:
+        payload["connection_arguments"] = connection_arguments
     return payload
 
 
@@ -162,6 +165,45 @@ def _sample_relationship_scope() -> dict[str, object]:
                 "based_on": "search-based-on::{indicator_id}::{observable_id}",
                 "indicates": "search-indicates::{indicator_id}::{malware_id}",
             },
+        },
+    }
+
+
+def _sample_direct_relationship_scope() -> dict[str, object]:
+    return {
+        "name": "threat_intel_context_direct_relationships",
+        "relationship_mode": "direct",
+        "enabled": True,
+        "required_for_baseline": False,
+        "bootstrap_mode": "incremental",
+        "allowed_relationship_types": ["indicates", "uses", "targets", "related-to", "mitigates"],
+        "entity_type_node_scopes": {
+            "Indicator": "indicator",
+            "Malware": "malware",
+            "Attack-Pattern": "attackPatterns",
+            "Infrastructure": "infrastructures",
+            "Intrusion-Set": "intrusionSets",
+            "Campaign": "campaigns",
+            "Identity": "identities",
+            "Sector": "sectors",
+            "Course-Of-Action": "coursesOfAction",
+            "Observed-Data": "observedData",
+            "Report": "reports",
+            "Grouping": "groupings",
+            "Tool": "tools",
+            "Vulnerability": "vulnerability",
+        },
+        "relationship_projection": {
+            "merge_key": {
+                "property": "opencti_id",
+                "source_field": "relationship_id",
+            },
+            "properties": [
+                {"property": "standard_id", "source_field": "relationship_standard_id"},
+                {"property": "relationship_type", "source_field": "relationship_type"},
+                {"property": "created_at", "source_field": "relationship_created_at"},
+                {"property": "updated_at", "source_field": "relationship_updated_at"},
+            ],
         },
     }
 
@@ -328,6 +370,167 @@ def test_load_sync_scope_config_rejects_candidate_relationship_autoload(monkeypa
         service._load_sync_scope_config()
 
 
+def test_load_sync_scope_config_accepts_direct_relationship_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+    payload = {
+        "version": 1,
+        "node_scopes": [
+            _sample_node_scope(
+                "ipv4_observable",
+                graphql_field="stixCyberObservables",
+                label="ipv4-addr",
+                entity_type="IPv4-Addr",
+                extra_properties=[{"property": "value", "source_field": "value"}],
+                search={"mode": "search_connection", "search_field": "value"},
+            ),
+            _sample_node_scope(
+                "indicator",
+                graphql_field="indicators",
+                label="indicator",
+                entity_type="Indicator",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "malware",
+                graphql_field="malwares",
+                label="malware",
+                entity_type="Malware",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "vulnerability",
+                required_for_baseline=False,
+                graphql_field="vulnerabilities",
+                bootstrap_mode="bootstrap_once",
+                label="vulnerability",
+                entity_type="Vulnerability",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "attackPatterns",
+                required_for_baseline=False,
+                graphql_field="attackPatterns",
+                bootstrap_mode="bootstrap_once",
+                label="attackPatterns",
+                entity_type="Attack-Pattern",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "infrastructures",
+                required_for_baseline=False,
+                graphql_field="infrastructures",
+                bootstrap_mode="bootstrap_once",
+                label="infrastructures",
+                entity_type="Infrastructure",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "intrusionSets",
+                required_for_baseline=False,
+                graphql_field="intrusionSets",
+                bootstrap_mode="bootstrap_once",
+                label="intrusionSets",
+                entity_type="Intrusion-Set",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "campaigns",
+                required_for_baseline=False,
+                graphql_field="campaigns",
+                bootstrap_mode="bootstrap_once",
+                label="campaigns",
+                entity_type="Campaign",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "identities",
+                required_for_baseline=False,
+                graphql_field="identities",
+                bootstrap_mode="bootstrap_once",
+                label="identities",
+                entity_type="Identity",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "sectors",
+                required_for_baseline=False,
+                graphql_field="sectors",
+                bootstrap_mode="bootstrap_once",
+                label="sectors",
+                entity_type="Sector",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "coursesOfAction",
+                required_for_baseline=False,
+                graphql_field="coursesOfAction",
+                bootstrap_mode="bootstrap_once",
+                label="coursesOfAction",
+                entity_type="Course-Of-Action",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "observedData",
+                required_for_baseline=False,
+                graphql_field="observedData",
+                bootstrap_mode="bootstrap_once",
+                label="observedData",
+                entity_type="Observed-Data",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "reports",
+                required_for_baseline=False,
+                graphql_field="reports",
+                bootstrap_mode="bootstrap_once",
+                label="reports",
+                entity_type="Report",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "groupings",
+                required_for_baseline=False,
+                graphql_field="groupings",
+                bootstrap_mode="bootstrap_once",
+                label="groupings",
+                entity_type="Grouping",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "tools",
+                required_for_baseline=False,
+                graphql_field="tools",
+                bootstrap_mode="bootstrap_once",
+                label="tools",
+                entity_type="Tool",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+        ],
+        "relationship_scopes": [_sample_relationship_scope(), _sample_direct_relationship_scope()],
+    }
+
+    monkeypatch.setattr(service, "SYNC_SCOPE_PATH", Path("virtual/sync_scope.json"))
+    monkeypatch.setattr(service.Path, "is_file", lambda self: True)
+    monkeypatch.setattr(service.Path, "read_text", lambda self, encoding="utf-8": service.json.dumps(payload))
+
+    scopes = service._load_sync_scope_config()
+
+    assert "threat_intel_context_direct_relationships" in scopes["relationship_scopes"]
+
+
 def test_fetch_connection_paginates_all_pages(monkeypatch: pytest.MonkeyPatch) -> None:
     responses = [
         {
@@ -367,6 +570,339 @@ def test_fetch_connection_paginates_all_pages(monkeypatch: pytest.MonkeyPatch) -
     assert graphql_calls[0][1]["first"] == 2
     assert graphql_calls[0][1]["after"] is None
     assert graphql_calls[1][1]["after"] == "cursor-1"
+
+
+def test_sync_cycle_projects_direct_relationship_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+    since = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
+    projected_relationships: list[tuple[str, dict[str, object]]] = []
+
+    node_scopes = {
+        "ipv4_observable": _sample_node_scope(
+            "ipv4_observable",
+            graphql_field="stixCyberObservables",
+            label="ipv4-addr",
+            entity_type="IPv4-Addr",
+            extra_properties=[{"property": "value", "source_field": "value"}],
+            search={"mode": "search_connection", "search_field": "value"},
+        ),
+        "indicator": _sample_node_scope(
+            "indicator",
+            graphql_field="indicators",
+            label="indicator",
+            entity_type="Indicator",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "malware": _sample_node_scope(
+            "malware",
+            graphql_field="malwares",
+            label="malware",
+            entity_type="Malware",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "vulnerability": _sample_node_scope(
+            "vulnerability",
+            required_for_baseline=False,
+            graphql_field="vulnerabilities",
+            bootstrap_mode="bootstrap_once",
+            label="vulnerability",
+            entity_type="Vulnerability",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "attackPatterns": _sample_node_scope(
+            "attackPatterns",
+            required_for_baseline=False,
+            graphql_field="attackPatterns",
+            bootstrap_mode="bootstrap_once",
+            label="attackPatterns",
+            entity_type="Attack-Pattern",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "infrastructures": _sample_node_scope(
+            "infrastructures",
+            required_for_baseline=False,
+            graphql_field="infrastructures",
+            bootstrap_mode="bootstrap_once",
+            label="infrastructures",
+            entity_type="Infrastructure",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "intrusionSets": _sample_node_scope(
+            "intrusionSets",
+            required_for_baseline=False,
+            graphql_field="intrusionSets",
+            bootstrap_mode="bootstrap_once",
+            label="intrusionSets",
+            entity_type="Intrusion-Set",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "campaigns": _sample_node_scope(
+            "campaigns",
+            required_for_baseline=False,
+            graphql_field="campaigns",
+            bootstrap_mode="bootstrap_once",
+            label="campaigns",
+            entity_type="Campaign",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "identities": _sample_node_scope(
+            "identities",
+            required_for_baseline=False,
+            graphql_field="identities",
+            bootstrap_mode="bootstrap_once",
+            label="identities",
+            entity_type="Identity",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "sectors": _sample_node_scope(
+            "sectors",
+            required_for_baseline=False,
+            graphql_field="sectors",
+            bootstrap_mode="bootstrap_once",
+            label="sectors",
+            entity_type="Sector",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "coursesOfAction": _sample_node_scope(
+            "coursesOfAction",
+            required_for_baseline=False,
+            graphql_field="coursesOfAction",
+            bootstrap_mode="bootstrap_once",
+            label="coursesOfAction",
+            entity_type="Course-Of-Action",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "observedData": _sample_node_scope(
+            "observedData",
+            required_for_baseline=False,
+            graphql_field="observedData",
+            bootstrap_mode="bootstrap_once",
+            label="observedData",
+            entity_type="Observed-Data",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "reports": _sample_node_scope(
+            "reports",
+            required_for_baseline=False,
+            graphql_field="reports",
+            bootstrap_mode="bootstrap_once",
+            label="reports",
+            entity_type="Report",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "groupings": _sample_node_scope(
+            "groupings",
+            required_for_baseline=False,
+            graphql_field="groupings",
+            bootstrap_mode="bootstrap_once",
+            label="groupings",
+            entity_type="Grouping",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "tools": _sample_node_scope(
+            "tools",
+            required_for_baseline=False,
+            graphql_field="tools",
+            bootstrap_mode="bootstrap_once",
+            label="tools",
+            entity_type="Tool",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+    }
+
+    baseline_scope = _sample_relationship_scope()
+    baseline_scope["enabled"] = False
+
+    monkeypatch.setattr(service, "_effective_since", lambda state: since)
+    monkeypatch.setattr(service, "_sync_scope_hash", lambda: "scope-hash-1")
+    monkeypatch.setattr(
+        service,
+        "_load_sync_scope_config",
+        lambda: {
+            "node_scopes": node_scopes,
+            "relationship_scopes": {
+                "indicator_ipv4_malware_neighborhood": baseline_scope,
+                "threat_intel_context_direct_relationships": _sample_direct_relationship_scope(),
+            },
+        },
+    )
+    monkeypatch.setattr(service, "_fetch_recent_scope", lambda scope, query_since: [])
+    monkeypatch.setattr(
+        service,
+        "_fetch_recent_relationships",
+        lambda _: [
+            {
+                "id": "relationship-1",
+                "standard_id": "relationship--1",
+                "relationship_type": "uses",
+                "created_at": "2026-05-14T12:00:04Z",
+                "updated_at": "2026-05-14T12:00:05Z",
+                "from": {
+                    "id": "intrusion-set-1",
+                    "standard_id": "intrusion-set--1",
+                    "entity_type": "Intrusion-Set",
+                },
+                "to": {
+                    "id": "malware-1",
+                    "standard_id": "malware--1",
+                    "entity_type": "Malware",
+                },
+            }
+        ],
+    )
+    monkeypatch.setattr(service, "_collect_candidate_pairs", lambda **_: {})
+    monkeypatch.setattr(service, "_collect_named_pairs", lambda _, __, tracked_pairs: (tracked_pairs, []))
+    monkeypatch.setattr(service, "_project_node_scope_record", lambda scope, record, payload_prefix=None: None)
+    monkeypatch.setattr(
+        service,
+        "_project_relationship_payload",
+        lambda relationship_scope, payload, scopes: projected_relationships.append((str(relationship_scope["name"]), payload)),
+    )
+    monkeypatch.setattr(service, "_write_discovery_debug", lambda payload: None)
+    monkeypatch.setattr(service, "_persist_watermark_state", lambda state: None)
+    monkeypatch.setattr(service, "_current_timestamp", lambda: "2026-05-14T12:00:09Z")
+    monkeypatch.setattr(service, "_read_anchor_timestamp", lambda: "")
+
+    service._sync_cycle({"tracked_pairs": []})
+
+    assert projected_relationships == [
+        (
+            "threat_intel_context_direct_relationships",
+            {
+                "relationship_scope_name": "threat_intel_context_direct_relationships",
+                "source_node_scope": "intrusionSets",
+                "target_node_scope": "malware",
+                "source_id": "intrusion-set-1",
+                "source_standard_id": "intrusion-set--1",
+                "source_entity_type": "Intrusion-Set",
+                "target_id": "malware-1",
+                "target_standard_id": "malware--1",
+                "target_entity_type": "Malware",
+                "relationship_id": "relationship-1",
+                "relationship_standard_id": "relationship--1",
+                "relationship_type": "uses",
+                "relationship_created_at": "2026-05-14T12:00:04Z",
+                "relationship_updated_at": "2026-05-14T12:00:05Z",
+            },
+        )
+    ]
+
+
+def test_fetch_connection_passes_observable_type_arguments(monkeypatch: pytest.MonkeyPatch) -> None:
+    graphql_calls: list[tuple[str, dict[str, object]]] = []
+
+    monkeypatch.setattr(service, "_configured_graphql_page_size", lambda: 50)
+
+    def _fake_graphql_request(query: str, variables: dict[str, object] | None = None) -> dict[str, object]:
+        graphql_calls.append((query, dict(variables or {})))
+        return {
+            "stixCyberObservables": {
+                "edges": [],
+                "pageInfo": {"hasNextPage": False, "endCursor": None},
+            }
+        }
+
+    monkeypatch.setattr(service, "_graphql_request", _fake_graphql_request)
+
+    service._fetch_connection(
+        "stixCyberObservables",
+        "id standard_id entity_type observable_value updated_at created_at",
+        datetime(2026, 5, 1, 0, 0, 0, tzinfo=UTC),
+        {"types": ["Domain-Name"]},
+    )
+
+    assert "types: $types" in graphql_calls[0][0]
+    assert graphql_calls[0][1]["types"] == ["Domain-Name"]
+
+
+def test_load_sync_scope_config_accepts_typed_connection_arguments(monkeypatch: pytest.MonkeyPatch) -> None:
+    payload = {
+        "version": 1,
+        "node_scopes": [
+            _sample_node_scope(
+                "ipv4_observable",
+                graphql_field="stixCyberObservables",
+                label="ipv4-addr",
+                entity_type="IPv4-Addr",
+                extra_properties=[{"property": "value", "source_field": "value"}],
+                search={
+                    "mode": "search_connection",
+                    "search_field": "value",
+                    "match_fields": [
+                        {"record_field": "entity_type", "equals": "IPv4-Addr"},
+                        {"record_field": "value", "equals_search": True},
+                    ],
+                },
+            ),
+            _sample_node_scope(
+                "indicator",
+                graphql_field="indicators",
+                label="indicator",
+                entity_type="Indicator",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "malware",
+                graphql_field="malwares",
+                label="malware",
+                entity_type="Malware",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "vulnerability",
+                required_for_baseline=False,
+                graphql_field="vulnerabilities",
+                bootstrap_mode="bootstrap_once",
+                label="vulnerability",
+                entity_type="Vulnerability",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "domain_name_observable",
+                required_for_baseline=False,
+                graphql_field="stixCyberObservables",
+                selection="id standard_id entity_type observable_value updated_at created_at",
+                bootstrap_mode="bootstrap_once",
+                label="domain-name",
+                entity_type="Domain-Name",
+                extra_properties=[{"property": "value", "source_field": "observable_value"}],
+                search={
+                    "mode": "search_connection",
+                    "search_field": "observable_value",
+                    "match_fields": [
+                        {"record_field": "entity_type", "equals": "Domain-Name"},
+                        {"record_field": "observable_value", "equals_search": True},
+                    ],
+                },
+                connection_arguments={"types": ["Domain-Name"]},
+            ),
+        ],
+        "relationship_scopes": [_sample_relationship_scope()],
+    }
+
+    monkeypatch.setattr(service, "SYNC_SCOPE_PATH", Path("virtual/sync_scope.json"))
+    monkeypatch.setattr(service.Path, "is_file", lambda self: True)
+    monkeypatch.setattr(service.Path, "read_text", lambda self, encoding="utf-8": service.json.dumps(payload))
+
+    scopes = service._load_sync_scope_config()
+
+    assert scopes["node_scopes"]["domain_name_observable"]["connection_arguments"] == {"types": ["Domain-Name"]}
 
 
 def test_load_sync_scope_config_rejects_disabled_required_relationship_scope(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "enable_all_candidate_node_scopes": true,
+  "enable_all_candidate_node_scopes": false,
   "node_scopes": [
     {
       "name": "ipv4_observable",
@@ -33,11 +33,110 @@
       }
     },
     {
+      "name": "domain_name_observable",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "stixCyberObservables",
+      "connection_arguments": {
+        "types": ["Domain-Name"]
+      },
+      "selection": "id standard_id entity_type observable_value updated_at created_at",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "domain-name",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "value", "source_field": "observable_value" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "observable_value",
+        "match_fields": [
+          { "record_field": "entity_type", "equals": "Domain-Name" },
+          { "record_field": "observable_value", "equals_search": true }
+        ]
+      }
+    },
+    {
+      "name": "url_observable",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "stixCyberObservables",
+      "connection_arguments": {
+        "types": ["Url"]
+      },
+      "selection": "id standard_id entity_type observable_value updated_at created_at",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "url",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "value", "source_field": "observable_value" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "observable_value",
+        "match_fields": [
+          { "record_field": "entity_type", "equals": "Url" },
+          { "record_field": "observable_value", "equals_search": true }
+        ]
+      }
+    },
+    {
+      "name": "file_observable",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "stixCyberObservables",
+      "connection_arguments": {
+        "types": ["File"]
+      },
+      "selection": "id standard_id entity_type observable_value updated_at created_at",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "file",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "value", "source_field": "observable_value" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "observable_value",
+        "match_fields": [
+          { "record_field": "entity_type", "equals": "File" },
+          { "record_field": "observable_value", "equals_search": true }
+        ]
+      }
+    },
+    {
       "name": "indicator",
       "enabled": true,
       "required_for_baseline": true,
       "graphql_field": "indicators",
-      "selection": "id standard_id name pattern updated_at created_at x_opencti_main_observable_type",
+      "selection": "id standard_id name pattern updated_at created_at x_opencti_main_observable_type confidence valid_from valid_until",
       "bootstrap_mode": "incremental",
       "projection": {
         "label": "indicator",
@@ -51,6 +150,9 @@
           { "property": "name", "source_field": "name" },
           { "property": "pattern", "source_field": "pattern" },
           { "property": "x_opencti_main_observable_type", "source_field": "x_opencti_main_observable_type" },
+          { "property": "confidence", "source_field": "confidence" },
+          { "property": "valid_from", "source_field": "valid_from" },
+          { "property": "valid_until", "source_field": "valid_until" },
           { "property": "created_at", "source_field": "created_at" },
           { "property": "updated_at", "source_field": "updated_at" }
         ]
@@ -108,6 +210,303 @@
         "properties": [
           { "property": "opencti_id", "source_field": "id" },
           { "property": "entity_type", "static_value": "Vulnerability" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "attackPatterns",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "attackPatterns",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "attackPatterns",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "campaigns",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "campaigns",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "campaigns",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "infrastructures",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "infrastructures",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "infrastructures",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "intrusionSets",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "intrusionSets",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "intrusionSets",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "reports",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "reports",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "reports",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "groupings",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "groupings",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "groupings",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "identities",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "identities",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "identities",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "sectors",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "sectors",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "sectors",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "coursesOfAction",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "coursesOfAction",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "coursesOfAction",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "observedData",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "observedData",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "observedData",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
+          { "property": "name", "source_field": "name" },
+          { "property": "description", "source_field": "description" },
+          { "property": "created_at", "source_field": "created_at" },
+          { "property": "updated_at", "source_field": "updated_at" }
+        ]
+      },
+      "search": {
+        "mode": "search_connection",
+        "search_field": "name"
+      }
+    },
+    {
+      "name": "tools",
+      "enabled": true,
+      "required_for_baseline": false,
+      "graphql_field": "tools",
+      "selection": "id standard_id entity_type updated_at created_at name description",
+      "bootstrap_mode": "bootstrap_once",
+      "projection": {
+        "label": "tools",
+        "merge_key": {
+          "property": "standard_id",
+          "source_field": "standard_id"
+        },
+        "properties": [
+          { "property": "opencti_id", "source_field": "id" },
+          { "property": "entity_type", "source_field": "entity_type" },
           { "property": "name", "source_field": "name" },
           { "property": "description", "source_field": "description" },
           { "property": "created_at", "source_field": "created_at" },
@@ -226,6 +625,68 @@
           "based_on": "search-based-on::{indicator_id}::{observable_id}",
           "indicates": "search-indicates::{indicator_id}::{malware_id}"
         }
+      }
+    },
+    {
+      "name": "indicator_extended_observable_based_on_direct_relationships",
+      "relationship_mode": "direct",
+      "enabled": true,
+      "required_for_baseline": false,
+      "bootstrap_mode": "incremental",
+      "allowed_relationship_types": ["based-on"],
+      "entity_type_node_scopes": {
+        "Indicator": "indicator",
+        "Domain-Name": "domain_name_observable",
+        "Url": "url_observable",
+        "File": "file_observable"
+      },
+      "relationship_projection": {
+        "merge_key": {
+          "property": "opencti_id",
+          "source_field": "relationship_id"
+        },
+        "properties": [
+          { "property": "standard_id", "source_field": "relationship_standard_id" },
+          { "property": "relationship_type", "source_field": "relationship_type" },
+          { "property": "created_at", "source_field": "relationship_created_at" },
+          { "property": "updated_at", "source_field": "relationship_updated_at" }
+        ]
+      }
+    },
+    {
+      "name": "threat_intel_context_direct_relationships",
+      "relationship_mode": "direct",
+      "enabled": true,
+      "required_for_baseline": false,
+      "bootstrap_mode": "incremental",
+      "allowed_relationship_types": ["indicates", "uses", "targets", "related-to", "mitigates"],
+      "entity_type_node_scopes": {
+        "Indicator": "indicator",
+        "Malware": "malware",
+        "Vulnerability": "vulnerability",
+        "Attack-Pattern": "attackPatterns",
+        "Campaign": "campaigns",
+        "Infrastructure": "infrastructures",
+        "Intrusion-Set": "intrusionSets",
+        "Report": "reports",
+        "Grouping": "groupings",
+        "Identity": "identities",
+        "Sector": "sectors",
+        "Course-Of-Action": "coursesOfAction",
+        "Observed-Data": "observedData",
+        "Tool": "tools"
+      },
+      "relationship_projection": {
+        "merge_key": {
+          "property": "opencti_id",
+          "source_field": "relationship_id"
+        },
+        "properties": [
+          { "property": "standard_id", "source_field": "relationship_standard_id" },
+          { "property": "relationship_type", "source_field": "relationship_type" },
+          { "property": "created_at", "source_field": "relationship_created_at" },
+          { "property": "updated_at", "source_field": "relationship_updated_at" }
+        ]
       }
     }
   ]
