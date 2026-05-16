@@ -85,5 +85,7 @@ def test_query_backend_container_delivery_is_physicalized() -> None:
     assert "FROM python:3.13-slim" in mirror_dockerfile_text
     assert "service.py" in mirror_dockerfile_text
     assert "bootstrap_start_at" in mirror_service_text
+    assert "candidate relationship scope templates" in (ROOT / "mirror-sync" / "ARCHITECTURE.md").read_text(encoding="utf-8")
+    assert "candidate relationship scope templates" in (ROOT / "OVERALL_ARCHITECTURE.md").read_text(encoding="utf-8")
     assert "FROM python:3.13-slim" in dockerfile_text
     assert "server.py" in dockerfile_text

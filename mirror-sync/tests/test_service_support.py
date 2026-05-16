@@ -277,6 +277,98 @@ def test_load_sync_scope_config_rejects_disabled_required_scope(monkeypatch: pyt
         service._load_sync_scope_config()
 
 
+def test_load_sync_scope_config_rejects_candidate_relationship_autoload(monkeypatch: pytest.MonkeyPatch) -> None:
+    payload = {
+        "version": 1,
+        "enable_all_candidate_relationship_scopes": True,
+        "node_scopes": [
+            _sample_node_scope(
+                "ipv4_observable",
+                graphql_field="stixCyberObservables",
+                label="ipv4-addr",
+                entity_type="IPv4-Addr",
+                extra_properties=[{"property": "value", "source_field": "value"}],
+                search={"mode": "search_connection", "search_field": "value"},
+            ),
+            _sample_node_scope(
+                "indicator",
+                graphql_field="indicators",
+                label="indicator",
+                entity_type="Indicator",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "malware",
+                graphql_field="malwares",
+                label="malware",
+                entity_type="Malware",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            _sample_node_scope(
+                "vulnerability",
+                required_for_baseline=False,
+                graphql_field="vulnerabilities",
+                bootstrap_mode="bootstrap_once",
+                label="vulnerability",
+                entity_type="Vulnerability",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+        ],
+        "relationship_scopes": [_sample_relationship_scope()],
+    }
+
+    monkeypatch.setattr(service, "SYNC_SCOPE_PATH", Path("virtual/sync_scope.json"))
+    monkeypatch.setattr(service.Path, "is_file", lambda self: True)
+    monkeypatch.setattr(service.Path, "read_text", lambda self, encoding="utf-8": service.json.dumps(payload))
+
+    with pytest.raises(AssertionError, match="does not support enabling candidate relationship scopes automatically"):
+        service._load_sync_scope_config()
+
+
+def test_fetch_connection_paginates_all_pages(monkeypatch: pytest.MonkeyPatch) -> None:
+    responses = [
+        {
+            "attackPatterns": {
+                "edges": [{"node": {"id": "attack-pattern-1"}}, {"node": {"id": "attack-pattern-2"}}],
+                "pageInfo": {"hasNextPage": True, "endCursor": "cursor-1"},
+            }
+        },
+        {
+            "attackPatterns": {
+                "edges": [{"node": {"id": "attack-pattern-3"}}],
+                "pageInfo": {"hasNextPage": False, "endCursor": "cursor-2"},
+            }
+        },
+    ]
+    graphql_calls: list[tuple[str, dict[str, object]]] = []
+
+    monkeypatch.setattr(service, "_configured_graphql_page_size", lambda: 2)
+
+    def _fake_graphql_request(query: str, variables: dict[str, object] | None = None) -> dict[str, object]:
+        graphql_calls.append((query, dict(variables or {})))
+        return responses[len(graphql_calls) - 1]
+
+    monkeypatch.setattr(service, "_graphql_request", _fake_graphql_request)
+
+    records = service._fetch_connection(
+        "attackPatterns",
+        "id standard_id name updated_at created_at",
+        datetime(2026, 5, 1, 0, 0, 0, tzinfo=UTC),
+    )
+
+    assert [record["id"] for record in records] == [
+        "attack-pattern-1",
+        "attack-pattern-2",
+        "attack-pattern-3",
+    ]
+    assert graphql_calls[0][1]["first"] == 2
+    assert graphql_calls[0][1]["after"] is None
+    assert graphql_calls[1][1]["after"] == "cursor-1"
+
+
 def test_load_sync_scope_config_rejects_disabled_required_relationship_scope(monkeypatch: pytest.MonkeyPatch) -> None:
     relationship_scope = _sample_relationship_scope()
     relationship_scope["enabled"] = False
@@ -383,10 +475,41 @@ def test_load_sync_scope_config_can_enable_all_candidate_node_scopes(monkeypatch
             extra_properties=[{"property": "name", "source_field": "name"}],
             search={"mode": "search_connection", "search_field": "name"},
         ),
+        {
+            **_sample_node_scope(
+                "about",
+                required_for_baseline=False,
+                graphql_field="about",
+                bootstrap_mode="bootstrap_once",
+                label="about",
+                entity_type="AppInfo",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+                search={"mode": "search_connection", "search_field": "name"},
+            ),
+            "introspection": {
+                "return_type": "AppInfo",
+                "arguments": [],
+            },
+        },
     ]
+
+    candidate_scopes[0]["introspection"] = {"return_type": "IndicatorConnection", "arguments": ["first", "search"]}
+    candidate_scopes[1]["introspection"] = {"return_type": "MalwareConnection", "arguments": ["first", "search"]}
+    candidate_scopes[2]["introspection"] = {"return_type": "VulnerabilityConnection", "arguments": ["first", "search"]}
+    candidate_scopes[3]["introspection"] = {"return_type": "ReportConnection", "arguments": ["first", "search"]}
 
     monkeypatch.setattr(service, "SYNC_SCOPE_PATH", Path("virtual/sync_scope.json"))
     monkeypatch.setattr(service, "FULL_SCOPE_CATALOG_PATH", Path("virtual/sync_scope.full.json"))
+    monkeypatch.setattr(
+        service,
+        "_resolve_candidate_connection_node_metadata",
+        lambda return_type: {
+            "IndicatorConnection": ("Indicator", {"id", "standard_id", "entity_type", "created_at", "updated_at", "name"}),
+            "MalwareConnection": ("Malware", {"id", "standard_id", "entity_type", "created_at", "updated_at", "name"}),
+            "VulnerabilityConnection": ("Vulnerability", {"id", "standard_id", "entity_type", "created_at", "updated_at", "name"}),
+            "ReportConnection": ("Report", {"id", "standard_id", "entity_type", "created_at", "updated_at", "name"}),
+        }.get(return_type),
+    )
 
     def _fake_is_file(self: Path) -> bool:
         return str(self) in {"virtual\\sync_scope.json", "virtual\\sync_scope.full.json"}
@@ -404,8 +527,44 @@ def test_load_sync_scope_config_can_enable_all_candidate_node_scopes(monkeypatch
     scopes = service._load_sync_scope_config()
 
     assert {"ipv4_observable", "indicator", "malware", "vulnerability", "report"} <= set(scopes["node_scopes"])
+    assert "about" not in scopes["node_scopes"]
     assert scopes["node_scopes"]["report"]["enabled"] is True
     assert set(scopes["relationship_scopes"]) == {"indicator_ipv4_malware_neighborhood"}
+
+
+def test_materialize_candidate_node_scope_uses_available_connection_fields(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        service,
+        "_resolve_candidate_connection_node_metadata",
+        lambda return_type: ("Log", {"id", "created_at"}) if return_type == "LogConnection" else None,
+    )
+
+    scope = service._materialize_candidate_node_scope(
+        {
+            **_sample_node_scope(
+                "logs",
+                required_for_baseline=False,
+                graphql_field="logs",
+                bootstrap_mode="bootstrap_once",
+                label="logs",
+                entity_type="Log",
+                extra_properties=[{"property": "name", "source_field": "name"}],
+            ),
+            "introspection": {
+                "return_type": "LogConnection",
+                "arguments": ["first"],
+            },
+        }
+    )
+
+    assert scope is not None
+    assert scope["selection"] == "id created_at"
+    assert scope["projection"]["merge_key"]["source_field"] == "id"
+    assert scope["projection"]["properties"] == [
+        {"property": "opencti_id", "source_field": "id"},
+        {"property": "entity_type", "static_value": "Log"},
+        {"property": "created_at", "source_field": "created_at"},
+    ]
 
 
 def test_effective_since_rewinds_existing_watermark(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -689,6 +848,7 @@ def test_sync_cycle_projects_recent_vulnerabilities(monkeypatch: pytest.MonkeyPa
     projected_relationships: list[dict[str, object]] = []
     debug_payloads: list[dict[str, object]] = []
     fetch_scope_calls: list[tuple[str, datetime]] = []
+    persisted_states: list[dict[str, object]] = []
     node_scopes = {
         "ipv4_observable": _sample_node_scope(
             "ipv4_observable",
@@ -775,7 +935,7 @@ def test_sync_cycle_projects_recent_vulnerabilities(monkeypatch: pytest.MonkeyPa
         lambda relationship_scope, pair, scopes: projected_relationships.append(pair),
     )
     monkeypatch.setattr(service, "_write_discovery_debug", lambda payload: debug_payloads.append(payload))
-    monkeypatch.setattr(service, "_persist_watermark_state", lambda state: None)
+    monkeypatch.setattr(service, "_persist_watermark_state", lambda state: persisted_states.append(state))
     monkeypatch.setattr(service, "_read_anchor_timestamp", lambda: "")
     monkeypatch.setattr(service, "_current_timestamp", lambda: "2026-05-14T12:00:09Z")
 
@@ -800,7 +960,110 @@ def test_sync_cycle_projects_recent_vulnerabilities(monkeypatch: pytest.MonkeyPa
     assert next_state["vulnerabilities_bootstrapped"] is True
     assert next_state["sync_scope_hash"] == "scope-hash-1"
     assert next_state["bootstrapped_node_scopes"] == ["ipv4_observable", "indicator", "malware", "vulnerability"]
+    assert persisted_states[0]["bootstrapped_node_scopes"] == []
+    assert persisted_states[0]["tracked_pairs"] == []
+    assert persisted_states[-1]["bootstrapped_node_scopes"] == [
+        "ipv4_observable",
+        "indicator",
+        "malware",
+        "vulnerability",
+    ]
     assert debug_payloads[0]["enabled_node_scopes"] == ["ipv4_observable", "indicator", "malware", "vulnerability"]
     assert debug_payloads[0]["enabled_relationship_scopes"] == ["indicator_ipv4_malware_neighborhood"]
     assert debug_payloads[0]["scope_since_by_name"]["vulnerability"] == "2026-05-01T00:00:00Z"
     assert debug_payloads[0]["recent_vulnerability_names"] == ["CVE-2019-1132"]
+
+
+def test_sync_cycle_skips_unsupported_optional_node_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+    since = datetime(2026, 5, 14, 12, 0, 0, tzinfo=UTC)
+    debug_payloads: list[dict[str, object]] = []
+    node_scopes = {
+        "ipv4_observable": _sample_node_scope(
+            "ipv4_observable",
+            graphql_field="stixCyberObservables",
+            label="ipv4-addr",
+            entity_type="IPv4-Addr",
+            extra_properties=[{"property": "value", "source_field": "value"}],
+            search={"mode": "search_connection", "search_field": "value"},
+        ),
+        "indicator": _sample_node_scope(
+            "indicator",
+            graphql_field="indicators",
+            label="indicator",
+            entity_type="Indicator",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "malware": _sample_node_scope(
+            "malware",
+            graphql_field="malwares",
+            label="malware",
+            entity_type="Malware",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "vulnerability": _sample_node_scope(
+            "vulnerability",
+            required_for_baseline=False,
+            graphql_field="vulnerabilities",
+            bootstrap_mode="bootstrap_once",
+            label="vulnerability",
+            entity_type="Vulnerability",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+        "disseminationLists": _sample_node_scope(
+            "disseminationLists",
+            enabled=True,
+            required_for_baseline=False,
+            graphql_field="disseminationLists",
+            bootstrap_mode="bootstrap_once",
+            label="disseminationLists",
+            entity_type="DisseminationList",
+            extra_properties=[{"property": "name", "source_field": "name"}],
+            search={"mode": "search_connection", "search_field": "name"},
+        ),
+    }
+
+    monkeypatch.setattr(service, "_effective_since", lambda state: since)
+    monkeypatch.setattr(service, "_sync_scope_hash", lambda: "scope-hash-1")
+    monkeypatch.setattr(
+        service,
+        "_load_sync_scope_config",
+        lambda: {
+            "node_scopes": node_scopes,
+            "relationship_scopes": {
+                "indicator_ipv4_malware_neighborhood": _sample_relationship_scope(),
+            },
+        },
+    )
+    monkeypatch.setattr(service, "_bootstrap_floor", lambda: "2026-05-01T00:00:00Z")
+
+    def _fake_fetch_recent_scope(scope: dict[str, object], query_since: datetime) -> list[dict[str, object]]:
+        if scope["name"] == "disseminationLists":
+            raise AssertionError("Enterprise edition is not enabled")
+        return []
+
+    monkeypatch.setattr(service, "_fetch_recent_scope", _fake_fetch_recent_scope)
+    monkeypatch.setattr(service, "_fetch_recent_relationships", lambda _: [])
+    monkeypatch.setattr(service, "_collect_candidate_pairs", lambda **_: {})
+    monkeypatch.setattr(service, "_collect_named_pairs", lambda _, __, tracked_pairs: (tracked_pairs, []))
+    monkeypatch.setattr(service, "_project_node_scope_record", lambda *args, **kwargs: None)
+    monkeypatch.setattr(service, "_project_relationship_payload", lambda *args, **kwargs: None)
+    monkeypatch.setattr(service, "_write_discovery_debug", lambda payload: debug_payloads.append(payload))
+    monkeypatch.setattr(service, "_persist_watermark_state", lambda state: None)
+    monkeypatch.setattr(service, "_read_anchor_timestamp", lambda: "")
+    monkeypatch.setattr(service, "_current_timestamp", lambda: "2026-05-14T12:00:09Z")
+
+    next_state = service._sync_cycle({"tracked_pairs": []})
+
+    assert next_state["bootstrapped_node_scopes"] == [
+        "ipv4_observable",
+        "indicator",
+        "malware",
+        "vulnerability",
+        "disseminationLists",
+    ]
+    assert debug_payloads[0]["skipped_optional_node_scope_errors"] == {
+        "disseminationLists": "Enterprise edition is not enabled"
+    }

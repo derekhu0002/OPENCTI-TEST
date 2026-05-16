@@ -1,0 +1,78 @@
+Command run at 05/15/2026 18:52:12
+ Image xtm-mirror-sync Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 530B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 381B 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.13-slim
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 462B done
+#5 DONE 0.0s
+
+#6 [1/6] FROM docker.io/library/python:3.13-slim@sha256:92c262cbb2e99cdc16218338d74fbe518055c13d224d942708f70f8042ff6d18
+#6 resolve docker.io/library/python:3.13-slim@sha256:92c262cbb2e99cdc16218338d74fbe518055c13d224d942708f70f8042ff6d18 0.1s done
+#6 DONE 0.1s
+
+#7 [2/6] WORKDIR /app
+#7 CACHED
+
+#8 [3/6] COPY mirror-sync/service.py /app/mirror-sync/service.py
+#8 CACHED
+
+#9 [4/6] COPY mirror-sync/sync_scope.json /app/mirror-sync/sync_scope.json
+#9 CACHED
+
+#10 [5/6] COPY mirror-sync/sync_scope.full.json /app/mirror-sync/sync_scope.full.json
+#10 CACHED
+
+#11 [6/6] COPY mirror-sync/runtime /app/mirror-sync/runtime
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers 0.0s done
+#12 exporting manifest sha256:8c8f6266bd556808ed4f5a857ceaeb54a032d75ec2b44f7fb3f9e3b53b6111ab done
+#12 exporting config sha256:3bb70e4891171e2883f39eb72bd2f1ed2c4c37fc8d25793daa8b3278a53155ed
+#12 exporting config sha256:3bb70e4891171e2883f39eb72bd2f1ed2c4c37fc8d25793daa8b3278a53155ed done
+#12 exporting attestation manifest sha256:cb432232621dde036bbccf1db2d21ab88e68887432aa33e543e128d62ffbed99 0.1s done
+#12 exporting manifest list sha256:a6cd8d52b5aa77f603ecda5adbe9ae0232005e97463d9b796cc4e6bc482dda88
+#12 exporting manifest list sha256:a6cd8d52b5aa77f603ecda5adbe9ae0232005e97463d9b796cc4e6bc482dda88 0.0s done
+#12 naming to docker.io/library/xtm-mirror-sync:latest done
+#12 unpacking to docker.io/library/xtm-mirror-sync:latest 0.0s done
+#12 DONE 0.4s
+
+#13 resolving provenance for metadata file
+#13 DONE 0.0s
+ Image xtm-mirror-sync Built 
+time="2026-05-15T18:52:15+08:00" level=warning msg="Found orphan containers ([xtm-misp-core-1 xtm-misp-db-1 xtm-misp-redis-1 xtm-misp-modules-1]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container xtm-minio-1 Running 
+ Container xtm-redis-1 Running 
+ Container xtm-elasticsearch-1 Running 
+ Container xtm-neo4j-1 Running 
+ Container xtm-rabbitmq-1 Running 
+ Container xtm-opencti-1 Running 
+ Container xtm-mirror-sync-1 Recreate 
+ Container xtm-mirror-sync-1 Recreated 
+ Container xtm-redis-1 Waiting 
+ Container xtm-elasticsearch-1 Waiting 
+ Container xtm-minio-1 Waiting 
+ Container xtm-rabbitmq-1 Waiting 
+ Container xtm-rabbitmq-1 Healthy 
+ Container xtm-redis-1 Healthy 
+ Container xtm-minio-1 Healthy 
+ Container xtm-elasticsearch-1 Healthy 
+ Container xtm-neo4j-1 Waiting 
+ Container xtm-opencti-1 Waiting 
+ Container xtm-neo4j-1 Healthy 
+ Container xtm-opencti-1 Healthy 
+ Container xtm-mirror-sync-1 Starting 
+ Container xtm-mirror-sync-1 Started 

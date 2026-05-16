@@ -158,6 +158,14 @@ services:
         target: /app/mirror-sync/service.py
         read_only: true
       - type: bind
+        source: ./mirror-sync/sync_scope.json
+        target: /app/mirror-sync/sync_scope.json
+        read_only: true
+      - type: bind
+        source: ./mirror-sync/sync_scope.full.json
+        target: /app/mirror-sync/sync_scope.full.json
+        read_only: true
+      - type: bind
         source: ./mirror-sync/runtime
         target: /app/mirror-sync/runtime
     depends_on:

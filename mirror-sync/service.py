@@ -17,6 +17,7 @@ ENV_PATH = ROOT / ".env"
 RUNTIME_DIR = Path(__file__).resolve().parent / "runtime"
 SYNC_SCOPE_PATH = Path(__file__).resolve().parent / "sync_scope.json"
 FULL_SCOPE_CATALOG_PATH = Path(__file__).resolve().parent / "sync_scope.full.json"
+FULL_SCOPE_INTROSPECTION_PATH = RUNTIME_DIR / "full_scope_introspection.json"
 FRESHNESS_PATH = RUNTIME_DIR / "freshness.json"
 WATERMARK_PATH = RUNTIME_DIR / "stream.watermark.json"
 ANCHOR_PATH = RUNTIME_DIR / "test_bootstrap_anchor.json"
@@ -42,11 +43,158 @@ def _load_candidate_node_scope_catalog() -> list[dict[str, object]]:
     for index, scope in enumerate(candidate_node_scopes):
         if not isinstance(scope, dict):
             raise AssertionError(f"Invalid candidate node scope at index {index}: expected object")
-        materialized_scope = dict(scope)
-        materialized_scope["enabled"] = True
-        materialized_scope.setdefault("required_for_baseline", False)
-        materialized_scopes.append(materialized_scope)
+        materialized_scope = _materialize_candidate_node_scope(scope)
+        if materialized_scope is not None:
+            materialized_scopes.append(materialized_scope)
     return materialized_scopes
+
+
+def _load_full_scope_types_by_name() -> dict[str, dict[str, object]]:
+    if not FULL_SCOPE_INTROSPECTION_PATH.is_file():
+        raise AssertionError(
+            f"Missing mirror sync full-scope introspection snapshot: {FULL_SCOPE_INTROSPECTION_PATH}"
+        )
+    payload = json.loads(FULL_SCOPE_INTROSPECTION_PATH.read_text(encoding="utf-8"))
+    schema = payload.get("data", {}).get("__schema", {})
+    types = schema.get("types")
+    if not isinstance(types, list):
+        raise AssertionError("Mirror sync full-scope introspection snapshot is missing schema types")
+    return {
+        str(item["name"]): item
+        for item in types
+        if isinstance(item, dict) and isinstance(item.get("name"), str) and item.get("name")
+    }
+
+
+def _named_type_name(type_ref: dict[str, object] | None) -> str | None:
+    current = type_ref
+    while isinstance(current, dict):
+        name = current.get("name")
+        if isinstance(name, str) and name:
+            return name
+        current = current.get("ofType") if isinstance(current.get("ofType"), dict) else None
+    return None
+
+
+def _resolve_candidate_connection_node_metadata(return_type: str) -> tuple[str, set[str]] | None:
+    types_by_name = _load_full_scope_types_by_name()
+    connection_type = types_by_name.get(return_type)
+    if not isinstance(connection_type, dict):
+        return None
+    connection_fields = connection_type.get("fields") or []
+    edges_field = next(
+        (
+            field
+            for field in connection_fields
+            if isinstance(field, dict) and field.get("name") == "edges"
+        ),
+        None,
+    )
+    if not isinstance(edges_field, dict):
+        return None
+    edge_type_name = _named_type_name(edges_field.get("type"))
+    if not edge_type_name:
+        return None
+    edge_type = types_by_name.get(edge_type_name)
+    if not isinstance(edge_type, dict):
+        return None
+    edge_fields = edge_type.get("fields") or []
+    node_field = next(
+        (
+            field
+            for field in edge_fields
+            if isinstance(field, dict) and field.get("name") == "node"
+        ),
+        None,
+    )
+    if not isinstance(node_field, dict):
+        return None
+    node_type_name = _named_type_name(node_field.get("type"))
+    if not node_type_name:
+        return None
+    node_type = types_by_name.get(node_type_name)
+    if not isinstance(node_type, dict):
+        return None
+    node_fields = {
+        str(field["name"])
+        for field in node_type.get("fields") or []
+        if isinstance(field, dict) and isinstance(field.get("name"), str) and field.get("name")
+    }
+    if not node_fields:
+        return None
+    return node_type_name, node_fields
+
+
+def _selection_field_names(selection: str) -> list[str]:
+    head = selection.split("...", 1)[0]
+    return [token for token in head.split() if token and token != "on"]
+
+
+def _materialize_candidate_node_scope(scope: dict[str, object]) -> dict[str, object] | None:
+    introspection = scope.get("introspection")
+    if not isinstance(introspection, dict):
+        return None
+    arguments = introspection.get("arguments") or []
+    return_type = str(introspection.get("return_type", "")).strip()
+    if "first" not in arguments or "Connection" not in return_type:
+        return None
+
+    connection_metadata = _resolve_candidate_connection_node_metadata(return_type)
+    if connection_metadata is None:
+        return None
+    node_type_name, available_fields = connection_metadata
+
+    selection_fields = _selection_field_names(str(scope.get("selection", "")))
+    sanitized_selection_fields = [field for field in selection_fields if field in available_fields]
+    if "id" not in available_fields:
+        return None
+    if "id" not in sanitized_selection_fields:
+        sanitized_selection_fields.insert(0, "id")
+
+    materialized_scope = dict(scope)
+    materialized_scope["enabled"] = True
+    materialized_scope.setdefault("required_for_baseline", False)
+    materialized_scope["selection"] = " ".join(dict.fromkeys(sanitized_selection_fields))
+
+    projection = dict(scope.get("projection") or {})
+    merge_key = dict(projection.get("merge_key") or {})
+    merge_source_field = "standard_id" if "standard_id" in available_fields else "id"
+    merge_key["source_field"] = merge_source_field
+    projection["merge_key"] = merge_key
+
+    properties: list[dict[str, object]] = []
+    for property_mapping in projection.get("properties") or []:
+        if not isinstance(property_mapping, dict):
+            continue
+        if "static_value" in property_mapping:
+            properties.append(dict(property_mapping))
+            continue
+        source_field = str(property_mapping.get("source_field", "")).strip()
+        property_name = str(property_mapping.get("property", "")).strip()
+        if source_field and source_field in available_fields:
+            properties.append(dict(property_mapping))
+            continue
+        if property_name == "entity_type":
+            properties.append({"property": "entity_type", "static_value": node_type_name})
+    projection["properties"] = properties
+    materialized_scope["projection"] = projection
+
+    search = materialized_scope.get("search")
+    if isinstance(search, dict):
+        search_field = str(search.get("search_field", "")).strip()
+        if search_field not in available_fields:
+            materialized_scope.pop("search", None)
+        else:
+            match_fields = search.get("match_fields") or []
+            materialized_scope["search"] = dict(search)
+            if match_fields:
+                materialized_scope["search"]["match_fields"] = [
+                    dict(field_rule)
+                    for field_rule in match_fields
+                    if str(field_rule.get("record_field", "")).strip() in available_fields
+                ]
+
+    return materialized_scope
 
 
 def _materialize_node_scopes(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -71,6 +219,21 @@ def _materialize_node_scopes(payload: dict[str, object]) -> list[dict[str, objec
         return merged_scopes
 
     return node_scopes
+
+
+def _validate_relationship_scope_flags(payload: dict[str, object]) -> None:
+    enable_all_candidate_relationship_scopes = payload.get("enable_all_candidate_relationship_scopes")
+    if enable_all_candidate_relationship_scopes is None:
+        return
+    if not isinstance(enable_all_candidate_relationship_scopes, bool):
+        raise AssertionError(
+            "Mirror sync scope config field 'enable_all_candidate_relationship_scopes' must be boolean"
+        )
+    if enable_all_candidate_relationship_scopes:
+        raise AssertionError(
+            "Mirror sync scope config does not support enabling candidate relationship scopes automatically; "
+            "declare reviewed relationship scopes explicitly in sync_scope.json"
+        )
 
 
 def _current_timestamp() -> str:
@@ -103,6 +266,7 @@ def _load_sync_scope_config() -> dict[str, dict[str, dict[str, object]]]:
         raise AssertionError(f"Unsupported mirror sync scope config version: {version}")
 
     node_scopes = _materialize_node_scopes(payload)
+    _validate_relationship_scope_flags(payload)
     if not isinstance(node_scopes, list) or not node_scopes:
         raise AssertionError("Mirror sync scope config must define a non-empty node_scopes list")
 
@@ -481,6 +645,59 @@ def _persist_watermark_state(state: dict[str, object]) -> None:
     WATERMARK_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
+def _build_watermark_state(
+    *,
+    sync_scope_hash: str,
+    bootstrapped_node_scopes: list[str],
+    bootstrapped_relationship_scopes: list[str],
+    records_by_scope: dict[str, list[dict[str, object]]],
+    relationships: list[dict[str, object]],
+    tracked_pairs: list[dict[str, object]],
+) -> dict[str, object]:
+    return {
+        "backend": "neo4j-replica",
+        "stream_id": os.getenv("STREAM_ID", "").strip(),
+        "bootstrap_start_at": _read_anchor_timestamp(),
+        "last_synced_at": _max_seen_timestamp(*records_by_scope.values(), relationships),
+        "last_poll_at": _current_timestamp(),
+        "sync_scope_hash": sync_scope_hash,
+        "vulnerabilities_bootstrapped": "vulnerability" in bootstrapped_node_scopes,
+        "bootstrapped_node_scopes": bootstrapped_node_scopes,
+        "bootstrapped_relationship_scopes": bootstrapped_relationship_scopes,
+        "tracked_pairs": tracked_pairs,
+    }
+
+
+def _build_bootstrap_placeholder_watermark_state(state: dict[str, object]) -> dict[str, object]:
+    bootstrapped_node_scopes = [
+        str(item)
+        for item in state.get("bootstrapped_node_scopes", [])
+        if isinstance(item, str)
+    ]
+    bootstrapped_relationship_scopes = [
+        str(item)
+        for item in state.get("bootstrapped_relationship_scopes", [])
+        if isinstance(item, str)
+    ]
+    tracked_pairs = [
+        pair
+        for pair in state.get("tracked_pairs", [])
+        if isinstance(pair, dict)
+    ]
+    return {
+        "backend": "neo4j-replica",
+        "stream_id": os.getenv("STREAM_ID", "").strip(),
+        "bootstrap_start_at": _read_anchor_timestamp(),
+        "last_synced_at": str(state.get("last_synced_at", "")).strip(),
+        "last_poll_at": _current_timestamp(),
+        "sync_scope_hash": str(state.get("sync_scope_hash", "")).strip(),
+        "vulnerabilities_bootstrapped": "vulnerability" in bootstrapped_node_scopes,
+        "bootstrapped_node_scopes": bootstrapped_node_scopes,
+        "bootstrapped_relationship_scopes": bootstrapped_relationship_scopes,
+        "tracked_pairs": tracked_pairs,
+    }
+
+
 def _write_discovery_debug(payload: dict[str, object]) -> None:
     RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
     DISCOVERY_DEBUG_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -519,6 +736,16 @@ def _graphql_request(query: str, variables: dict[str, object] | None = None) -> 
     return body["data"]
 
 
+def _configured_graphql_page_size() -> int:
+    configured = os.getenv("MIRROR_PAGE_SIZE", "").strip()
+    if not configured:
+        return GRAPHQL_PAGE_SIZE
+    try:
+        return max(1, int(configured))
+    except ValueError:
+        return GRAPHQL_PAGE_SIZE
+
+
 def _updated_since_filters(since: datetime) -> dict[str, object]:
     return {
         "mode": "and",
@@ -533,33 +760,106 @@ def _updated_since_filters(since: datetime) -> dict[str, object]:
     }
 
 
+def _fetch_connection_page(
+    query: str,
+    field: str,
+    *,
+    page_size: int,
+    base_variables: dict[str, object] | None = None,
+    limit: int | None = None,
+) -> list[dict[str, object]]:
+    records: list[dict[str, object]] = []
+    after: str | None = None
+    seen_cursors: set[str] = set()
+
+    while True:
+        current_first = page_size
+        if limit is not None:
+            remaining = limit - len(records)
+            if remaining <= 0:
+                return records[:limit]
+            current_first = min(current_first, remaining)
+
+        variables = {"first": current_first, "after": after}
+        if base_variables:
+            variables.update(base_variables)
+        data = _graphql_request(query, variables)
+        connection = data.get(field)
+        if not isinstance(connection, dict):
+            raise AssertionError(f"OpenCTI GraphQL query did not return connection payload for field '{field}'")
+        edges = connection.get("edges")
+        if not isinstance(edges, list):
+            raise AssertionError(f"OpenCTI GraphQL query did not return edges list for field '{field}'")
+        for edge in edges:
+            if not isinstance(edge, dict) or not isinstance(edge.get("node"), dict):
+                continue
+            records.append(edge["node"])
+
+        page_info = connection.get("pageInfo") or {}
+        has_next_page = bool(page_info.get("hasNextPage"))
+        end_cursor = str(page_info.get("endCursor", "")).strip() or None
+        if not has_next_page:
+            break
+        if not end_cursor or end_cursor in seen_cursors:
+            raise AssertionError(f"OpenCTI GraphQL pagination for field '{field}' returned an invalid cursor")
+        seen_cursors.add(end_cursor)
+        after = end_cursor
+
+    return records[:limit] if limit is not None else records
+
+
 def _fetch_connection(field: str, selection: str, since: datetime) -> list[dict[str, object]]:
+    page_size = _configured_graphql_page_size()
     filtered_query = (
-        f"query MirrorRecent($first: Int!, $filters: FilterGroup) {{"
-        f" {field}(first: $first, filters: $filters, orderBy: updated_at, orderMode: desc) {{"
+        f"query MirrorRecent($first: Int!, $after: ID, $filters: FilterGroup) {{"
+        f" {field}(first: $first, after: $after, filters: $filters, orderBy: updated_at, orderMode: desc) {{"
         "   edges {"
         f"     node {{ {selection} }}"
         "   }"
+        "   pageInfo { hasNextPage endCursor }"
         " }"
         "}"
     )
     try:
-        data = _graphql_request(
+        return _fetch_connection_page(
             filtered_query,
-            {"first": GRAPHQL_PAGE_SIZE, "filters": _updated_since_filters(since)},
+            field,
+            page_size=page_size,
+            base_variables={"filters": _updated_since_filters(since)},
         )
     except AssertionError:
-        fallback_query = (
-            f"query MirrorRecent($first: Int!) {{"
-            f" {field}(first: $first, orderBy: updated_at, orderMode: desc) {{"
-            "   edges {"
-            f"     node {{ {selection} }}"
-            "   }"
-            " }"
-            "}"
-        )
-        data = _graphql_request(fallback_query, {"first": GRAPHQL_PAGE_SIZE})
-    return [edge["node"] for edge in data[field]["edges"]]
+        try:
+            fallback_query = (
+                f"query MirrorRecent($first: Int!, $after: ID) {{"
+                f" {field}(first: $first, after: $after, orderBy: updated_at, orderMode: desc) {{"
+                "   edges {"
+                f"     node {{ {selection} }}"
+                "   }"
+                "   pageInfo { hasNextPage endCursor }"
+                " }"
+                "}"
+            )
+            return _fetch_connection_page(
+                fallback_query,
+                field,
+                page_size=page_size,
+            )
+        except AssertionError:
+            first_only_query = (
+                f"query MirrorRecent($first: Int!, $after: ID) {{"
+                f" {field}(first: $first, after: $after) {{"
+                "   edges {"
+                f"     node {{ {selection} }}"
+                "   }"
+                "   pageInfo { hasNextPage endCursor }"
+                " }"
+                "}"
+            )
+            return _fetch_connection_page(
+                first_only_query,
+                field,
+                page_size=page_size,
+            )
 
 
 def _fetch_recent_scope(scope: dict[str, object], since: datetime) -> list[dict[str, object]]:
@@ -570,21 +870,28 @@ def _fetch_recent_scope(scope: dict[str, object], since: datetime) -> list[dict[
     )
 
 
-def _search_connection(field: str, selection: str, search: str, limit: int = 10) -> list[dict[str, object]]:
+def _search_connection(field: str, selection: str, search: str, limit: int | None = 10) -> list[dict[str, object]]:
+    page_size = _configured_graphql_page_size()
     query = (
-        f"query MirrorSearch($first: Int!, $search: String) {{"
-        f" {field}(first: $first, search: $search, orderBy: updated_at, orderMode: desc) {{"
+        f"query MirrorSearch($first: Int!, $after: ID, $search: String) {{"
+        f" {field}(first: $first, after: $after, search: $search, orderBy: updated_at, orderMode: desc) {{"
         "   edges {"
         f"     node {{ {selection} }}"
         "   }"
+        "   pageInfo { hasNextPage endCursor }"
         " }"
         "}"
     )
     try:
-        data = _graphql_request(query, {"first": limit, "search": search})
+        return _fetch_connection_page(
+            query,
+            field,
+            page_size=page_size,
+            base_variables={"search": search},
+            limit=limit,
+        )
     except AssertionError:
         return []
-    return [edge["node"] for edge in data[field]["edges"]]
 
 
 def _fetch_recent_observables(since: datetime) -> list[dict[str, object]]:
@@ -636,7 +943,7 @@ def _fetch_named_replica_indicators(since: datetime) -> list[dict[str, object]]:
     candidate_map: dict[str, dict[str, object]] = {}
     search_term = str(dict(relationship_scope["named_fallback"])["indicator_search_term"])
 
-    for candidate in _search_connection("indicators", selection, search_term, limit=200):
+    for candidate in _search_connection("indicators", selection, search_term, limit=None):
         candidate_id = str(candidate.get("id", "")).strip()
         if candidate_id:
             candidate_map[candidate_id] = candidate
@@ -1242,15 +1549,38 @@ def _enabled_scope_names(scopes_by_name: dict[str, dict[str, object]]) -> list[s
 
 
 def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
+    _persist_watermark_state(_build_bootstrap_placeholder_watermark_state(state))
     scopes_by_name = _load_sync_scope_config()
     node_scopes = scopes_by_name["node_scopes"]
     relationship_scopes = scopes_by_name["relationship_scopes"]
     since = _effective_since(state)
     sync_scope_hash = _sync_scope_hash()
     config_changed = str(state.get("sync_scope_hash", "")) != sync_scope_hash
+    enabled_node_scope_names = _enabled_scope_names(node_scopes)
+    enabled_relationship_scope_names = _enabled_scope_names(relationship_scopes)
 
     records_by_scope: dict[str, list[dict[str, object]]] = {}
     scope_since_by_name: dict[str, str] = {}
+    skipped_optional_node_scope_errors: dict[str, str] = {}
+    completed_node_scopes: list[str] = []
+    completed_relationship_scopes: list[str] = []
+    checkpoint_tracked_pairs = list(state.get("tracked_pairs", [])) if not config_changed else []
+
+    def _persist_progress_watermark() -> None:
+        _persist_watermark_state(
+            _build_watermark_state(
+                sync_scope_hash=sync_scope_hash,
+                bootstrapped_node_scopes=list(completed_node_scopes),
+                bootstrapped_relationship_scopes=list(completed_relationship_scopes),
+                records_by_scope=records_by_scope,
+                relationships=relationships,
+                tracked_pairs=checkpoint_tracked_pairs,
+            )
+        )
+
+    relationships: list[dict[str, object]] = []
+    _persist_progress_watermark()
+
     for scope_name, scope in node_scopes.items():
         if not scope.get("enabled"):
             records_by_scope[scope_name] = []
@@ -1263,13 +1593,20 @@ def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
             bootstrap_mode=str(scope["bootstrap_mode"]),
             config_changed=config_changed,
         )
-        records = _fetch_recent_scope(scope, scope_since)
+        try:
+            records = _fetch_recent_scope(scope, scope_since)
+        except AssertionError as exc:
+            if scope.get("required_for_baseline"):
+                raise
+            records = []
+            skipped_optional_node_scope_errors[scope_name] = str(exc)
         records_by_scope[scope_name] = records
         scope_since_by_name[scope_name] = scope_since.astimezone(UTC).isoformat().replace("+00:00", "Z")
         for record in records:
             _project_node_scope_record(scope, record)
+        completed_node_scopes.append(scope_name)
+        _persist_progress_watermark()
 
-    relationships: list[dict[str, object]] = []
     relationship_scope_since = since
     relationship_scope = relationship_scopes["indicator_ipv4_malware_neighborhood"]
     if relationship_scope["enabled"]:
@@ -1282,6 +1619,8 @@ def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
             config_changed=config_changed,
         )
         relationships = _fetch_recent_relationships(relationship_scope_since)
+        completed_relationship_scopes.append(str(relationship_scope["name"]))
+        _persist_progress_watermark()
 
     existing_pairs = {} if config_changed else {
         str(pair["projected_relationship_key"]): pair
@@ -1308,6 +1647,8 @@ def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
     )
     for pair in tracked_pairs.values():
         _project_relationship_payload(relationship_scope, pair, node_scopes)
+    checkpoint_tracked_pairs = list(tracked_pairs.values())
+    _persist_progress_watermark()
 
     _write_discovery_debug(
         {
@@ -1316,8 +1657,9 @@ def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
             "sync_scope_hash": sync_scope_hash,
             "scope_since_by_name": scope_since_by_name,
             "relationship_scope_since": relationship_scope_since.astimezone(UTC).isoformat().replace("+00:00", "Z"),
-            "enabled_node_scopes": _enabled_scope_names(node_scopes),
-            "enabled_relationship_scopes": _enabled_scope_names(relationship_scopes),
+            "enabled_node_scopes": enabled_node_scope_names,
+            "enabled_relationship_scopes": enabled_relationship_scope_names,
+            "skipped_optional_node_scope_errors": skipped_optional_node_scope_errors,
             "recent_indicator_names": [item.get("name") for item in records_by_scope.get("indicator", [])],
             "recent_vulnerability_names": [item.get("name") for item in records_by_scope.get("vulnerability", [])],
             "recent_relationship_types": [item.get("relationship_type") for item in relationships],
@@ -1326,18 +1668,14 @@ def _sync_cycle(state: dict[str, object]) -> dict[str, object]:
         }
     )
 
-    next_state = {
-        "backend": "neo4j-replica",
-        "stream_id": os.getenv("STREAM_ID", "").strip(),
-        "bootstrap_start_at": _read_anchor_timestamp(),
-        "last_synced_at": _max_seen_timestamp(*records_by_scope.values(), relationships),
-        "last_poll_at": _current_timestamp(),
-        "sync_scope_hash": sync_scope_hash,
-        "vulnerabilities_bootstrapped": bool(node_scopes["vulnerability"]["enabled"]),
-        "bootstrapped_node_scopes": _enabled_scope_names(node_scopes),
-        "bootstrapped_relationship_scopes": _enabled_scope_names(relationship_scopes),
-        "tracked_pairs": list(tracked_pairs.values()),
-    }
+    next_state = _build_watermark_state(
+        sync_scope_hash=sync_scope_hash,
+        bootstrapped_node_scopes=enabled_node_scope_names,
+        bootstrapped_relationship_scopes=enabled_relationship_scope_names,
+        records_by_scope=records_by_scope,
+        relationships=relationships,
+        tracked_pairs=list(tracked_pairs.values()),
+    )
     _persist_watermark_state(next_state)
     return next_state
 

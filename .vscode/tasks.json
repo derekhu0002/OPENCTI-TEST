@@ -513,6 +513,274 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "test"
+		},
+		{
+			"label": "mirror-sync-logs-tail",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"logs",
+				"--tail",
+				"200",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-ps",
+			"type": "shell",
+			"command": "docker-compose",
+			"args": [
+				"ps",
+				"mirror-sync"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "inspect-full-candidate-scope-count",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-c",
+				"import importlib.util, pathlib; p = pathlib.Path(r'd:\\Projects\\OPENCTI-TEST\\mirror-sync\\service.py'); spec = importlib.util.spec_from_file_location('mirror_service', p); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); cfg = m._load_sync_scope_config(); enabled = [name for name, scope in cfg['node_scopes'].items() if scope.get('enabled')]; print(len(enabled)); print(enabled[:20])"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "inspect-full-candidate-scope-count-2",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-c",
+				"import importlib.util, pathlib; p = pathlib.Path(r\"d:\\Projects\\OPENCTI-TEST\\mirror-sync\\service.py\"); spec = importlib.util.spec_from_file_location(\"mirror_service\", p); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); cfg = m._load_sync_scope_config(); enabled = [name for name, scope in cfg['node_scopes'].items() if scope.get('enabled')]; print(len(enabled)); print(enabled[:20])"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "inspect-full-candidate-scope-count-file",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_inspect_full_candidate_scope_count.py"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-runtime-inside-container",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"exec",
+				"xtm-mirror-sync-1",
+				"sh",
+				"-lc",
+				"ls -la /app/mirror-sync/runtime; echo '---'; find /app/mirror-sync -maxdepth 2 -type f | sort | grep watermark || true"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-logs-tail-plain",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"logs",
+				"--tail",
+				"200",
+				"xtm-mirror-sync-1"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-ps-inside",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"exec",
+				"xtm-mirror-sync-1",
+				"sh",
+				"-lc",
+				"ps -ef"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-inspect-state",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"inspect",
+				"xtm-mirror-sync-1",
+				"--format",
+				"status={{.State.Status}} running={{.State.Running}} started={{.State.StartedAt}} path={{.Path}} args={{json .Args}}"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-top",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"top",
+				"xtm-mirror-sync-1"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-runtime-inside-container-after-patch",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"exec",
+				"xtm-mirror-sync-1",
+				"sh",
+				"-lc",
+				"ls -la /app/mirror-sync/runtime; echo '---'; test -f /app/mirror-sync/runtime/stream.watermark.json && cat /app/mirror-sync/runtime/stream.watermark.json | head -n 40 || echo 'missing-watermark'"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-top-after-patch",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"top",
+				"xtm-mirror-sync-1"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-runtime-checkpoint-check",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"exec",
+				"xtm-mirror-sync-1",
+				"python",
+				"-c",
+				"from pathlib import Path; p = Path('/app/mirror-sync/runtime'); print(sorted(x.name for x in p.iterdir())); w = p / 'stream.watermark.json'; print('exists=', w.exists()); print(w.read_text()[:800] if w.exists() else 'missing')"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "count-bootstrapped-full-candidate",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-c",
+				"import json, pathlib; data = json.loads(pathlib.Path(r'd:\\Projects\\OPENCTI-TEST\\mirror-sync\\runtime\\stream.watermark.json').read_text(encoding='utf-8')); print(len(data.get('bootstrapped_node_scopes', []))); print(len(data.get('bootstrapped_relationship_scopes', []))); print(data.get('bootstrapped_relationship_scopes', []))"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-attackpattern-neo4j",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-c",
+				"import json, urllib.request, base64, pathlib; env = {}; p = pathlib.Path(r'd:\\Projects\\OPENCTI-TEST\\.env');\nfor line in p.read_text(encoding='utf-8').splitlines():\n    line=line.strip();\n    if not line or line.startswith('#') or '=' not in line: continue\n    k,v=line.split('=',1); env[k]=v\nendpoint=f\"http://{env.get('NEO4J_ADVERTISED_HOST','localhost')}:{env.get('NEO4J_HTTP_PORT','27474')}/db/neo4j/tx/commit\"; auth=base64.b64encode(f\"neo4j:{env['NEO4J_PASSWORD']}\".encode()).decode();\nstmt=\"MATCH (n) WHERE toLower(coalesce(n.name,'')) CONTAINS toLower($needle) RETURN labels(n) AS labels, n.name AS name, n.standard_id AS standard_id LIMIT 25\"; body=json.dumps({'statements':[{'statement':stmt,'parameters':{'needle':'AI4X Attack Pattern 00e611ca0d'},'resultDataContents':['row']}]}).encode(); req=urllib.request.Request(endpoint,data=body,headers={'Authorization':f'Basic {auth}','Content-Type':'application/json'},method='POST');\nwith urllib.request.urlopen(req, timeout=60) as r: print(r.read().decode())"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-attackpattern-neo4j-file",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_probe_attackpattern_neo4j.py"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-attackpattern-opencti-file",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"exec",
+				"xtm-mirror-sync-1",
+				"python",
+				"/app/../tmp_probe_attackpattern_opencti.py"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-attackpattern-opencti-host",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_probe_attackpattern_opencti.py"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-attackpattern-neo4j-count",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"d:\\Projects\\OPENCTI-TEST\\tmp_probe_attackpattern_neo4j.py"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "probe-attackpatterns-after-pagination",
+			"type": "shell",
+			"command": "d:\\Projects\\OPENCTI-TEST\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-c",
+				"import json, urllib.request, base64, pathlib; env={}; p=pathlib.Path(r'd:\\Projects\\OPENCTI-TEST\\.env');\nfor raw in p.read_text(encoding='utf-8').splitlines():\n line=raw.strip();\n if line and not line.startswith('#') and '=' in line:\n  k,v=line.split('=',1); env[k]=v\nendpoint=f\"http://{env.get('NEO4J_ADVERTISED_HOST','localhost')}:{env.get('NEO4J_HTTP_PORT','27474')}/db/neo4j/tx/commit\"; token=base64.b64encode(f\"neo4j:{env['NEO4J_PASSWORD']}\".encode()).decode('ascii');\npayload=json.dumps({'statements':[{'statement':'MATCH (n:attackPatterns) RETURN count(n) AS count','parameters':{}},{'statement':'MATCH (n:attackPatterns) WHERE n.name = $name RETURN n.name AS name, n.standard_id AS standard_id LIMIT 5','parameters':{'name':'AI4X Attack Pattern 00e611ca0d'}}]}).encode('utf-8');\nreq=urllib.request.Request(endpoint,data=payload,headers={'Authorization':f'Basic {token}','Content-Type':'application/json'},method='POST');\nwith urllib.request.urlopen(req, timeout=60) as r: print(r.read().decode())"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "mirror-sync-top-progress",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"top",
+				"xtm-mirror-sync-1"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
 		}
 	]
 }
